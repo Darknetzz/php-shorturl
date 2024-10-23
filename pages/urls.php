@@ -19,11 +19,12 @@
             data-search="true"
             data-pagination="true"
             data-page-size="25"
-            data-showColumnsSearch="true"
-            data-showToggle="true"
-            data-showColumnsToggleAll="true"
-            data-showExtendedPagination="true"
-            data-showPaginationSwitch="true"
+            data-show-columns="true"
+            data-show-toggle="true"
+            data-show-columns-toggle-all="true"
+            data-show-extended-pagination="true"
+            data-show-pagination-switch="true"
+            data-show-search-clear-button="true"
         >
             <thead>
                 <tr class="table table-primary">
@@ -68,16 +69,12 @@
                             <a href="javascript:void(0);" class="url-action m-3" 
                                 data-action="edit"
                                 data-bs-toggle="modal"
-                                data-bs-target="#editUrlModal">
-                                    '.icon("pencil", 2).'
-                            </a>
+                                data-bs-target="#editUrlModal">'.icon("pencil", 1.5).'</a>
 
-                            <a href="javascript:void(0);" class="url-action m-3" 
+                            <a href="javascript:void(0);" class="url-action m-3 link-danger" 
                                 data-bs-toggle="modal" 
                                 data-bs-target="#deleteUrlModal" 
-                                data-action="delete">
-                                    '.icon("trash", 2).'
-                            </a>
+                                data-action="delete">'.icon("trash", 1.5).'</a>
 
                         </td>
                     </tr>
@@ -115,8 +112,15 @@
                             <input type="text" class="form-control" id="editShortUrl" name="short" required>
                         </div>
                         <div class="mb-3">
+                            <label for="editDestProtocol" class="form-label">Destination Protocol</label>
+                            <select class="form-select url-protocol" id="editDestProtocol" name="protocol" required>
+                                <option value="http://">http://</option>
+                                <option value="https://" selected>https://</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
                             <label for="editDestUrl" class="form-label">Destination URL</label>
-                            <input type="text" class="form-control" id="editDestUrl" name="dest" required>
+                            <input type="text" class="form-control url-input" id="editDestUrl" name="dest" required>
                         </div>
                         <input type="hidden" id="editUrlId" name="id">
                     </form>
@@ -138,7 +142,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body text-danger">
-
+                    <div id="deleteUrlResponse"></div>
                     <form id="deleteUrlForm">
                         <input type="hidden" id="deleteUrlId" name="id">
                         Are you sure you want to delete short URL <b id="deleteUrlShort"></b>?

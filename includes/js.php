@@ -62,20 +62,22 @@
 
         // NOTE: .url-action
         $(".url-action").on("click", function() {
-            var action = $(this).data("action");
-            var tr     = $(this).closest("tr");
-            var id     = tr.data("id");
-            var type   = tr.data("type");
-            var short  = tr.data("shorturl");
-            var dest   = tr.data("desturl");
-            var user   = tr.data("user");
+            var action   = $(this).data("action");
+            var tr       = $(this).closest("tr");
+            var id       = tr.data("id");
+            var type     = tr.data("type");
+            var short    = tr.data("shorturl");
+            var protocol = short.split("://")[0] + "://";
+            var dest     = tr.data("desturl");
+            var user     = tr.data("user");
 
             if (action == "edit") {
-                var editUrlForm = $("#editUrlForm");
-                var editUrlType = editUrlForm.find("#editUrlType");
+                var editUrlForm  = $("#editUrlForm");
+                var editUrlType  = editUrlForm.find("#editUrlType");
                 var editShortUrl = editUrlForm.find("#editShortUrl");
-                var editDestUrl = editUrlForm.find("#editDestUrl");
-                var editUrlId = editUrlForm.find("#editUrlId");
+                var editProtocol = editUrlForm.find("#editDestProtocol");
+                var editDestUrl  = editUrlForm.find("#editDestUrl");
+                var editUrlId    = editUrlForm.find("#editUrlId");
 
                 editUrlType.val(type);
                 editShortUrl.val(short);
@@ -88,7 +90,33 @@
                 var deleteUrlForm = $("#deleteUrlForm");
                 console.log("Delete action clicked.");
                 $("#deleteUrlShort").text(short);
+                $("#confirmDeleteUrl").data("id", id);
+                $("#confirmDeleteUrl").show();
+                $("#deleteUrlForm").show();
             }
+        });
+
+        // NOTE: confirmDeleteUrl
+        $("#confirmDeleteUrl").on("click", function() {
+            var id       = $(this).data("id");
+            var formdata = "action=delete&id="+id;
+            var url      = "includes/api.php";
+
+            $.ajax({
+                type   : "POST",
+                url    : url,
+                data   : formdata,
+                success: function(data) {
+                    console.groupCollapsed("URL deleted successfully.");
+                    console.log("ID: " + id);
+                    console.log("Data: " + data);
+                    console.groupEnd();
+                    $("#deleteUrlResponse").html(data);
+                    $("tr[data-id='" + id + "']").remove();
+                    $("#confirmDeleteUrl").hide();
+                    $("#deleteUrlForm").hide();
+                }
+            });
         });
 
         // NOTE: .url-input

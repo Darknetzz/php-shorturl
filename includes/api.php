@@ -113,6 +113,12 @@ do {
             break;
         }
 
+        // Check if short URL and destination URL are the same
+        if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
+            echo alert("The short URL and destination URL cannot be the same.", "danger");
+            break;
+        }
+
         $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`) VALUES (?, ?, ?, ?)";
         $insertShort = query($insertShort, [$type, $short, $dest, $_SESSION['id']]);
 
@@ -121,7 +127,41 @@ do {
                 <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
                 <p>Destination URL: <a href='$dest' class='alert-link' target='_blank'>$dest</a></p>
         ", "success");
+    }
 
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                deleteShort                                 */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "delete") {
+        $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
+
+        if ($id == Null) {
+            echo alert("No ID specified.", "danger");
+            break;
+        }
+
+        // Check if the user is logged in
+        if (empty($_SESSION['id'])) {
+            echo alert("You are not logged in.", "danger");
+            break;
+        }
+
+        // Check if the URL exists
+        // if (!urlExists($id)) {
+        //     echo alert("The URL does not exist.", "danger");
+        //     break;
+        // }
+
+        // Check if the user is the owner of the URL
+        // if (!isOwner($id)) {
+        //     echo alert("You are not the owner of this URL.", "danger");
+        //     break;
+        // }
+
+        $deleteShort = "DELETE FROM urls WHERE id = ?";
+        $deleteShort = query($deleteShort, [$id]);
+
+        echo alert("The URL was deleted successfully.", "success");
     }
 
 } while (False);
