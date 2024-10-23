@@ -54,7 +54,8 @@
                                             </select>
                                         </div>
                                         <input class="form-control url-input" type="text" name="dest"
-                                            placeholder="Destination URL (ex. example.com)">
+                                            placeholder="Destination URL (ex. example.com)"
+                                            required>
                                     </div>
                                     <span class="text-muted">
                                         <b>Required</b>
