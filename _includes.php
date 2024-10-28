@@ -12,6 +12,7 @@ $includes = [
     "redirection.php",
     "navbar.php",
     "navigation.php",
+    "custom.php",
     # "js.php", # NOTE: This is directly included in index.php
 ];
 

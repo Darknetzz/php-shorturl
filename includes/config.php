@@ -14,12 +14,12 @@ $cfg["short_default"] = 5;
 $cfg["include_dir"]   = $cfg["base_path"] . DIRECTORY_SEPARATOR . "includes";
 $cfg["url_types"]     = [
     [
-        "name"  => "Short",
-        "value" => "short"
+        "name"  => "Redirect",
+        "value" => "redirect"
     ],
     [
-        "name"  => "Script",
-        "value" => "script"
+        "name"  => "Alias",
+        "value" => "alias"
     ],
     [
         "name"  => "Custom",

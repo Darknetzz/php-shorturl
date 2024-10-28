@@ -7,7 +7,7 @@
                     <tr>
                         <td>Username</td>
                         <td>
-                            <input class='form-control' type='text' name='username' placeholder='Username' autofocus>
+                            <input class='form-control username' type='text' name='username' placeholder='Username' autofocus>
                         </td>
                     </tr>
                     <tr>

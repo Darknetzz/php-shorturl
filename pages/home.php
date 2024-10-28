@@ -6,6 +6,23 @@
                     <form class="dynamic-form" action="index.php" method="POST" data-action="createshort">
                         <table class="table table-default">
 
+                            <tr class="urlInputRow" data-input="short">
+                                <td>Short URL</td>
+                                <td>
+                                    <div class="input-group m-1">
+                                        <span class="input-group-text">
+                                            <?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') ?>://<?= $_SERVER['HTTP_HOST'] ?>/
+                                        </span>
+                                        <!--<input type="hidden" id="shortgen" name="shortgen" value="'.$shortGen.'">-->
+                                        <input class="form-control newUrlInput" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed">
+                                    </div>
+                                    <span class="text-muted">
+                                        <b>Optional</b> The short URL that you want to use.
+                                        If left empty, it will be generated for you.
+                                    </span>
+                                </td>
+                            </tr>
+
                             <tr>
                                 <td>
                                     <span class="text-danger">*</span>
@@ -13,7 +30,7 @@
                                 </td>
                                 <td>
                                     <div class="form-group m-1">
-                                        <select class="form-select" name="type">
+                                        <select class="form-select newUrlInput" name="type">
                                             <?php
                                                 foreach ($cfg["url_types"] as $type) {
                                                     echo '<option value="'.$type["value"].'">'.$type["name"].'</option>';
@@ -24,23 +41,58 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <td>Short URL</td>
+                            <!--
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            /*                                   ALIAS                                    */
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            -->
+                            <tr class="urlInputRow" data-input="alias" style="display:none;">
+                                <td>
+                                    <span class="text-danger">*</span>
+                                    Alias
+                                </td>
                                 <td>
                                     <div class="input-group m-1">
-                                        <span class="input-group-text">
-                                            <?= (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') ?>://<?= $_SERVER['HTTP_HOST'] ?>/
-                                        </span>
-                                        <!--<input type="hidden" id="shortgen" name="shortgen" value="'.$shortGen.'">-->
-                                        <input class="form-control" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed">
+                                        <div class="input-group-text p-0">
+                                            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
+                                                <option value="http://">http://</option>
+                                                <option value="https://" selected>https://</option>
+                                            </select>
+                                        </div>
+                                        <input class="form-control urlValidate" type="text" name="alias_dest"
+                                            placeholder="Destination URL (ex. example.com)"
+                                            >
                                     </div>
                                     <span class="text-muted">
-                                        <b>Optional</b> The short URL that you want to use.
-                                        If left empty, it will be generated for you.</span>
+                                        <b>Required</b>
+                                        The URL that the short URL should be an alias of.
+                                    </span>
                                 </td>
                             </tr>
 
-                            <tr>
+                            <!--
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            /*                                  CUSTOM                                   */
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            -->
+                            <tr class="urlInputRow" data-input="custom" style="display:none;">
+                                <td>
+                                    <span class="text-danger">*</span>
+                                    Custom Script
+                                </td>
+                                <td>
+                                    <div class="form-group-text">
+                                        <textarea class="form-control newUrlInput" name="custom_dest" placeholder="Custom Script" rows="3"></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <!--
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            /*                                  REDIRECT                                  */
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            -->
+                            <tr class="urlInputRow" data-input="redirect">
                                 <td>
                                     <span class="text-danger">*</span>
                                     Destination URL
@@ -48,14 +100,14 @@
                                 <td>
                                     <div class="input-group m-1">
                                         <div class="input-group-text p-0">
-                                            <select class="form-select border-0 url-protocol" name="protocol">
+                                            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
                                                 <option value="http://">http://</option>
                                                 <option value="https://" selected>https://</option>
                                             </select>
                                         </div>
-                                        <input class="form-control url-input" type="text" name="dest"
+                                        <input class="form-control urlValidate newUrlInput" type="text" name="redirect_dest"
                                             placeholder="Destination URL (ex. example.com)"
-                                            required>
+                                            >
                                     </div>
                                     <span class="text-muted">
                                         <b>Required</b>

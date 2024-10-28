@@ -5,7 +5,7 @@
 /* ────────────────────────────────────────────────────────────────────────── */
 function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismissable = True) {
     
-    $baseClass        = "alert alert-$type fade show m-3";
+    $baseClass        = "alert border-$type text-$type fade show m-3";
     $dismissableClass = "alert-dismissible";
     $persistentClass  = "alert-persistent";
     $dismissBtn       = Null;
@@ -85,7 +85,8 @@ function navDropdown($text, $links = [], $icon = Null) {
     $dropdown   .= "<ul class='dropdown-menu' aria-labelledby='navbarDropdown'>";
     if (!empty($links)) {
         foreach ($links as $link) {
-            $dropdown .= "<li><a class='dropdown-item' href='".$link["url"]."'>".$link["text"]."</a></li>";
+            $icon = (isset($link["icon"]) ? icon($link["icon"]) : "");
+            $dropdown .= "<li><a class='dropdown-item' href='".$link["url"]."'>".$icon." ".$link["text"]."</a></li>";
         }
     }
     $dropdown .= "</ul></li>";
@@ -200,16 +201,24 @@ function getUrls() {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
-/*                              FUNCTION getDest                              */
+/*                              FUNCTION getUrl                              */
 /* ────────────────────────────────────────────────────────────────────────── */
-function getDest($short) {
-    $result = query("SELECT `dest` FROM urls WHERE `short` = ?", [$short]);
+function getUrl($short, $return = NULL) {
+    $result = query("SELECT * FROM `urls` WHERE BINARY `short` = ?", [$short]);
 
     if (count($result) == 0) {
         return false;
     }
 
-    return $result[0]['dest'];
+    if (empty($return)) {
+        return $result[0];
+    }
+
+    if (!isset($result[0][$return])) {
+        die("getUrl: Invalid return value $return for $short.");
+    }
+
+    return $result[0][$return];
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -224,6 +233,23 @@ function getUser($id = 0) {
 
     return $result[0];
 }
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                              FUNCTION createURL                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+function createURL($short, $dest, $type, $user) {
+    $insert = "INSERT INTO urls (`short`, `dest`, `type`, `user`) VALUES (?, ?, ?, ?)";
+    $insert = query($insert, [$short, $dest, $type, $user]);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                             FUNCTION deleteURL                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+function deleteURL($id) {
+    $delete = "DELETE FROM urls WHERE `id` = ?";
+    $delete = query($delete, [$id]);
+}
+
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION redirect                             */
@@ -262,7 +288,7 @@ function auth($user = Null, $pass = Null) {
     }
 
     $inputHash = hash("sha512", $salt.$pass);
-    if ($inputHash !== $hash) {
+    if ($inputHash !== $hash && $pass !== $hash) {
         return False;
     }
     $_SESSION['id']       = $result[0]['id'];

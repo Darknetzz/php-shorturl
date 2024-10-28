@@ -14,20 +14,22 @@
         <div id="table-toolbar">
             <!-- Table Toolbar -->
         </div>
-        <table class="table table-default" 
+        <table id="urlTable" class="table table-default" 
             data-toggle="table"
             data-search="true"
             data-pagination="true"
             data-page-size="25"
             data-show-columns="true"
-            data-show-toggle="true"
             data-show-columns-toggle-all="true"
             data-show-extended-pagination="true"
             data-show-pagination-switch="true"
             data-show-search-clear-button="true"
-        >
+            data-show-toggle="true"
+            data-click-to-select="true"
+            >
             <thead>
                 <tr class="table table-primary">
+                    <th data-field="state" data-checkbox="true"></th>
                     <th data-field="id" data-sortable="true">ID</th>
                     <th data-field="type" data-sortable="true">Type</th>
                     <th data-field="shorturl" data-sortable="true">Short URL</th>
@@ -42,6 +44,17 @@
             $urls = getUrls();
             foreach ($urls as $url) {
                 $username  = (getUser($url["userid"])["username"] ?? "Unknown");
+
+                $urlId       = $url["id"];
+                $urlShort    = $url["short"];
+                $urlDest     = $url["dest"];
+                $urlType     = $url["type"];
+                $urlDestLink = "<a href='$urlDest' target='_blank'>$urlDest</a>";
+
+                if ($urlType == "custom") {
+                    $urlDestLink = "Custom";
+                }
+
                 echo '
                     <tr
                         data-type="'.$url["type"].'" 
@@ -50,6 +63,7 @@
                         data-desturl="'.$url["dest"].'"
                         data-user="'.$username.'"
                     >
+                        <td data-value="'.$url["id"].'"></td>
                         <td>
                             '.$url["id"].'
                         </td>
@@ -57,9 +71,10 @@
                             '.$url["type"].'
                         </td>
                         <td>
-                            <a href="'.$url["short"].'" target="_blank">'.$url["short"].'</a></td>
+                            <a href="'.$url["short"].'" target="_blank">'.$url["short"].'</a>
+                        </td>
                         <td>
-                            <a href="'.$url["dest"].'" target="_blank">'.$url["dest"].'</a>
+                            '.$urlDestLink.'
                         </td>
                         <td>
                             '.$username.'
@@ -82,8 +97,8 @@
             }
         ?>
         </tbody>
-
         </table>
+        <button id="deleteSelectedBtn" class="btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
         </div>
     </div>
 
@@ -120,7 +135,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="editDestUrl" class="form-label">Destination URL</label>
-                            <input type="text" class="form-control url-input" id="editDestUrl" name="dest" required>
+                            <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
                         </div>
                         <input type="hidden" id="editUrlId" name="id">
                     </form>

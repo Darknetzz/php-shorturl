@@ -3,6 +3,9 @@
     var startTime = performance.now();
     console.log("js.php started running at " + startTime + " ms.");
 
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                               DOCUMENT READY                               */
+    /* ────────────────────────────────────────────────────────────────────────── */
     $(document).ready(function() {
 
         var endTime   = performance.now();
@@ -24,9 +27,11 @@
             var type = $(this).prev().attr("type");
             if (type == "password") {
                 $(this).prev().attr("type", "text");
-                return;
+            } else {
+                $(this).prev().attr("type", "password");
             }
-            $(this).prev().attr("type", "password");
+            var icon = (type == "password") ? "<?= icon("eye") ?>" : "<?= icon("eye-slash") ?>";
+            $(this).html(icon);
         });
 
         // Fade out the alert message after 2 seconds
@@ -60,6 +65,36 @@
             });
         });
 
+        /* ────────────────────────────────────────────────────────────────────────── */
+        /*                              NOTE: home (add)                              */
+        /* ────────────────────────────────────────────────────────────────────────── */
+        $(".newUrlInput[name=type]").on("change", function() {
+            $(".urlInputRow").hide();
+            $(".urlInputRow[data-input=short]").show();
+            $(".newUrlInput").attr("disabled", true);
+
+            var type = $(this).val();
+            if (type == "redirect") {
+                $(".urlInputRow[data-input=redirect]").show();
+            } else if (type == "custom") {
+                $(".urlInputRow[data-input=custom]").show();
+            } else if (type == "alias") {
+                $(".urlInputRow[data-input=alias]").show();
+            }
+
+            $(".newUrlInput").each(function() {
+                if (!$(this).is(":visible")) {
+                    $(this).prop("disabled", true);
+                } else {
+                    $(this).prop("disabled", false);
+                }
+            });
+
+        });
+
+        /* ────────────────────────────────────────────────────────────────────────── */
+        /*                                 NOTE: urls                                 */
+        /* ────────────────────────────────────────────────────────────────────────── */
         // NOTE: .url-action
         $(".url-action").on("click", function() {
             var action   = $(this).data("action");
@@ -119,8 +154,8 @@
             });
         });
 
-        // NOTE: .url-input
-        $(".url-input").on("input", function() {
+        // NOTE: .urlValidate
+        $(".urlValidate").on("input", function() {
             var url = $(this).val();
             var protocol = "";
 
@@ -138,7 +173,55 @@
         });
 
 
-    }); // End of document.ready
+        // NOTE: urlTable
+        var urlsChecked = 0;
+        var urls        = [];
+        $("#urlTable").on("check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table", function(e, row) {
+            
+            var url_id = row.id
+
+            console.log("Event type: " + e.type);
+            console.log("Row: " + row);
+            console.log("ID: " + url_id);
+
+            if (e.type == "check") {
+                urlsChecked++;
+                urls.push(url_id);
+            }
+            if (e.type == "uncheck") {
+                urlsChecked--;
+                urls = urls.filter(function(filterid) {
+                    return filterid !== url_id;
+                });
+            }
+            if (e.type == "check-all") {
+                urlsChecked = row.length;
+                urls = row.map(function(r) {
+                    return r.id;
+                });
+            }
+            if (e.type == "uncheck-all") {
+                urlsChecked = 0;
+                urls = [];
+            }
+
+            // Buttons
+            var deleteSelectedBtn = $("#deleteSelectedBtn");
+            if (urlsChecked > 0) {
+                deleteSelectedBtn.removeAttr("disabled");
+                deleteSelectedBtn.attr("data-urls", urls);
+            } else {
+                deleteSelectedBtn.attr("disabled", true);
+                deleteSelectedBtn.attr("data-urls", "");
+            }
+        });
+
+
+
+    });
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                            End of document.ready                           */
+    /* ────────────────────────────────────────────────────────────────────────── */
 
     $(window).on("load", function() {
         var endTime   = performance.now();

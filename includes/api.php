@@ -59,7 +59,6 @@ do {
     if ($action == "createshort") {
 
         $type     = (!empty($_POST['type']) ? $_POST['type'] : Null);
-        $dest     = (!empty($_POST['dest']) ? $_POST['dest'] : Null);
         $protocol = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
         $short    = (!empty($_POST['short']) ? $_POST['short'] : Null);
         $shortGen = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
@@ -79,8 +78,27 @@ do {
         $short = preg_replace('/[^a-zA-Z0-9]/', '', $short);
 
         // Check if $type or $dest is empty
-        if ($type == Null || $dest == Null) {
-            echo alert("Please fill out all fields.", "danger");
+        if ($type == Null) {
+            echo json_encode($_POST, JSON_PRETTY_PRINT);
+            echo alert("URL must have a valid type.", "danger");
+            break;
+        }
+
+        if ($type == "alias") {
+            $validateURL = True;
+            $dest = (!empty($_POST['alias_dest']) ? $_POST['alias_dest'] : Null);
+        }
+        if ($type == "custom") {
+            $validateURL = False;
+            $dest = (!empty($_POST['custom_dest']) ? $_POST['custom_dest'] : Null);
+        } 
+        if ($type == "redirect") {
+            $validateURL = True;
+            $dest = (!empty($_POST['redirect_dest']) ? $_POST['redirect_dest'] : Null);
+        }
+
+        if ($dest == Null) {
+            echo alert("URL must have a destination.", "danger");
             break;
         }
 
@@ -96,36 +114,43 @@ do {
             break;
         }
 
-        // Check if $dest contains http:// or https:// at the start, if not prepend https://
-        if (!preg_match('/^https?:\/\//', $dest)) {
-            $dest = $protocol . $dest;
-        }
+        if ($validateURL) {
+            // Check if $dest contains http:// or https:// at the start, if not prepend https://
+            if (!preg_match('/^https?:\/\//', $dest)) {
+                $dest = $protocol . $dest;
+            }
+    
+            // Validate and sanitize the destination URL
+            $dest = filter_var($dest, FILTER_SANITIZE_URL);
+    
+            // Remove duplicate http:// or https:// from the start of the string
+            $dest = preg_replace('/^(https?:\/\/)+/', $protocol, $dest);
+    
+            // Check if the URL is valid
+            if (!filter_var($dest, FILTER_VALIDATE_URL)) {
+                echo alert("The destination URL is not valid.", "danger");
+                break;
+            }
 
-        // Validate and sanitize the destination URL
-        $dest = filter_var($dest, FILTER_SANITIZE_URL);
-
-        // Remove duplicate http:// or https:// from the start of the string
-        $dest = preg_replace('/^(https?:\/\/)+/', $protocol, $dest);
-
-        // Check if the URL is valid
-        if (!filter_var($dest, FILTER_VALIDATE_URL)) {
-            echo alert("The destination URL is not valid.", "danger");
-            break;
-        }
-
-        // Check if short URL and destination URL are the same
-        if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
-            echo alert("The short URL and destination URL cannot be the same.", "danger");
-            break;
+            // Check if short URL and destination URL are the same
+            if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
+                echo alert("The short URL and destination URL cannot be the same.", "danger");
+                break;
+            }
         }
 
         $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`) VALUES (?, ?, ?, ?)";
         $insertShort = query($insertShort, [$type, $short, $dest, $_SESSION['id']]);
 
+        $destLink = "<p>Destination URL: <a href='$dest' class='alert-link' target='_blank'>$dest</a></p>";
+        if ($type == "custom") {
+            $destLink = "<p>Destination URL: Custom</p>";
+        }
+
         echo alert("
                 <h4>Your URL was created successfully!</h4>
                 <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
-                <p>Destination URL: <a href='$dest' class='alert-link' target='_blank'>$dest</a></p>
+                $destLink
         ", "success");
     }
 
@@ -138,6 +163,11 @@ do {
         if ($id == Null) {
             echo alert("No ID specified.", "danger");
             break;
+        }
+
+        // Split `$id` if it contains a ,
+        if (strpos($id, ',') !== False) {
+            $id = explode(',', $id);
         }
 
         // Check if the user is logged in
@@ -158,8 +188,15 @@ do {
         //     break;
         // }
 
-        $deleteShort = "DELETE FROM urls WHERE id = ?";
-        $deleteShort = query($deleteShort, [$id]);
+        if (is_array($id)) {
+            foreach ($id as $i) {
+                deleteURL($i);
+            }
+            echo alert("The URLs were deleted successfully.", "success");
+            break;
+        } else {
+            deleteURL($id);
+        }
 
         echo alert("The URL was deleted successfully.", "success");
     }

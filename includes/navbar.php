@@ -17,8 +17,9 @@
                             die("Error: User with ID $userid not found.");
                         }
                         $navUserBtn = navDropDown($userName, [
-                            ["url" => "?do=profile", "text" => "Profile"],
-                            ["url" => "?do=logout", "text" => "Logout"]
+                            ["url" => "?do=profile", "text" => "Profile", "icon" => "person-vcard"],
+                            ["url" => "?do=urls", "text" => "URLs", "icon" => "bookmarks"],
+                            ["url" => "?do=logout", "text" => "Logout", "icon" => "power"],
                         ], "person");
                     }
                     echo $navUserBtn;

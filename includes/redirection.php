@@ -22,23 +22,28 @@ do {
     }
 
 
-    // Ignore $p if it is equal to BASE_URL/index.php
-    if (strlen($p) > 0) {
-        $dest = getDest($p);
-    
-        if (empty($dest)) {
-            echo "
-                <div class='alert alert-danger m-3'>
-                    The short URL <b>$p</b> does not exist.
-                </div>
-            ";
-            jsRedirect();
-            die();
-        }
-        echo "Redirecting to <a href='$dest'>$dest</a>...";
-        redirect($dest);
+    $url = getUrl($p);
+    $type = $url["type"];
+    $dest = $url["dest"];
+
+    if (empty($type) || !is_string($type)) {
+        echo alert("The type <b>$type</b> does not exist.", "danger");
         die();
     }
+    if ($type === "alias") {
+        die("<iframe src='$dest' style='position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0;'></iframe>");
+    }
+    if ($type === "custom") {
+        die($dest);
+    }
+    if ($dest === False || empty($dest)) {
+        echo alert("The short URL <b>$p</b> does not exist.", "danger");
+        jsRedirect();
+        die();
+    }
+    echo alert("Redirecting to <a href='$dest'>$dest</a>...", "info");
+    redirect($dest);
+    die();
 
 } while (False);
 
