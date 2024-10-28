@@ -23,11 +23,15 @@ do {
 
 
     $url = getUrl($p);
-    $type = $url["type"];
-    $dest = $url["dest"];
+    $type = $url["type"] ?? Null;
+    $dest = $url["dest"] ?? Null;
 
+    if ($url === False) {
+        echo alert("The short URL <b>$p</b> does not exist.", "danger");
+        die();
+    }
     if (empty($type) || !is_string($type)) {
-        echo alert("The type <b>$type</b> does not exist.", "danger");
+        echo alert("The type is empty.", "danger");
         die();
     }
     if ($type === "alias") {

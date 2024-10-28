@@ -207,7 +207,7 @@ function getUrl($short, $return = NULL) {
     $result = query("SELECT * FROM `urls` WHERE BINARY `short` = ?", [$short]);
 
     if (count($result) == 0) {
-        return false;
+        return False;
     }
 
     if (empty($return)) {
