@@ -4,6 +4,15 @@
     console.log("js.php started running at " + startTime + " ms.");
 
     /* ────────────────────────────────────────────────────────────────────────── */
+    /*                            playNotificationSound                           */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function playNotificationSound() {
+        var audio = new Audio('assets/notification.mp3');
+            audio.volume = 0.5;
+            audio.play();
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
     /*                                    toast                                   */
     /* ────────────────────────────────────────────────────────────────────────── */
     function toast(message = "Toast", type = "primary", title = null, icon = "exclamation-circle") {
@@ -35,6 +44,10 @@
         $(".toast").toast("show").on("hidden.bs.toast", function() {
             $(this).remove();
         });
+
+        <?php if ($cfg["notification_sound"] !== False) { ?>
+            playNotificationSound();
+        <?php } ?>
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
