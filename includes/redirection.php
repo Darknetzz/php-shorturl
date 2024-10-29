@@ -22,9 +22,16 @@ do {
     }
 
 
-    $url = getUrl($p);
-    $type = $url["type"] ?? Null;
-    $dest = $url["dest"] ?? Null;
+    $url      = getUrl($p);
+    $type     = $url["type"] ?? Null;
+    $dest     = $url["dest"] ?? Null;
+
+    # NOTE: Write to log
+    if (!empty($url) && !empty($type) && !empty($dest)) {
+        $urlText  = "#". $url["id"] . " - " . $url["short"];
+        $destText = ($url["type"] !== "custom" ? "$dest" : "Custom URL");
+        writeLog(json_encode("Clicked on URL $urlText -> $type -> $destText"));
+    }
 
     if ($url === False) {
         echo alert("The short URL <b>$p</b> does not exist.", "danger");
@@ -46,7 +53,7 @@ do {
         die();
     }
     echo alert("Redirecting to <a href='$dest'>$dest</a>...", "info");
-    redirect($dest);
+    jsRedirect($dest);
     die();
 
 } while (False);

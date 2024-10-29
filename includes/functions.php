@@ -13,14 +13,15 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
     
     # Determine icon
     if ($type == "info" && $icon == Null) {
-        $icon = icon("info-circle");
+        $icon = "info-circle";
     } elseif ($type == "success" && $icon == Null) {
-        $icon = icon("check-circle");
+        $icon = "check-circle";
     } elseif ($type == "warning" && $icon == Null) {
-        $icon = icon("exclamation-triangle");
+        $icon = "exclamation-triangle";
     } elseif ($type == "danger" && $icon == Null) {
-        $icon = icon("exclamation-circle");
+        $icon = "exclamation-circle";
     }
+    $icon = icon($icon, 1.5);
 
     if ($dismissable) {
         $class      .= " $dismissableClass";
@@ -33,10 +34,9 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
     return "
     <div class='container'>
         <div class='$class' role='alert'>
-            <span>
-                $icon
-                $msg
-            </span>
+            <span style='display: inline-flex; align-items: center;'>
+                <span class='mx-2'>$icon</span>
+                <span class='mx-2'>$msg</span>
             $dismissBtn
         </div>
     </div>
@@ -103,11 +103,12 @@ function jsRedirect($url = "index.php", $time = 1000) {
             window.location.href = '$url';
         }, $time);
     </script>";
-    if (headers_sent()) {
-        echo $script;
-    } else {
-        return $script;
-    }
+    die($script);
+    // if (headers_sent()) {
+    // echo $script;
+    // } else {
+    // return $script;
+    // }
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -254,10 +255,10 @@ function deleteURL($id) {
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION redirect                             */
 /* ────────────────────────────────────────────────────────────────────────── */
-function redirect($url) {
-    echo "<script type='text/javascript'>window.location.href = '$url';</script>";
-    exit();
-}
+// function redirect($url) {
+//     echo "<script type='text/javascript'>window.location.href = '$url';</script>";
+//     exit();
+// }
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                            FUNCTION deleteShort                            */
@@ -274,7 +275,7 @@ function auth($user = Null, $pass = Null) {
         return False;
     }
 
-    $result = query("SELECT * FROM users WHERE `username` = ?", [$user]);
+    $result = query("SELECT * FROM users WHERE LOWER(`username`) = LOWER(?)", [$user]);
     $count  = count($result);
 
     if ($count < 1) {
@@ -292,8 +293,65 @@ function auth($user = Null, $pass = Null) {
         return False;
     }
     $_SESSION['id']       = $result[0]['id'];
-    $_SESSION['username'] = $user;
+    $_SESSION['acl']      = $result[0]['acl'];
+    $_SESSION['username'] = $result[0]['username'];
     return True;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                              FUNCTION urlInput                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlInput($name = "url", $placeholder = "Destination URL (ex. example.com)") {
+    return '
+    <div class="input-group m-1">
+        <div class="input-group-text p-0">
+            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
+                <option value="http://">http://</option>
+                <option value="https://" selected>https://</option>
+            </select>
+        </div>
+        <input class="form-control urlValidate newUrlInput" type="text" name="'.$name.'"
+            placeholder="'.$placeholder.'"
+            >
+        <span class="text-muted">
+            <b>Required</b>
+            The protocol URL that the short URL should be an alias of.
+            HTTP usually redirects to HTTPS, but choose HTTPS if you want to enforce it.
+        </span>
+    </div>
+';
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                             FUNCTION aclToText                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+function aclToText($acl = 0) {
+    $acl = (int) $acl;
+    if ($acl == 0) {
+        return "User";
+    }
+    if ($acl == 1) {
+        return "Admin";
+    }
+    if ($acl == 2) {
+        return "Super Admin";
+    }
+    if ($acl == 3) {
+        return "Owner";
+    }
+    return "Unknown";
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                              FUNCTION writeLog                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+function writeLog($event = Null) {
+    $forwarded_for = ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? Null);
+    $remote_addr   = ($_SERVER['REMOTE_ADDR'] ?? Null);
+    $ip            = ($forwarded_for ?? $remote_addr);
+    $user          = ($_SESSION['username'] ?? "Guest");
+    $query         = "INSERT INTO logs (`event`, `user`, `ip`) VALUES (?, ?, ?)";
+    query($query, [$event, $user, $ip]);
 }
 
 ?>

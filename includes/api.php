@@ -19,7 +19,15 @@ do {
     $action = (!empty($_REQUEST["action"]) ? $_REQUEST["action"] : Null);
 
     if ($action == Null) {
-        echo alert("No action specified.", "danger");
+        $res = ["status" => "OK", "message" => "No action specified."];
+        break;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                    test                                    */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "test") {
+        $res = ["status" => "OK", "message" => "Test successful."];
         break;
     }
 
@@ -28,8 +36,11 @@ do {
     /* ────────────────────────────────────────────────────────────────────────── */
     if ($action == "logout") {
         session_destroy();
-        echo alert("You are now logged out.", "success");
-        echo jsRedirect();
+        $res = [
+            "status" => "OK", 
+            "message" => "You are now logged out.", 
+            "redirect" => "index.php"
+        ];
         die();
     }
 
@@ -42,13 +53,16 @@ do {
         $auth     = auth($username, $password);
 
         if ($auth !== True) {
-            echo alert("Invalid username or password.", "danger");
+            $res = ["status" => "ERROR", "message" => "Invalid username or password."];
             break;
         }
 
         if ($auth === True) {
-            echo alert("You are now logged in.", "success");
-            echo jsRedirect();
+            $res = [
+                "status" => "OK", 
+                "message" => "You are now logged in.",
+                "redirect" => "index.php"
+            ];
             break;
         }
     }
@@ -65,7 +79,7 @@ do {
 
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
-            echo alert("You are not logged in.", "danger");
+            $res = ["status" => "ERROR", "message" => "You are not logged in."];
             break;
         }
 
@@ -80,7 +94,7 @@ do {
         // Check if $type or $dest is empty
         if ($type == Null) {
             echo json_encode($_POST, JSON_PRETTY_PRINT);
-            echo alert("URL must have a valid type.", "danger");
+            $res = ["status" => "ERROR", "message" => "URL must have a valid type."];
             break;
         }
 
@@ -98,19 +112,19 @@ do {
         }
 
         if ($dest == Null) {
-            echo alert("URL must have a destination.", "danger");
+            $res = ["status" => "ERROR", "message" => "URL must have a destination."];
             break;
         }
 
         // Check if the destination URL already exists
         if (urlExists($short)) {
-            echo alert("The short URL <a href='$short' target='_blank'>$short</a> already exists.", "info");
+            $res = ["status" => "ERROR", "message" => "The short URL <a href='$short' target='_blank'>$short</a> already exists."];
             break;
         }
 
         // Validate and sanitize the short URL
         if (strlen($short) < $cfg["short_min"] || strlen($short) > $cfg["short_max"]) {
-            echo alert("The short URL must be between ".$cfg["short_min"]." and ".$cfg["short_max"]." characters long.", "danger");
+            $res = ["status" => "ERROR", "message" => "The short URL must be between ".$cfg["short_min"]." and ".$cfg["short_max"]." characters long."];
             break;
         }
 
@@ -128,13 +142,13 @@ do {
     
             // Check if the URL is valid
             if (!filter_var($dest, FILTER_VALIDATE_URL)) {
-                echo alert("The destination URL is not valid.", "danger");
+                $res = ["status" => "ERROR", "message" => "The destination URL is not valid."];
                 break;
             }
 
             // Check if short URL and destination URL are the same
             if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
-                echo alert("The short URL and destination URL cannot be the same.", "danger");
+                $res = ["status" => "ERROR", "message" => "The short URL and destination URL cannot be the same."];
                 break;
             }
         }
@@ -147,11 +161,12 @@ do {
             $destLink = "<p>Destination URL: Custom</p>";
         }
 
-        echo alert("
-                <h4>Your URL was created successfully!</h4>
-                <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
-                $destLink
-        ", "success");
+        $res = ["status" => "OK", "message" => "
+            <h4>Your URL was created successfully!</h4>
+            <p>Type: ".ucfirst($type)."</p>
+            <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
+            $destLink
+        "];
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -161,7 +176,12 @@ do {
         $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
 
         if ($id == Null) {
-            echo alert("No ID specified.", "danger");
+            $res = ["status" => "ERROR", "message" => "No ID specified."];
+            break;
+        }
+
+        if (!is_numeric($id) && strpos($id, ',') === False) {
+            $res = ["status" => "ERROR", "message" => "Invalid ID specified."];
             break;
         }
 
@@ -172,35 +192,29 @@ do {
 
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
-            echo alert("You are not logged in.", "danger");
+            $res = ["status" => "ERROR", "message" => "You are not logged in."];
             break;
         }
-
-        // Check if the URL exists
-        // if (!urlExists($id)) {
-        //     echo alert("The URL does not exist.", "danger");
-        //     break;
-        // }
-
-        // Check if the user is the owner of the URL
-        // if (!isOwner($id)) {
-        //     echo alert("You are not the owner of this URL.", "danger");
-        //     break;
-        // }
 
         if (is_array($id)) {
             foreach ($id as $i) {
                 deleteURL($i);
             }
-            echo alert("The URLs were deleted successfully.", "success");
+            $res = ["status" => "OK", "message" => "The URLs were deleted successfully."];
             break;
         } else {
             deleteURL($id);
         }
 
-        echo alert("The URL was deleted successfully.", "success");
+        $res = ["status" => "OK", "message" => "The URL was deleted successfully."];
     }
 
 } while (False);
 
+if (!empty($res)) {
+    echo json_encode($res, JSON_PRETTY_PRINT);
+    die();
+}
+
+echo json_encode(["status" => "OK", "message" => "No action specified."], JSON_PRETTY_PRINT);
 ?>

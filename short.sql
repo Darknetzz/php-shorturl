@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 22, 2024 at 07:00 AM
+-- Generation Time: Oct 29, 2024 at 12:39 PM
 -- Server version: 8.0.39-0ubuntu0.22.04.1
 -- PHP Version: 8.3.11
 
@@ -20,6 +20,20 @@ SET time_zone = "+00:00";
 --
 -- Database: `short`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `logs`
+--
+
+CREATE TABLE `logs` (
+  `id` int NOT NULL,
+  `event` text,
+  `user` varchar(255) DEFAULT NULL,
+  `ip` varchar(30) DEFAULT NULL,
+  `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -45,12 +59,19 @@ CREATE TABLE `users` (
   `id` int NOT NULL,
   `username` varchar(100) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
-  `salt` varchar(255) NOT NULL
+  `salt` varchar(255) NOT NULL,
+  `acl` int DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `logs`
+--
+ALTER TABLE `logs`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `urls`
@@ -67,6 +88,12 @@ ALTER TABLE `users`
 --
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `logs`
+--
+ALTER TABLE `logs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `urls`

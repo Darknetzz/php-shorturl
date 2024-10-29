@@ -52,21 +52,7 @@
                                     Alias
                                 </td>
                                 <td>
-                                    <div class="input-group m-1">
-                                        <div class="input-group-text p-0">
-                                            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
-                                                <option value="http://">http://</option>
-                                                <option value="https://" selected>https://</option>
-                                            </select>
-                                        </div>
-                                        <input class="form-control urlValidate" type="text" name="alias_dest"
-                                            placeholder="Destination URL (ex. example.com)"
-                                            >
-                                    </div>
-                                    <span class="text-muted">
-                                        <b>Required</b>
-                                        The URL that the short URL should be an alias of.
-                                    </span>
+                                    <?= urlInput("alias_dest") ?>
                                 </td>
                             </tr>
 
@@ -98,21 +84,7 @@
                                     Destination URL
                                 </td>
                                 <td>
-                                    <div class="input-group m-1">
-                                        <div class="input-group-text p-0">
-                                            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
-                                                <option value="http://">http://</option>
-                                                <option value="https://" selected>https://</option>
-                                            </select>
-                                        </div>
-                                        <input class="form-control urlValidate newUrlInput" type="text" name="redirect_dest"
-                                            placeholder="Destination URL (ex. example.com)"
-                                            >
-                                    </div>
-                                    <span class="text-muted">
-                                        <b>Required</b>
-                                        The URL that the short URL should redirect to.
-                                    </span>
+                                    <?= urlInput("redirect_dest") ?>
                                 </td>
                             </tr>
 

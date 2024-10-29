@@ -9,10 +9,12 @@ $includes = [
     "config.php",
     "sqlcon.php",
     "functions.php",
+    "css.php",
     "redirection.php",
     "navbar.php",
     "navigation.php",
     "custom.php",
+    "toast.php",
     # "js.php", # NOTE: This is directly included in index.php
 ];
 

@@ -31,7 +31,6 @@
 
 <body data-bs-theme="dark">
 
-
     <?php
 
     require_once("_includes.php");
@@ -65,6 +64,7 @@
     // echo $debug_card;
 
     ?>
+
 </body>
 
 <?php require_once("includes/js.php") ?>

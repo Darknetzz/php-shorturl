@@ -4,6 +4,93 @@
     console.log("js.php started running at " + startTime + " ms.");
 
     /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                    toast                                   */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function toast(message = "Toast", type = "primary", title = null, icon = "exclamation-circle") {
+        if (title == null) {
+            title = type.charAt(0).toUpperCase() + type.slice(1);
+        }
+        if (icon != null) {
+            title = `
+            <span style='display: flex; align-items: center;'>
+                <span class='bi bi-${icon}' style='font-size:1.5rem; margin-right: 0.5rem;'></span> ${title}
+            </span>
+            `;
+        }
+        var container = $(".toast-container");
+        var toast = $(`
+            <div class="toast border-${type} w-100" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast-header text-bg-${type}">
+                    <strong class="me-auto">${title}</strong>
+                    <small class="text-${type}">just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+                <div class="toast-body text-${type}">
+                    ${message}
+                </div>
+            </div>
+        `);
+        
+        container.append(toast);
+        $(".toast").toast("show").on("hidden.bs.toast", function() {
+            $(this).remove();
+        });
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                     api                                    */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function api(method, action, data, callback = null) {
+        var url      = "includes/api.php";
+        var formdata = "action=" + action + "&" + data;
+        $.ajax({
+            type   : method,
+            url    : url,
+            data   : formdata,
+            success: function(response) {
+                try {
+                    var data = JSON.parse(response);
+                } catch (e) {
+                    console.error("Invalid JSON response:", response);
+                    toast("Invalid JSON response", "danger", "Error");
+                    return;
+                }
+                var status      = data["status"];
+                var message     = data["message"];
+                var redirect    = data["redirect"];
+                // var extcallback = data["callback"];
+                var type        = "info";
+                if (status == "OK") {
+                    type = "success";
+                } else if (status == "ERROR") {
+                    type = "danger";
+                } else if (status == "WARNING" || status == "WARN") {
+                    type = "warning";
+                }
+                console.groupCollapsed("API request successful.");
+                console.log("Action: " + action);
+                console.log("Data: " + data);
+                console.groupEnd();
+
+                if (callback != null) {
+                    callback(data);
+                    return;
+                }
+                toast(message, type, type.toUpperCase());
+
+                // if (typeof extcallback !== "undefined" && typeof window[extcallback] === "function") {
+                //     window[extcallback](data);
+                //     return;
+                // }
+
+                if (data["redirect"] != null) {
+                    window.location.href = data["redirect"];
+                }
+            }
+        });
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
     /*                               DOCUMENT READY                               */
     /* ────────────────────────────────────────────────────────────────────────── */
     $(document).ready(function() {
@@ -49,20 +136,22 @@
             var formdata = $(this).serialize();
             formdata += "&action="+action;
             
-            $.ajax({
-                type   : method,
-                url    : url,
-                data   : formdata,
-                success: function(data) {
-                    console.groupCollapsed("Form submitted successfully.");
-                    console.log("Method: " + method);
-                    console.log("URL: " + url);
-                    console.log("Action: " + action);
-                    console.log("Data: " + data);
-                    console.groupEnd();
-                    $(".dynamic-form-response").html(data);
-                }
-            });
+            api(method, action, formdata);
+
+            // $.ajax({
+            //     type   : method,
+            //     url    : url,
+            //     data   : formdata,
+            //     success: function(data) {
+            //         console.groupCollapsed("Form submitted successfully.");
+            //         console.log("Method: " + method);
+            //         console.log("URL: " + url);
+            //         console.log("Action: " + action);
+            //         console.log("Data: " + data);
+            //         console.groupEnd();
+            //         $(".dynamic-form-response").html(data);
+            //     }
+            // });
         });
 
         /* ────────────────────────────────────────────────────────────────────────── */
@@ -133,26 +222,30 @@
 
         // NOTE: confirmDeleteUrl
         $("#confirmDeleteUrl").on("click", function() {
-            var id       = $(this).data("id");
-            var formdata = "action=delete&id="+id;
-            var url      = "includes/api.php";
-
-            $.ajax({
-                type   : "POST",
-                url    : url,
-                data   : formdata,
-                success: function(data) {
-                    console.groupCollapsed("URL deleted successfully.");
-                    console.log("ID: " + id);
-                    console.log("Data: " + data);
-                    console.groupEnd();
-                    $("#deleteUrlResponse").html(data);
-                    $("tr[data-id='" + id + "']").remove();
-                    $("#confirmDeleteUrl").hide();
-                    $("#deleteUrlForm").hide();
-                }
-            });
+            api("POST", "delete", "id="+$(this).data("id"));
+            $(this).attr("disabled", true);
+            $("#deleteUrlModal").modal("hide");
         });
+        //     var id       = $(this).data("id");
+        //     var formdata = "action=delete&id="+id;
+        //     var url      = "includes/api.php";
+
+        //     $.ajax({
+        //         type   : "POST",
+        //         url    : url,
+        //         data   : formdata,
+        //         success: function(data) {
+        //             console.groupCollapsed("URL deleted successfully.");
+        //             console.log("ID: " + id);
+        //             console.log("Data: " + data);
+        //             console.groupEnd();
+        //             $("#deleteUrlResponse").html(data);
+        //             $("tr[data-id='" + id + "']").remove();
+        //             $("#confirmDeleteUrl").hide();
+        //             $("#deleteUrlForm").hide();
+        //         }
+        //     });
+        // });
 
         // NOTE: .urlValidate
         $(".urlValidate").on("input", function() {
@@ -216,7 +309,36 @@
             }
         });
 
+        // NOTE: deleteSelectedBtn
+        $("#deleteSelectedBtn").on("click", function() {
+            var urls = $(this).data("urls");
+            var formdata = "action=delete&id="+urls;
+            var url      = "includes/api.php";
+            console.log("Deleting urls" + urls);
 
+            $.ajax({
+                type   : "POST",
+                url    : url,
+                data   : formdata,
+                success: function(data) {
+                    console.groupCollapsed("URLs deleted successfully.");
+                    console.log("IDs: " + urls);
+                    console.log("Data: " + data);
+                    console.groupEnd();
+                    $("#deleteUrlResponse").html(data);
+                    urls.forEach(function(id) {
+                        $("tr[data-id='" + id + "']").remove();
+                    });
+                    $("#confirmDeleteUrl").hide();
+                    $("#deleteUrlForm").hide();
+                }
+            });
+        });
+
+        // NOTE: testAPI
+        $(".testAPI").on("click", function() {
+            api("GET", "test", "test=1");
+        });
 
     });
     /* ────────────────────────────────────────────────────────────────────────── */
