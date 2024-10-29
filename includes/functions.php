@@ -302,12 +302,13 @@ function auth($user = Null, $pass = Null) {
 /*                              FUNCTION urlInput                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 function urlInput($name = "url", $placeholder = "Destination URL (ex. example.com)") {
+    global $cfg;
     return '
     <div class="input-group m-1">
         <div class="input-group-text p-0">
             <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
-                <option value="http://">http://</option>
-                <option value="https://" selected>https://</option>
+                <option value="http://" '.($cfg["default_protocol"] == "http://" ? "selected" : "").'>http://</option>
+                <option value="https://" '.($cfg["default_protocol"] == "https://" ? "selected" : "").'>https://</option>
             </select>
         </div>
         <input class="form-control urlValidate newUrlInput" type="text" name="'.$name.'"
@@ -346,6 +347,10 @@ function aclToText($acl = 0) {
 /*                              FUNCTION writeLog                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 function writeLog($event = Null) {
+    global $cfg;
+    if (!$cfg["logging"]) {
+        return;
+    }
     $forwarded_for = ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? Null);
     $remote_addr   = ($_SERVER['REMOTE_ADDR'] ?? Null);
     $ip            = ($forwarded_for ?? $remote_addr);
