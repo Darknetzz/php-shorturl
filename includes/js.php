@@ -344,8 +344,16 @@
         });
 
         // NOTE: .testAPI
-        $(".testAPI").on("click", function() {
-            api("GET", "test", "test=1");
+        $(".profile-api-form").on("submit", function() {
+            var method = $(this).find("#api_method").val();
+            var action = $(this).find("#api_action").val();
+            var data   = $(this).serialize();
+            api(method, action, data);
+        });
+        $(".profile-api-card").on("change", "#api_action", function() {
+            var action = $(this).val();
+            $(".testAPIInputs").hide();
+            $(".testAPIInputs[data-action='"+action+"']").show();
         });
 
     });

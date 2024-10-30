@@ -192,6 +192,29 @@ function query($query, array $params = []) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*                            FUNCTION urlValidate                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlValidate($url = Null, $protocol = Null) {
+    global $cfg;
+    if ($protocol == Null) {
+        $protocol = $cfg["default_protocol"];
+    }
+    if (empty($url)) {
+        return False;
+    }
+    # Check if $dest contains http:// or https:// at the start, if not prepend https://
+    if (!preg_match('/^https?:\/\//', $url)) {
+        $url = $protocol . $url;
+    }
+    # Check if $url is a valid URL
+    $url = filter_var($url, FILTER_SANITIZE_URL);
+    if (filter_var($url, FILTER_VALIDATE_URL) === False) {
+        return False;
+    }
+    return $url;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*                         FUNCTION urlExists                                 */
 /* ────────────────────────────────────────────────────────────────────────── */
 function urlExists($url = Null) {

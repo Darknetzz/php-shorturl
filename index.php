@@ -72,9 +72,10 @@
 <?php require_once("includes/js.php") ?>
 
 <?php
-    $end_time        = microtime(True);
-    $execution_time  = ($end_time - $start_time);
-    echo "<!-- Page generated in $execution_time seconds. -->";
+    $end_time          = microtime(True);
+    $execution_time    = ($end_time - $start_time);         // Seconds
+    $execution_time_ms = round($execution_time * 1000, 2);  // Convert to milliseconds
+    echo "<!-- Page generated in $execution_time_ms ms. -->";
 ?>
 
 

@@ -19,7 +19,7 @@ do {
     $action = (!empty($_REQUEST["action"]) ? $_REQUEST["action"] : Null);
 
     if ($action == Null) {
-        $res = ["status" => "OK", "message" => "No action specified."];
+        $res = ["status" => "WARN", "message" => "No action specified."];
         break;
     }
 
@@ -76,6 +76,7 @@ do {
         $protocol = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
         $short    = (!empty($_POST['short']) ? $_POST['short'] : Null);
         $shortGen = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
+        $dest     = (!empty($_POST[$type.'_dest']) ? $_POST[$type.'_dest'] : Null);
 
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
@@ -98,25 +99,14 @@ do {
             break;
         }
 
-        if ($type == "alias") {
-            $validateURL = True;
-            $dest = (!empty($_POST['alias_dest']) ? $_POST['alias_dest'] : Null);
-        }
-        if ($type == "custom") {
-            $validateURL = False;
-            $dest = (!empty($_POST['custom_dest']) ? $_POST['custom_dest'] : Null);
-        } 
-        if ($type == "redirect") {
-            $validateURL = True;
-            $dest = (!empty($_POST['redirect_dest']) ? $_POST['redirect_dest'] : Null);
+        // Verify the destination URL if type != custom
+        if ($type != "custom") {
+            $dest = urlValidate($dest);
         }
 
-        if ($dest == Null) {
-            if ($type == "custom") {
-                $res = ["status" => "ERROR", "message" => "Custom URL must have content."];
-                break;
-            }
-            $res = ["status" => "ERROR", "message" => "URL must have a destination."];
+        // Check if the $dest URL is empty after validation
+        if (empty($dest)) {
+            $res = ["status" => "ERROR", "message" => "The destination URL is not valid."];
             break;
         }
 
@@ -132,29 +122,10 @@ do {
             break;
         }
 
-        if ($validateURL) {
-            // Check if $dest contains http:// or https:// at the start, if not prepend https://
-            if (!preg_match('/^https?:\/\//', $dest)) {
-                $dest = $protocol . $dest;
-            }
-    
-            // Validate and sanitize the destination URL
-            $dest = filter_var($dest, FILTER_SANITIZE_URL);
-    
-            // Remove duplicate http:// or https:// from the start of the string
-            $dest = preg_replace('/^(https?:\/\/)+/', $protocol, $dest);
-    
-            // Check if the URL is valid
-            if (!filter_var($dest, FILTER_VALIDATE_URL)) {
-                $res = ["status" => "ERROR", "message" => "The destination URL is not valid."];
-                break;
-            }
-
-            // Check if short URL and destination URL are the same
-            if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
-                $res = ["status" => "ERROR", "message" => "The short URL and destination URL cannot be the same."];
-                break;
-            }
+        // Check if short URL and destination URL are the same
+        if ($cfg["base_url"].DIRECTORY_SEPARATOR.$short == $dest) {
+            $res = ["status" => "ERROR", "message" => "The short URL and destination URL cannot be the same."];
+            break;
         }
 
         $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`) VALUES (?, ?, ?, ?)";
@@ -171,6 +142,49 @@ do {
             <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
             $destLink
         "];
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                  editShort                                 */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "edit") {
+        $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
+        $type = (!empty($_POST['type']) ? $_POST['type'] : Null);
+        $short = (!empty($_POST['short']) ? $_POST['short'] : Null);
+        $dest = (!empty($_POST['dest']) ? $_POST['dest'] : Null);
+
+        // Check if the user is logged in
+        if (empty($_SESSION['id'])) {
+            $res = ["status" => "ERROR", "message" => "You are not logged in."];
+            break;
+        }
+
+        if ($id == Null) {
+            $res = ["status" => "ERROR", "message" => "No ID specified."];
+            break;
+        }
+
+        if ($type == Null) {
+            $res = ["status" => "ERROR", "message" => "URL must have a valid type."];
+            break;
+        }
+
+        // Verify the destination URL if type != custom
+        if ($type != "custom") {
+            $dest = urlValidate($dest);
+        }
+
+        // Check if the $dest URL is empty after validation
+        if (empty($dest)) {
+            $res = ["status" => "ERROR", "message" => "The destination URL is not valid."];
+            break;
+        }
+
+        // Validate and sanitize the short URL
+        if (strlen($short) < $cfg["short_min"] || strlen($short) > $cfg["short_max"]) {
+            $res = ["status" => "ERROR", "message" => "The short URL must be between ".$cfg["short_min"]." and ".$cfg["short_max"]." characters long."];
+            break;
+        }
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -206,9 +220,12 @@ do {
 } while (False);
 
 if (!empty($res)) {
+    $res["debug"] = $_REQUEST;
     echo json_encode($res, JSON_PRETTY_PRINT);
     die();
 }
 
-echo json_encode(["status" => "OK", "message" => "No action specified."], JSON_PRETTY_PRINT);
+echo json_encode(["status" => "WARN", "message" => "Action <code>".$action."</code> is invalid or empty."], JSON_PRETTY_PRINT);
+
+
 ?>
