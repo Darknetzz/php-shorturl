@@ -22,10 +22,10 @@ $cfg["url_types"]          = [
     ],
     [
         "name"  => "Alias",
-        "value" => "alias"
+        "value" => "alias",
     ],
     [
         "name"  => "Custom",
-        "value" => "custom"
+        "value" => "custom",
     ],
 ];

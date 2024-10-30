@@ -104,14 +104,19 @@
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
-    /*                               DOCUMENT READY                               */
+    /*                           // NOTE: DOCUMENT READY                          */
     /* ────────────────────────────────────────────────────────────────────────── */
     $(document).ready(function() {
+
+        // NOTE: Tooltips (Bootstrap)
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
 
         var endTime   = performance.now();
         var timeTaken = endTime - startTime;
         console.log("Time taken for document to ready up: " + timeTaken + " ms.");
 
+        // NOTE: .password
         // Show/hide password when the button is clicked
         $(".password").each(function() {
             // Append a show/hide button to the password field
@@ -122,6 +127,7 @@
             $(this).after(btn);
         });
 
+        // NOTE: .password-toggle
         // Show/hide password when the button is clicked
         $(".password-toggle").on("click", function() {
             var type = $(this).prev().attr("type");
@@ -134,11 +140,13 @@
             $(this).html(icon);
         });
 
+        // NOTE: .alert
         // Fade out the alert message after 2 seconds
         $(".alert").not(".alert-persistent").fadeTo(2000, 500).slideUp(500, function(){
             $(this).slideUp(500);
         });
 
+        // NOTE: .dynamic-form
         // Submit form to `formhandler.php` when the button is clicked
         $(".dynamic-form").on("submit", function(e) {
             e.preventDefault();
@@ -239,26 +247,6 @@
             $(this).attr("disabled", true);
             $("#deleteUrlModal").modal("hide");
         });
-        //     var id       = $(this).data("id");
-        //     var formdata = "action=delete&id="+id;
-        //     var url      = "includes/api.php";
-
-        //     $.ajax({
-        //         type   : "POST",
-        //         url    : url,
-        //         data   : formdata,
-        //         success: function(data) {
-        //             console.groupCollapsed("URL deleted successfully.");
-        //             console.log("ID: " + id);
-        //             console.log("Data: " + data);
-        //             console.groupEnd();
-        //             $("#deleteUrlResponse").html(data);
-        //             $("tr[data-id='" + id + "']").remove();
-        //             $("#confirmDeleteUrl").hide();
-        //             $("#deleteUrlForm").hide();
-        //         }
-        //     });
-        // });
 
         // NOTE: .urlValidate
         $(".urlValidate").on("input", function() {
@@ -279,7 +267,7 @@
         });
 
 
-        // NOTE: urlTable
+        // NOTE: #urlTable
         var urlsChecked = 0;
         var urls        = [];
         $("#urlTable").on("check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table", function(e, row) {
@@ -322,7 +310,7 @@
             }
         });
 
-        // NOTE: deleteSelectedBtn
+        // NOTE: #deleteSelectedBtn
         $("#deleteSelectedBtn").on("click", function() {
             var urls = $(this).data("urls");
             var formdata = "action=delete&id="+urls;
@@ -348,7 +336,7 @@
             });
         });
 
-        // NOTE: testAPI
+        // NOTE: .testAPI
         $(".testAPI").on("click", function() {
             api("GET", "test", "test=1");
         });

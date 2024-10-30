@@ -6,7 +6,7 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                    <?= navBtn("Generate", "?do=home", "house") ?>
+                    <?= navBtn("Generate", "?do=home", "plus-circle") ?>
                     <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
                     <?php
                     $navUserBtn = navBtn("Login", "?do=login", "person");

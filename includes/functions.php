@@ -34,7 +34,7 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
     return "
     <div class='container'>
         <div class='$class' role='alert'>
-            <span style='display: inline-flex; align-items: center;'>
+            <span class='inline' style='align-items: center;'>
                 <span class='mx-2'>$icon</span>
                 <span class='mx-2'>$msg</span>
             $dismissBtn
@@ -49,9 +49,23 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
 function icon($icon, $size = 1, $color = Null) {
     $style = "style='";
     $style .= ($color == Null ? "" : "color:$color;");
-    $style .= "font-size:".$size."rem;";
-    $style .= "'";
+    $style .= "font-size:".$size."rem;'";
     return "<span class='bi bi-$icon' $style></span>";
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                              FUNCTION tooltip                              */
+/* ────────────────────────────────────────────────────────────────────────── */
+function tooltip($text = "Tooltip", $icon = "question-circle", $html = "true", $placement = "top") {
+    return '
+        <button class="btn btn-default" type="button" 
+            data-bs-toggle="tooltip" 
+            data-bs-title="'.$text.'" 
+            data-bs-placement="'.$placement.'" 
+            data-bs-html="'.$html.'"
+            title="'.$text.'">
+            '. icon($icon) .'
+        </button>';
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -304,7 +318,7 @@ function auth($user = Null, $pass = Null) {
 function urlInput($name = "url", $placeholder = "Destination URL (ex. example.com)") {
     global $cfg;
     return '
-    <div class="input-group m-1">
+    <div class="input-group m-2">
         <div class="input-group-text p-0">
             <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
                 <option value="http://" '.($cfg["default_protocol"] == "http://" ? "selected" : "").'>http://</option>
@@ -314,11 +328,6 @@ function urlInput($name = "url", $placeholder = "Destination URL (ex. example.co
         <input class="form-control urlValidate newUrlInput" type="text" name="'.$name.'"
             placeholder="'.$placeholder.'"
             >
-        <span class="text-muted">
-            <b>Required</b>
-            The protocol URL that the short URL should be an alias of.
-            HTTP usually redirects to HTTPS, but choose HTTPS if you want to enforce it.
-        </span>
     </div>
 ';
 }
