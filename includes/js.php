@@ -66,12 +66,11 @@
                 } catch (e) {
                     console.error("Invalid JSON response:", response);
                     toast("Invalid JSON response", "danger", "Error");
-                    return;
+                    return false;
                 }
                 var status      = data["status"];
                 var message     = data["message"];
                 var redirect    = data["redirect"];
-                // var extcallback = data["callback"];
                 var type        = "info";
                 if (status == "OK") {
                     type = "success";
@@ -87,18 +86,17 @@
 
                 if (callback != null) {
                     callback(data);
-                    return;
+                    return true;
                 }
                 toast(message, type, type.toUpperCase());
-
-                // if (typeof extcallback !== "undefined" && typeof window[extcallback] === "function") {
-                //     window[extcallback](data);
-                //     return;
-                // }
 
                 if (data["redirect"] != null) {
                     window.location.href = data["redirect"];
                 }
+                return true;
+            },
+            error: function() {
+                return false;
             }
         });
     }
@@ -205,6 +203,10 @@
         /* ────────────────────────────────────────────────────────────────────────── */
         /*                                 NOTE: urls                                 */
         /* ────────────────────────────────────────────────────────────────────────── */
+        
+        var urlsChecked = 0;
+        var urls        = [];
+
         // NOTE: .url-action
         $(".url-action").on("click", function() {
             var action   = $(this).data("action");
@@ -237,6 +239,7 @@
                 $("#deleteUrlShort").text(short);
                 $("#confirmDeleteUrl").data("id", id);
                 $("#confirmDeleteUrl").show();
+                $("#confirmDeleteUrl").prop("disabled", false);
                 $("#deleteUrlForm").show();
             }
         });
@@ -246,6 +249,7 @@
             api("POST", "delete", "id="+$(this).data("id"));
             $(this).attr("disabled", true);
             $("#deleteUrlModal").modal("hide");
+            $("tr[data-id='" + $(this).data("id") + "']").remove();
         });
 
         // NOTE: .urlValidate
@@ -268,8 +272,6 @@
 
 
         // NOTE: #urlTable
-        var urlsChecked = 0;
-        var urls        = [];
         $("#urlTable").on("check.bs.table uncheck.bs.table check-all.bs.table uncheck-all.bs.table", function(e, row) {
             
             var url_id = row.id
@@ -307,33 +309,40 @@
             } else {
                 deleteSelectedBtn.attr("disabled", true);
                 deleteSelectedBtn.attr("data-urls", "");
+                urls        = [];
+                urlsChecked = 0;
             }
         });
 
         // NOTE: #deleteSelectedBtn
         $("#deleteSelectedBtn").on("click", function() {
-            var urls = $(this).data("urls");
-            var formdata = "action=delete&id="+urls;
-            var url      = "includes/api.php";
-            console.log("Deleting urls" + urls);
+            // variable urls fetched from global scope
+            var ids      = urls.join(",");
+            console.log("Deleting urls: " + urls);
 
-            $.ajax({
-                type   : "POST",
-                url    : url,
-                data   : formdata,
-                success: function(data) {
-                    console.groupCollapsed("URLs deleted successfully.");
-                    console.log("IDs: " + urls);
-                    console.log("Data: " + data);
-                    console.groupEnd();
-                    $("#deleteUrlResponse").html(data);
-                    urls.forEach(function(id) {
-                        $("tr[data-id='" + id + "']").remove();
-                    });
-                    $("#confirmDeleteUrl").hide();
-                    $("#deleteUrlForm").hide();
-                }
+            if (urls.length == 0) {
+                console.log("No URLs selected.");
+                return;
+            }
+
+            api("POST", "delete", "id="+ids);
+
+            console.log(typeof urls);
+
+            urls.forEach(function(id) {
+                $("tr[data-id='" + id + "']").remove();
+                urls.splice(urls.indexOf(id), 1);
             });
+
+            // Buttons
+            var deleteSelectedBtn = $("#deleteSelectedBtn");
+                deleteSelectedBtn.attr("disabled", true);
+                deleteSelectedBtn.attr("data-urls", "");
+            urls        = [];
+            urlsChecked = 0;
+
+            $("#confirmDeleteUrl").hide();
+            $("#deleteUrlForm").hide();
         });
 
         // NOTE: .testAPI

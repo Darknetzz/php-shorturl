@@ -175,37 +175,27 @@ do {
     if ($action == "delete") {
         $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
 
-        if ($id == Null) {
-            $res = ["status" => "ERROR", "message" => "No ID specified."];
-            break;
-        }
-
-        if (!is_numeric($id) && strpos($id, ',') === False) {
-            $res = ["status" => "ERROR", "message" => "Invalid ID specified."];
-            break;
-        }
-
-        // Split `$id` if it contains a ,
-        if (strpos($id, ',') !== False) {
-            $id = explode(',', $id);
-        }
-
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
             $res = ["status" => "ERROR", "message" => "You are not logged in."];
             break;
         }
 
-        if (is_array($id)) {
-            foreach ($id as $i) {
-                deleteURL($i);
-            }
-            $res = ["status" => "OK", "message" => "The URLs were deleted successfully."];
+        if ($id == Null) {
+            $res = ["status" => "ERROR", "message" => "No ID specified."];
             break;
-        } else {
-            deleteURL($id);
         }
 
+        $id = explode(",", $id);
+
+        foreach ($id as $i) {
+            if (!is_numeric($i)) {
+                $res = ["status" => "ERROR", "message" => "Invalid ID '$i' specified."];
+                break;
+            }
+            deleteURL($i);
+        }
+        
         $res = ["status" => "OK", "message" => "The URL was deleted successfully."];
     }
 
