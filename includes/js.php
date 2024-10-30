@@ -81,14 +81,14 @@
                 }
                 console.groupCollapsed("API request successful.");
                 console.log("Action: " + action);
-                console.log("Data: " + data);
+                console.log("Data: " + JSON.stringify(data));
                 console.groupEnd();
 
                 if (callback != null) {
                     callback(data);
                     return true;
                 }
-                toast(message, type, type.toUpperCase());
+                toast(message, type, status.toUpperCase());
 
                 if (data["redirect"] != null) {
                     window.location.href = data["redirect"];
@@ -327,11 +327,9 @@
 
             api("POST", "delete", "id="+ids);
 
-            console.log(typeof urls);
-
             urls.forEach(function(id) {
+                console.log("Removing " + id + " from table.");
                 $("tr[data-id='" + id + "']").remove();
-                urls.splice(urls.indexOf(id), 1);
             });
 
             // Buttons

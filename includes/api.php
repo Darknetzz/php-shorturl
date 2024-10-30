@@ -112,6 +112,10 @@ do {
         }
 
         if ($dest == Null) {
+            if ($type == "custom") {
+                $res = ["status" => "ERROR", "message" => "Custom URL must have content."];
+                break;
+            }
             $res = ["status" => "ERROR", "message" => "URL must have a destination."];
             break;
         }
