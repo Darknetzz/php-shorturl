@@ -113,7 +113,7 @@
             <div class="card profile-api-card">
                 <h5 class="card-header">API</h5>
                 <div class="card-body">
-                    <form class="profile-api-form" action="javascript:void(0);">
+                    <form class="dynamic-form">
                         <table class="table table-default">
                             <tr>
                                 <td><label for="api_key">API Key</label></td>

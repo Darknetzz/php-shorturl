@@ -4,6 +4,13 @@
     console.log("js.php started running at " + startTime + " ms.");
 
     /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                     log                                    */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function customLog(message, styles = "") {
+        console.log("%c" + message, styles);
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
     /*                            playNotificationSound                           */
     /* ────────────────────────────────────────────────────────────────────────── */
     function playNotificationSound() {
@@ -80,8 +87,8 @@
                     type = "warning";
                 }
                 console.groupCollapsed("API request successful.");
-                console.log("Action: " + action);
-                console.log("Data: " + JSON.stringify(data));
+                customLog("Action: " + action);
+                customLog("Data: " + JSON.stringify(data));
                 console.groupEnd();
 
                 if (callback != null) {
@@ -112,7 +119,7 @@
 
         var endTime   = performance.now();
         var timeTaken = endTime - startTime;
-        console.log("Time taken for document to ready up: " + timeTaken + " ms.");
+        customLog("Time taken for document to ready up: " + timeTaken + " ms.");
 
         // NOTE: .password
         // Show/hide password when the button is clicked
@@ -145,32 +152,32 @@
         });
 
         // NOTE: .dynamic-form
-        // Submit form to `formhandler.php` when the button is clicked
+        // Submit form to `api.php` when the button is clicked
         $(".dynamic-form").on("submit", function(e) {
             e.preventDefault();
-            console.log("Dynamic form submitted.");
-            var method   = $(this).attr("method").toUpperCase();
-            var url      = "includes/api.php";
-            var action   = $(this).data("action");
-            var formdata = $(this).serialize();
+            var form = $(this);
+            console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
+            customLog("Form: " + form.attr("id"));
+            customLog("Method: " + form.attr("method"));
+            customLog("Action: " + form.data("action"));
+            customLog("Data: " + form.serialize());
+            console.groupEnd();
+            var method   = form.attr("method").toUpperCase();
+            var action   = form.data("action");
+            var formdata = form.serialize();
+            var url      = (form.attr("action") ?  form.attr("action") : "includes/api.php");
             formdata += "&action="+action;
             
+            // Recursively disable all form elements
+            formElements = form.find("[name]");
+            // And re-enable them after 2 seconds
+            formElements.prop("disabled", true);
+            setTimeout(function() {
+                formElements.prop("disabled", false);
+            }, <?= $cfg["form_disable_timeout"] ?>);
+
             api(method, action, formdata);
 
-            // $.ajax({
-            //     type   : method,
-            //     url    : url,
-            //     data   : formdata,
-            //     success: function(data) {
-            //         console.groupCollapsed("Form submitted successfully.");
-            //         console.log("Method: " + method);
-            //         console.log("URL: " + url);
-            //         console.log("Action: " + action);
-            //         console.log("Data: " + data);
-            //         console.groupEnd();
-            //         $(".dynamic-form-response").html(data);
-            //     }
-            // });
         });
 
         /* ────────────────────────────────────────────────────────────────────────── */
@@ -231,11 +238,11 @@
                 editDestUrl.val(dest);
                 editUrlId.val(id);
 
-                console.log("Edit action clicked.");
+                customLog("Edit action clicked.");
             }
             if (action == "delete") {
                 var deleteUrlForm = $("#deleteUrlForm");
-                console.log("Delete action clicked.");
+                customLog("Delete action clicked.");
                 $("#deleteUrlShort").text(short);
                 $("#confirmDeleteUrl").data("id", id);
                 $("#confirmDeleteUrl").show();
@@ -276,9 +283,9 @@
             
             var url_id = row.id
 
-            console.log("Event type: " + e.type);
-            console.log("Row: " + row);
-            console.log("ID: " + url_id);
+            customLog("Event type: " + e.type);
+            customLog("Row: " + row);
+            customLog("ID: " + url_id);
 
             if (e.type == "check") {
                 urlsChecked++;
@@ -318,17 +325,17 @@
         $("#deleteSelectedBtn").on("click", function() {
             // variable urls fetched from global scope
             var ids      = urls.join(",");
-            console.log("Deleting urls: " + urls);
+            customLog("Deleting urls: " + urls);
 
             if (urls.length == 0) {
-                console.log("No URLs selected.");
+                customLog("No URLs selected.");
                 return;
             }
 
             api("POST", "delete", "id="+ids);
 
             urls.forEach(function(id) {
-                console.log("Removing " + id + " from table.");
+                customLog("Removing " + id + " from table.");
                 $("tr[data-id='" + id + "']").remove();
             });
 
@@ -344,12 +351,12 @@
         });
 
         // NOTE: .testAPI
-        $(".profile-api-form").on("submit", function() {
-            var method = $(this).find("#api_method").val();
-            var action = $(this).find("#api_action").val();
-            var data   = $(this).serialize();
-            api(method, action, data);
-        });
+        // $(".profile-api-form").on("submit", function() {
+        //     var method = $(this).find("#api_method").val();
+        //     var action = $(this).find("#api_action").val();
+        //     var data   = $(this).serialize();
+        //     api(method, action, data);
+        // });
         $(".profile-api-card").on("change", "#api_action", function() {
             var action = $(this).val();
             $(".testAPIInputs").hide();
@@ -364,7 +371,7 @@
     $(window).on("load", function() {
         var endTime   = performance.now();
         var timeTaken = endTime - startTime;
-        console.log("Time taken for window to load up: " + timeTaken + " ms.");
+        customLog("Time taken for window to load up: " + timeTaken + " ms.");
     });
 
 </script>
