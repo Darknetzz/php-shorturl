@@ -127,3 +127,10 @@ $cfg["url_types"] = [
         "value" => "custom",
     ],
 ];
+
+/**
+ * urls_public
+ * Whether shortened URLs are public. Everyone can see it in the URL list.
+ * Default: True
+ */
+$cfg["urls_public"] = True;

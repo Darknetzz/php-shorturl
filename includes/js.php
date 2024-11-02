@@ -112,8 +112,10 @@
                 console.groupEnd();
 
                 if (callback != null) {
-                    callback(data);
-                    return true;
+                    callback = callback(data);
+                    if (callback == false) {
+                        return true;
+                    }
                 }
                 toast(message, type, status.toUpperCase());
 
@@ -138,19 +140,46 @@
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
 
 
-        // NOTE: Highlight.js
+        // NOTE: Ace Editor
         const codeInputs = $(".codeInput");
         codeInputs.prop("contenteditable", true);
+        codeInputs.each(function() {
+            var thisObj   = $(this)[0];
+            var inputName = $(this).attr("name");
+            customLog("Highlighting code input for " + inputName);
 
-        codeInputs.on("keyup", function() {
-            var code = $(this).text();
-            var codeOutput = $($(this).data("output")) || $(this).next(".codeOutput");
-            if (!codeOutput) {
-                customError("Output element not found.");
-                return;
-            }
-            var hlCode = hljs.highlightAuto(code).value;
-            codeOutput.html(hlCode);
+            // Create a hidden textarea
+            var hiddenTextarea = $("<textarea></textarea>")
+                .attr("name", inputName)
+                .css("display", "none");
+
+            // Insert the hidden textarea after the code input
+            $(this).after(hiddenTextarea);
+
+            // Ace Options
+            aceOpts = {
+                mode: "ace/mode/html",
+                theme: "ace/theme/monokai",
+                showPrintMargin: false,
+                tabSize: 4,
+                useSoftTabs: true,
+                wrap: true,
+                autoScrollEditorIntoView: true,
+                maxLines: 0,
+                minLines: 10,
+            };
+
+            // Initialize Ace Editor
+            var editor = ace.edit(thisObj, aceOpts);
+            editor.name = inputName;
+
+            // Update hidden textarea value when Ace Editor content changes
+            editor.getSession().on('change', function() {
+                hiddenTextarea.val(editor.getValue());
+            });
+
+            // Initial update of hidden textarea
+            hiddenTextarea.val(editor.getValue());
         });
 
         var endTime   = performance.now();
@@ -195,6 +224,7 @@
             var formdata = form.serialize();
             var method   = form.find("[name='method']").val() || form.attr("method") || form.data("method");
             var action   = form.find("[name='action']").val() || form.data("action");
+            var output   = form.data("output") || null; // NOTE: Output element to display the response
             var url      = form.attr("action") || "includes/api.php";
 
             if (!method || !action) {
@@ -221,7 +251,11 @@
                 }, <?= $cfg["form_disable_timeout"] ?>);
             <?php } ?>
 
-            api(method, action, formdata);
+            api(method, action, formdata, function(data) {
+                if (output != null) {
+                    $(output).html(JSON.stringify(data, null, 2));
+                }
+            });
         });
 
         /* ────────────────────────────────────────────────────────────────────────── */

@@ -145,8 +145,8 @@
                 <li class="<?= $listGroupClass ?> " data-action="api">
                     <a class="<?= $listLinkClass ?>" href="javascript:void(0);">API Tester</a>
                 </li>
-                <li class="<?= $listGroupClass ?> " data-action="hljseditor">
-                    <a class="<?= $listLinkClass ?>" href="javascript:void(0);">HLJS Editor Tester</a>
+                <li class="<?= $listGroupClass ?> " data-action="ace">
+                    <a class="<?= $listLinkClass ?>" href="javascript:void(0);">Ace Editor Tester</a>
                 </li>
                 <li class="<?= $listGroupClass ?> " data-action="users">
                     <a class="<?= $listLinkClass ?>" href="javascript:void(0);">Users</a>
@@ -175,6 +175,30 @@
             </h4>
             <div class="card-body">
                 Welcome to the admin dashboard.
+                <table class="table table-default">
+                    <tr>
+                        <th colspan="100%">
+                            User Information
+                        </th>
+                    <tr>
+                        <td>Logged in as</td>
+                        <td><?= $_SESSION['username'] ?></td>
+                    </tr>
+                    <tr>
+                        <td>Access Level</td>
+                        <td><?= $_SESSION['acl'] ?></td>
+                    </tr>
+                    <tr>
+                        <td>API Key</td>
+                        <td><?= $_SESSION['id'] ?></td>
+                    </tr>
+                    <tr>
+                        <th colspan="100%">
+                            Application Information
+                        </th>
+                    </tr>
+
+                </table>
             </div>
         </div>
 
@@ -188,137 +212,139 @@
                 API Tester
             </h4>
             <div class="card-body">
-                        <form class="dynamic-form" action="includes/api.php">
-                            <table class="table table-default">
-                                <!-- <tr>
-                                    <td>
-                                        API Key
-                                    </td>
-                                    <td>
-                                        <input type="text" class="form-control" id="test_api_key"
-                                            value="<?= $_SESSION['id'] ?>" readonly>
-                                    </td>
-                                </tr> -->
-                                <tr>
-                                    <td>
-                                        Action
-                                    </td>
-                                    <td>
-                                        <select name="action" class="form-select" id="test_api_action">
-                                            <?php
-                                                foreach ($apiEndpoints as $action => $endpoint) {
-                                                    echo "<option value='$action' id='test_api_action_$action' data-method='$endpoint[method]'>$endpoint[description]</option>";
-                                                }
-                                            ?>
-                                            <!--
-                                            <option value="test">Test API (does nothing except return OK)</option>
-                                            <option value="createshort">Create Short URL</option>
-                                            <option value="delete">Delete Short URL</option>
-                                            <option value="edit">Edit Short URL</option>
-                                            <option value="list">List Short URLs</option>
-                                            -->
-                                        </select>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Method</td>
-                                    <td>
-                                        <select name="method" class="form-select" id="test_api_method" readonly>
-                                            <option value="GET">GET</option>
-                                            <option value="POST">POST</option>
-                                        </select>
-                                    </td>
-                                </tr>
-                                </table>
-
-                                <div class="allTestAPIInputs m-3 p-3">
+                <form id="api-test-form" class="dynamic-form" action="includes/api.php" data-output="#api-tester-response">
+                    <table class="table table-default">
+                        <!-- <tr>
+                            <td>
+                                API Key
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="test_api_key"
+                                    value="<?= $_SESSION['id'] ?>" readonly>
+                            </td>
+                        </tr> -->
+                        <tr>
+                            <td>
+                                Action
+                            </td>
+                            <td>
+                                <select name="action" class="form-select" id="test_api_action">
                                     <?php
-                                    foreach ($apiEndpoints as $action => $endpoint) {
-                                        $displayOpts = ($action != "test") ? "style='display:none;'" : "";
-                                        echo "
-                                            <div class='card testAPIInputs' data-action='$action' $displayOpts>
-                                                <h4 class='card-header bg-secondary-subtle'>Inputs for <span class='text-info'>$action</span></h4>
-                                                <div class='card-body'>
-                                                <p>{$endpoint['description']}</p>
-                                        ";
-                                        foreach ($endpoint['inputs'] as $input) {
-
-                                            echo "
-                                            <span class='test_api_input_name' data-namefor='{$input['name']}'>
-                                                {$input['name']}
-                                            </span>";
-                                            $inputAttrs = "id='test_api_{$input['name']}' name='{$input['name']}'";
-                                            
-                                            # URL input
-                                            if ($input["type"] == "url") {
-                                                echo "<select class='form-select' $inputAttrs>";
-                                                foreach ($input['options'] as $id => $url) {
-                                                    $destText = "Custom";
-                                                    if ($url['type'] != "custom") {
-                                                        $destText = $url['dest'];
-                                                    }
-                                                    echo "<option value='$id'>[#$id] $url[short] => $destText</option>";
-                                                }
-                                                echo "</select>";
-                                                continue;
-                                            }
-
-                                            # Select input
-                                            if ($input["type"] == "select") {
-                                                echo "<select class='form-select' $inputAttrs>";
-                                                foreach ($input['options'] as $name => $val) {
-                                                    $optionClass = "";
-                                                    if (!empty($input['class'])) {
-                                                        $optionClass = " class='{$input['class']}'";
-                                                    }
-                                                    echo "<option value='$name' class='$optionClass'>".$val."</option>";
-                                                }
-                                                echo "</select>";
-                                                continue;
-                                            }
-
-                                            # Textarea input
-                                            if ($input["type"] == "textarea") {
-                                                echo "<textarea class='form-control' $inputAttrs>{$input['value']}</textarea>";
-                                                continue;
-                                            }
-
-                                            # Default input
-                                            echo "<input type='text' class='form-control' $inputAttrs value='{$input['value']}'>";
+                                        foreach ($apiEndpoints as $action => $endpoint) {
+                                            echo "<option value='$action' id='test_api_action_$action' data-method='$endpoint[method]'>$endpoint[description]</option>";
                                         }
-                                        echo "</div>";
-                                        echo "</div>";
-                                    }
                                     ?>
+                                    <!--
+                                    <option value="test">Test API (does nothing except return OK)</option>
+                                    <option value="createshort">Create Short URL</option>
+                                    <option value="delete">Delete Short URL</option>
+                                    <option value="edit">Edit Short URL</option>
+                                    <option value="list">List Short URLs</option>
+                                    -->
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Method</td>
+                            <td>
+                                <select name="method" class="form-select" id="test_api_method" readonly>
+                                    <option value="GET">GET</option>
+                                    <option value="POST">POST</option>
+                                </select>
+                            </td>
+                        </tr>
+                        </table>
+
+                        <div class="allTestAPIInputs m-3 p-3">
+                            <?php
+                            foreach ($apiEndpoints as $action => $endpoint) {
+                                $displayOpts = ($action != "test") ? "style='display:none;'" : "";
+                                echo "
+                                    <div class='card testAPIInputs' data-action='$action' $displayOpts>
+                                        <h4 class='card-header bg-secondary-subtle'>Inputs for <span class='text-info'>$action</span></h4>
+                                        <div class='card-body'>
+                                        <p>{$endpoint['description']}</p>
+                                ";
+                                foreach ($endpoint['inputs'] as $input) {
+
+                                    echo "
+                                    <span class='test_api_input_name' data-namefor='{$input['name']}'>
+                                        {$input['name']}
+                                    </span>";
+                                    $inputAttrs = "id='test_api_{$input['name']}' name='{$input['name']}'";
+                                    
+                                    # URL input
+                                    if ($input["type"] == "url") {
+                                        echo "<select class='form-select' $inputAttrs>";
+                                        foreach ($input['options'] as $id => $url) {
+                                            $destText = "Custom";
+                                            if ($url['type'] != "custom") {
+                                                $destText = $url['dest'];
+                                            }
+                                            echo "<option value='$id'>[#$id] $url[short] => $destText</option>";
+                                        }
+                                        echo "</select>";
+                                        continue;
+                                    }
+
+                                    # Select input
+                                    if ($input["type"] == "select") {
+                                        echo "<select class='form-select' $inputAttrs>";
+                                        foreach ($input['options'] as $name => $val) {
+                                            $optionClass = "";
+                                            if (!empty($input['class'])) {
+                                                $optionClass = " class='{$input['class']}'";
+                                            }
+                                            echo "<option value='$name' class='$optionClass'>".$val."</option>";
+                                        }
+                                        echo "</select>";
+                                        continue;
+                                    }
+
+                                    # Textarea input
+                                    if ($input["type"] == "textarea") {
+                                        echo "<textarea class='form-control' $inputAttrs>{$input['value']}</textarea>";
+                                        continue;
+                                    }
+
+                                    # Default input
+                                    echo "<input type='text' class='form-control' $inputAttrs value='{$input['value']}'>";
+                                }
+                                echo "</div>";
+                                echo "</div>";
+                            }
+                            ?>
                         </div>
                                 <button name="testAPI" class="btn btn-lg btn-success testAPI m-3"><?= icon("send-fill") ?> Send</button>
                         </form>
+                        <hr>
+                        <div class="card m-2">
+                            <h4 class="card-header <?= $headerClass ?>">API Response</h4>
+                            <div class="card-body">
+                                <pre id="api-tester-response" class="text-bg-secondary p-3 border border-secondary">
+                                    Response will appear here
+                                </pre>
+                            </div>
+                        </div>
                 </div>
             </div>
 
 
         <!--
-        /* ────────────────────────────────────────────────────────────────────────── */
-        /*                          NOTE: HLJS Editor Tester                          */
-        /* ────────────────────────────────────────────────────────────────────────── */
+          /* ────────────────────────────────────────────────────────────────────────── */
+          /*                          NOTE: Ace Editor Tester                          */
+          /* ────────────────────────────────────────────────────────────────────────── */
         -->
-        <div class="card m-2 adminContent" data-action="hljseditor" style="display: none;">
+        <div class="card m-2 adminContent" data-action="ace" style="display: none;">
             <h4 class="card-header <?= $headerClass ?>">
-                HLJS Editor Tester
+                Ace Editor Tester
             </h4>
             <div class="card-body">
 
                 <div class="card m-2">
-                    <h3 class="card-header">Highlight.js</h3>
+                    <h3 class="card-header">Code</h3>
                     <div class="card-body">
-                        <pre class="codeHighlight codeBox"></pre>
-                    </div>
-                </div>
-
-                <div class="card m-2">
-                    <h3 class="card-header">Code (with highlight)</h3>
-                    <div class="card-body">
-                        <pre class="codeInput codeBox" data-output=".codeHighlight"></pre>
+                        <pre class="codeInput codeBox"></pre>
                     </div>
                 </div>
 
@@ -352,7 +378,10 @@
                         <tbody>
                         ";
                         foreach ($logs as $log) {
-                            echo "<tr><td>$log[timestamp]</td><td>$log[ip]</td><td>$log[event]</td></tr>";
+                            $event = str_replace("short", "<span class='text-info'>short</span>", $event);
+                            $event = preg_replace('/#(\d+)/', '<span class="text-info">#$1</span>', $log['event']);
+                            $event = stripslashes($log['event']);
+                            echo "<tr><td>$log[timestamp]</td><td>$log[ip]</td><td>$event</td></tr>";
                         }
                         echo "</table>";
                     }
@@ -470,6 +499,10 @@ $(document).ready(function() {
     $("[name=type]").on("change", function() {
         var type = $(this).val();
         $("#test_api_dest").attr("name", type + "_dest");
+    });
+
+    $("#api-test-form").on("submit", function() {
+        
     });
 
 

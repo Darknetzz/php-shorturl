@@ -235,7 +235,11 @@ function urlExists($url = Null) {
 /*                              FUNCTION getUrls                              */
 /* ────────────────────────────────────────────────────────────────────────── */
 function getUrls() {
-    return query("SELECT * FROM urls");
+    global $cfg;
+    if ($cfg["urls_public"] == True && $_SESSION['id'] && $_SESSION['acl'] < 1) {
+        return query("SELECT * FROM urls WHERE `user` = ? ORDER BY `id` DESC", [$_SESSION['id']]);
+    }
+    return query("SELECT * FROM urls ORDER BY `id` DESC");
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

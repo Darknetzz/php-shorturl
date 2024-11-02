@@ -4,3 +4,4 @@ assets/highlight/languages/*.js
 !assets/highlight/languages/*.min.js
 assets/highlight/styles/*.css
 !assets/highlight/styles/*.min.css
+*_old

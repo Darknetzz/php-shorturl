@@ -189,10 +189,7 @@ $protocol_tooltip = "
                                     ") ?>
                                 </td>
                                 <td>
-                                    <code class="newUrlInput hljs" language="php" name="custom_dest" placeholder="Custom Script" rows="3">
-                                        <!-- Insert your code here -->
-                                    </code>
-                                        <!-- <textarea class="form-control newUrlInput hljs" language="php" name="custom_dest" placeholder="Custom Script" rows="3"></textarea> -->
+                                    <div class="newUrlInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
                                 </td>
                             </tr>
 

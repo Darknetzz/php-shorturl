@@ -21,12 +21,15 @@
     }
 
     .codeBox {
-        min-height      : 100px;
+        min-height      : 250px;
+        max-height      : 100%;
+        overflow        : auto;
         background-color: #343a40;
         color           : #fff;
         border          : 1px solid #2f5f8f;
         border-radius   : 0.25rem;
         padding         : 0.5rem;
         margin          : 0.5rem;
+        white-space     : pre;
     }
 </style>

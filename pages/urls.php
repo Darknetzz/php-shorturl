@@ -19,6 +19,7 @@
             data-search="true"
             data-pagination="true"
             data-page-size="25"
+            data-page-list="[10, 25, 50, 100, 200, All]"
             data-show-columns="true"
             data-show-columns-toggle-all="true"
             data-show-extended-pagination="true"
@@ -30,7 +31,7 @@
             <thead>
                 <tr class="table table-primary">
                     <th data-field="state" data-checkbox="true"></th>
-                    <th data-field="id" data-sortable="true">ID</th>
+                    <th data-field="id" data-sortable="true" data-visible="false">ID</th>
                     <th data-field="type" data-sortable="true">Type</th>
                     <th data-field="shorturl" data-sortable="true">Short URL</th>
                     <th data-field="desturl" data-sortable="true">Destination URL</th>
@@ -111,7 +112,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editUrlForm">
+                    <form id="editUrlForm" class="dynamic-form">
                         <div class="mb-3">
                             <label for="editUrlType" class="form-label">Type</label>
                             <select class="form-select" id="editUrlType" name="type" required>
@@ -138,6 +139,7 @@
                             <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
                         </div>
                         <input type="hidden" id="editUrlId" name="id">
+                        <input type="hidden" name="action" value="edit">
                     </form>
                 </div>
                 <div class="modal-footer">

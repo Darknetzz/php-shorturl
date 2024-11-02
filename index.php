@@ -30,14 +30,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.js"></script>
 
     <!-- Highlight.js -->
-    <link rel="stylesheet" href="assets/highlight/styles/dark.min.css">
+    <!-- <link rel="stylesheet" href="assets/highlight/styles/dark.min.css">
     <script src="assets/highlight/highlight.min.js"></script>
     <script src="assets/highlight/languages/php.min.js"></script>
     <script src="assets/highlight/languages/javascript.min.js"></script>
     <script src="assets/highlight/languages/http.min.js"></script>
     <script src="assets/highlight/languages/plaintext.min.js"></script>
     <script src="assets/highlight/languages/css.min.js"></script>
-    <script src="assets/highlight/languages/xml.min.js"></script>
+    <script src="assets/highlight/languages/xml.min.js"></script> -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.3/ace.min.js" integrity="sha512-faieT+YRcxd+aQZbK6m2iaKhYEKkDvwbn7n2WToge2+k6+YBlxbT/Wii5bVPUWpnXm186SPynzVfc+ME8a/a3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
 
 </head>
 
