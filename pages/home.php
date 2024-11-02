@@ -9,7 +9,7 @@ $protocol_tooltip = "
 ";
 ?>
 
-<div class="container-fluid">
+<div class="container-fluid d-flex justify-content-center">
     <div class="card m-3 border border-primary">
                 <h1 class="card-header text-bg-primary">URL Shortener</h1>
                 <div class="card-body">
@@ -189,9 +189,10 @@ $protocol_tooltip = "
                                     ") ?>
                                 </td>
                                 <td>
-                                    <div class="form-group-text">
-                                        <textarea class="form-control newUrlInput" name="custom_dest" placeholder="Custom Script" rows="3"></textarea>
-                                    </div>
+                                    <code class="newUrlInput hljs" language="php" name="custom_dest" placeholder="Custom Script" rows="3">
+                                        <!-- Insert your code here -->
+                                    </code>
+                                        <!-- <textarea class="form-control newUrlInput hljs" language="php" name="custom_dest" placeholder="Custom Script" rows="3"></textarea> -->
                                 </td>
                             </tr>
 

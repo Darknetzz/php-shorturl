@@ -29,6 +29,16 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.css">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.23.5/dist/bootstrap-table.min.js"></script>
 
+    <!-- Highlight.js -->
+    <link rel="stylesheet" href="assets/highlight/styles/dark.min.css">
+    <script src="assets/highlight/highlight.min.js"></script>
+    <script src="assets/highlight/languages/php.min.js"></script>
+    <script src="assets/highlight/languages/javascript.min.js"></script>
+    <script src="assets/highlight/languages/http.min.js"></script>
+    <script src="assets/highlight/languages/plaintext.min.js"></script>
+    <script src="assets/highlight/languages/css.min.js"></script>
+    <script src="assets/highlight/languages/xml.min.js"></script>
+
 </head>
 
 <body data-bs-theme="dark">

@@ -9,6 +9,13 @@
                     <?= navBtn("Generate", "?do=home", "plus-circle") ?>
                     <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
                     <?php
+
+                    # NOTE: Admin
+                    if ($_SESSION['acl'] > 0) {
+                        echo navBtn("Admin", "?do=admin", "gear");
+                    }
+
+                    # NOTE: User
                     $navUserBtn = navBtn("Login", "?do=login", "person");
                     if (!empty($_SESSION['id'])) {
                         $userid      = $_SESSION['id'];
@@ -18,7 +25,6 @@
                         }
                         $navUserBtn = navDropDown($userName, [
                             ["url" => "?do=profile", "text" => "Profile", "icon" => "person-vcard"],
-                            ["url" => "?do=urls", "text" => "URLs", "icon" => "bookmarks"],
                             ["url" => "?do=logout", "text" => "Logout", "icon" => "power"],
                         ], "person");
                     }

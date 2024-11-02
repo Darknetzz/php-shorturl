@@ -4,7 +4,14 @@
     console.log("js.php started running at " + startTime + " ms.");
 
     /* ────────────────────────────────────────────────────────────────────────── */
-    /*                                     log                                    */
+    /*                                 customError                                */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function customError(message, styles = "") {
+        console.error("%c" + message, styles);
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                               customLog                                    */
     /* ────────────────────────────────────────────────────────────────────────── */
     function customLog(message, styles = "") {
         console.log("%c" + message, styles);
@@ -13,10 +20,24 @@
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                            playNotificationSound                           */
     /* ────────────────────────────────────────────────────────────────────────── */
-    function playNotificationSound() {
-        var audio = new Audio('assets/notification.mp3');
+    function playSound(sound = "notification") {
+        var soundEnabled = <?= ($cfg["notification_sound"] !== False ? "true" : "false") ?>;
+        if (soundEnabled) {
+            customLog("Playing sound: Notification sound is enabled.");
+            var audioFile = "assets/" + sound + ".mp3";
+            var audio = new Audio(audioFile);
             audio.volume = 0.5;
-            audio.play();
+            audio.play().then(() => {
+                audio.onended = () => {
+                    customLog("Notification sound ended.");
+                    audio.remove();
+                };
+            }).catch(error => {
+                customError("Error playing sound:", error);
+            });
+            return;
+        }
+        customLog("Not playing sound: Notification sound is disabled.");
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -51,10 +72,6 @@
         $(".toast").toast("show").on("hidden.bs.toast", function() {
             $(this).remove();
         });
-
-        <?php if ($cfg["notification_sound"] !== False) { ?>
-            playNotificationSound();
-        <?php } ?>
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -80,10 +97,13 @@
                 var redirect    = data["redirect"];
                 var type        = "info";
                 if (status == "OK") {
+                    playSound("notification");
                     type = "success";
                 } else if (status == "ERROR") {
+                    playSound("error");
                     type = "danger";
                 } else if (status == "WARNING" || status == "WARN") {
+                    playSound();
                     type = "warning";
                 }
                 console.groupCollapsed("API request successful.");
@@ -114,8 +134,24 @@
     $(document).ready(function() {
 
         // NOTE: Tooltips (Bootstrap)
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+
+        // NOTE: Highlight.js
+        const codeInputs = $(".codeInput");
+        codeInputs.prop("contenteditable", true);
+
+        codeInputs.on("keyup", function() {
+            var code = $(this).text();
+            var codeOutput = $($(this).data("output")) || $(this).next(".codeOutput");
+            if (!codeOutput) {
+                customError("Output element not found.");
+                return;
+            }
+            var hlCode = hljs.highlightAuto(code).value;
+            codeOutput.html(hlCode);
+        });
 
         var endTime   = performance.now();
         var timeTaken = endTime - startTime;
@@ -156,28 +192,36 @@
         $(".dynamic-form").on("submit", function(e) {
             e.preventDefault();
             var form = $(this);
-            console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
-            customLog("Form: " + form.attr("id"));
-            customLog("Method: " + form.attr("method"));
-            customLog("Action: " + form.data("action"));
-            customLog("Data: " + form.serialize());
-            console.groupEnd();
-            var method   = form.attr("method").toUpperCase();
-            var action   = form.data("action");
             var formdata = form.serialize();
-            var url      = (form.attr("action") ?  form.attr("action") : "includes/api.php");
-            formdata += "&action="+action;
+            var method   = form.find("[name='method']").val() || form.attr("method") || form.data("method");
+            var action   = form.find("[name='action']").val() || form.data("action");
+            var url      = form.attr("action") || "includes/api.php";
+
+            if (!method || !action) {
+            customError("Form method or action not specified.");
+            return;
+            }
+
+            console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
+                customLog("Method: " + method);
+                customLog("Action: " + action);
+                customLog("Data: " + formdata);
+            console.groupEnd();
+
+
+            formdata += "&action=" + action;
             
-            // Recursively disable all form elements
-            formElements = form.find("[name]");
-            // And re-enable them after 2 seconds
-            formElements.prop("disabled", true);
-            setTimeout(function() {
-                formElements.prop("disabled", false);
-            }, <?= $cfg["form_disable_timeout"] ?>);
+            <?php if (!empty($cfg["form_disable_timeout"]) && $cfg["form_disable_timeout"] > 0) { ?>
+                // Recursively disable all form elements
+                formElements = form.find("[name]");
+                // And re-enable them after the specified timeout
+                formElements.prop("disabled", true);
+                setTimeout(function() {
+                    formElements.prop("disabled", false);
+                }, <?= $cfg["form_disable_timeout"] ?>);
+            <?php } ?>
 
             api(method, action, formdata);
-
         });
 
         /* ────────────────────────────────────────────────────────────────────────── */
@@ -348,19 +392,6 @@
 
             $("#confirmDeleteUrl").hide();
             $("#deleteUrlForm").hide();
-        });
-
-        // NOTE: .testAPI
-        // $(".profile-api-form").on("submit", function() {
-        //     var method = $(this).find("#api_method").val();
-        //     var action = $(this).find("#api_action").val();
-        //     var data   = $(this).serialize();
-        //     api(method, action, data);
-        // });
-        $(".profile-api-card").on("change", "#api_action", function() {
-            var action = $(this).val();
-            $(".testAPIInputs").hide();
-            $(".testAPIInputs[data-action='"+action+"']").show();
         });
 
     });

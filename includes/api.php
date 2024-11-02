@@ -16,12 +16,14 @@ require_once($includes_fullpath);
 
 do {
 
-    $action = (!empty($_REQUEST["action"]) ? $_REQUEST["action"] : Null);
+    $action       = (!empty($_REQUEST["action"]) ? $_REQUEST["action"] : Null);
 
     if ($action == Null) {
         $res = ["status" => "WARN", "message" => "No action specified."];
         break;
     }
+
+    writeLog("API Request from user ".$_SESSION['id']." API action: ".$action);
 
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                                    test                                    */
@@ -94,7 +96,6 @@ do {
 
         // Check if $type or $dest is empty
         if ($type == Null) {
-            echo json_encode($_POST, JSON_PRETTY_PRINT);
             $res = ["status" => "ERROR", "message" => "URL must have a valid type."];
             break;
         }
@@ -148,10 +149,10 @@ do {
     /*                                  editShort                                 */
     /* ────────────────────────────────────────────────────────────────────────── */
     if ($action == "edit") {
-        $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
-        $type = (!empty($_POST['type']) ? $_POST['type'] : Null);
+        $id    = (!empty($_POST['id']) ? $_POST['id'] : Null);
+        $type  = (!empty($_POST['type']) ? $_POST['type'] : Null);
         $short = (!empty($_POST['short']) ? $_POST['short'] : Null);
-        $dest = (!empty($_POST['dest']) ? $_POST['dest'] : Null);
+        $dest  = (!empty($_POST['dest']) ? $_POST['dest'] : Null);
 
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
@@ -220,12 +221,12 @@ do {
 } while (False);
 
 if (!empty($res)) {
-    $res["debug"] = $_REQUEST;
-    echo json_encode($res, JSON_PRETTY_PRINT);
+    $res["debug"]        = $_REQUEST;
+    echo json_encode($res);
     die();
 }
 
-echo json_encode(["status" => "WARN", "message" => "Action <code>".$action."</code> is invalid or empty."], JSON_PRETTY_PRINT);
+echo json_encode(["status" => "WARN", "message" => "Action <code>".$action."</code> is invalid or empty."]);
 
 
 ?>

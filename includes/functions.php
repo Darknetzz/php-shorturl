@@ -380,7 +380,7 @@ function aclToText($acl = 0) {
 /* ────────────────────────────────────────────────────────────────────────── */
 function writeLog($event = Null) {
     global $cfg;
-    if (!$cfg["logging"]) {
+    if (!$cfg["logging"] || $event == Null) {
         return;
     }
     $forwarded_for = ($_SERVER['HTTP_X_FORWARDED_FOR'] ?? Null);

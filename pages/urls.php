@@ -1,4 +1,4 @@
-<div class="container-fluid">
+<div class="container-fluid d-flex justify-content-center">
     <div class="card m-3 border border-primary">
     <div class="card-header text-bg-primary d-flex justify-content-between">
         <div>

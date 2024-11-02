@@ -30,7 +30,7 @@ do {
     if (!empty($url) && !empty($type) && !empty($dest)) {
         $urlText  = "#". $url["id"] . " - " . $url["short"];
         $destText = ($url["type"] !== "custom" ? "$dest" : "Custom URL");
-        writeLog(json_encode("Clicked on URL $urlText -> $type -> $destText"));
+        writeLog("Clicked on URL $urlText -> $type -> $destText");
     }
 
     if ($url === False) {

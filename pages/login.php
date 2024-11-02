@@ -1,5 +1,5 @@
-<div class='d-flex justify-content-center'>
-    <div class='card m-3 border border-primary w-50'>
+<div class="container-fluid d-flex justify-content-center">
+    <div class='card m-3 border border-primary'>
         <h1 class='card-header text-bg-primary'>Login</h1>
         <div class='card-body'>
             <form class='dynamic-form' method='POST' data-action='login'>
