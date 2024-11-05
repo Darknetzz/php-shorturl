@@ -7,7 +7,7 @@ Not quite ready for public use yet, but if you're very curious:
 * Create a user and sha512 password (with optional salt) in your MySQL database
 * Change `includes/sqlcon.php` to match your connection settings.
 
-## Feautures
+## Features
 - [x] Add URLs
 - [x] Delete URLs
 - [x] Extensive tooltips
