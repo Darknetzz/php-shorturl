@@ -290,14 +290,15 @@
 
         // NOTE: .url-action
         $(".url-action").on("click", function() {
-            var action   = $(this).data("action");
-            var tr       = $(this).closest("tr");
-            var id       = tr.data("id");
-            var type     = tr.data("type");
-            var short    = tr.data("shorturl");
-            var protocol = short.split("://")[0] + "://";
-            var dest     = tr.data("desturl");
-            var user     = tr.data("user");
+            var actionObj = $(this);
+            var action    = actionObj.data("action");
+            var tr        = actionObj.closest("tr");
+            var id        = tr.data("id");
+            var type      = tr.data("type");
+            var short     = tr.data("shorturl");
+            var protocol  = short.split("://")[0] + "://";
+            var dest      = tr.data("desturl");
+            var user      = tr.data("user");
 
             if (action == "edit") {
                 var editUrlForm  = $("#editUrlForm");
@@ -327,7 +328,12 @@
             }
             if (action == "bookmark") {
                 customLog("Bookmark action clicked.");
-                api("POST", "bookmark", "id="+id);
+                api("POST", "bookmark", "id="+id, function(data) {
+                    if (data["status"] == "OK") {
+                        var icon = data["icon"];
+                        actionObj.html(icon);
+                    }
+                });
                 return;
             }
         });

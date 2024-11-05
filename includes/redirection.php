@@ -22,7 +22,7 @@ do {
     }
 
 
-    $url     = getUrl($p);
+    $url     = getUrl($p, "short");
     $type    = $url["type"] ?? Null;
     $dest    = $url["dest"] ?? Null;
     $options = $url["options"] ?? Null;

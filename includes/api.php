@@ -243,19 +243,23 @@ do {
         }
 
         $currentBookmarks_JSON = getUser($_SESSION['id'], "bookmarks");
-        $currentBookmarks_JSON = (!empty($currentBookmarks_JSON) ? $currentBookmarks_JSON : "[]");
-        $currentBookmarks = json_decode($currentBookmarks_JSON, True);
+        $currentBookmarks = [];
+        if (!empty($currentBookmarks_JSON)) {
+            $currentBookmarks = json_decode($currentBookmarks_JSON, True);
+        }
         if (in_array($id, $currentBookmarks)) {
             unset($currentBookmarks[array_search($id, $currentBookmarks)]);
             $message = "The URL was removed from bookmarks successfully.";
+            $icon    = icon("star", 1.5);
         } else {
             array_push($currentBookmarks, $id);
             $message = "The URL was bookmarked successfully.";
+            $icon    = icon("star-fill", 1.5);
         }
         $newBookmarks = json_encode($currentBookmarks);
         setUser($_SESSION['id'], "bookmarks", $newBookmarks);
 
-        $res = ["status" => "OK", "message" => $message];
+        $res = ["status" => "OK", "message" => $message, "icon" => $icon];
         break;
     }
 

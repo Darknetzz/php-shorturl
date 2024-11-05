@@ -52,6 +52,7 @@
                         ],
                     ],
                     "short" => [
+                        "type"  => "text",
                         "name"  => "short",
                         "value" => genStr($cfg["short_default"]),
                     ],
@@ -379,7 +380,7 @@
                         <tbody>
                         ";
                         foreach ($logs as $log) {
-                            $event = str_replace("short", "<span class='text-info'>short</span>", $event);
+                            $event = str_replace("short", "<span class='text-info'>short</span>", $log);
                             $event = preg_replace('/#(\d+)/', '<span class="text-info">#$1</span>', $log['event']);
                             $event = stripslashes($log['event']);
                             echo "<tr><td>$log[timestamp]</td><td>$log[ip]</td><td>$event</td></tr>";
