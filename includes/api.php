@@ -250,11 +250,11 @@ do {
         if (in_array($id, $currentBookmarks)) {
             unset($currentBookmarks[array_search($id, $currentBookmarks)]);
             $message = "The URL was removed from bookmarks successfully.";
-            $icon    = icon("star", 1.5);
+            $icon    = icon("star", 1.5, "grey");
         } else {
             array_push($currentBookmarks, $id);
             $message = "The URL was bookmarked successfully.";
-            $icon    = icon("star-fill", 1.5);
+            $icon    = icon("star-fill", 1.5, "gold");
         }
         $newBookmarks = json_encode($currentBookmarks);
         setUser($_SESSION['id'], "bookmarks", $newBookmarks);

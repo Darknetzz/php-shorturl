@@ -489,9 +489,9 @@ function listUrls(?array $urls = []) {
                 $urlDestLink = "Custom";
             }
 
-            $favoriteIcon = icon("star", 1.5);
+            $favoriteIcon = icon("star", 1.5, "grey");
             if (is_array($favorites) && in_array($urlId, $favorites)) {
-                $favoriteIcon = " ".icon("star-fill", 1.5);
+                $favoriteIcon = " ".icon("star-fill", 1.5, "gold");
             }
 
             $optionsText = "";

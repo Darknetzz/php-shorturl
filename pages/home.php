@@ -206,7 +206,7 @@ $protocol_tooltip = "
                                     Redirect delay (ms)
                                 </td>
                                 <td>
-                                    <input class="form-control" type="number" name="options[delay]" value="0">
+                                    <input class="form-control m-1" type="number" name="options[delay]" value="0">
                                 </td>
                             </tr>
 
