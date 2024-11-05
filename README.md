@@ -7,7 +7,12 @@ Not quite ready for public use yet, but if you're very curious:
 * Create a user and sha512 password (with optional salt) in your MySQL database
 * Change `includes/sqlcon.php` to match your connection settings.
 
-## Todo
-- [ ] Delete selected URLs not working (doesn't treat `urls` as array in API)
-- [ ] Editing any URLs
-- [ ] Update help texts (tooltips? or modal)
+## Feautures
+- [x] Add URLs
+- [x] Delete URLs
+- [x] Extensive tooltips
+- [x] Favorites
+- [x] User accounts with ACL
+- [x] Logs
+- [ ] Edit URLs
+- [ ] Edit settings
