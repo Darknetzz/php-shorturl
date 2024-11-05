@@ -79,6 +79,7 @@ do {
         $short    = (!empty($_POST['short']) ? $_POST['short'] : Null);
         $shortGen = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
         $dest     = (!empty($_POST[$type.'_dest']) ? $_POST[$type.'_dest'] : Null);
+        $options  = (!empty($_POST['options']) ? $_POST['options'] : Null);
 
         // Check if the user is logged in
         if (empty($_SESSION['id'])) {
@@ -129,8 +130,13 @@ do {
             break;
         }
 
-        $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`) VALUES (?, ?, ?, ?)";
-        $insertShort = query($insertShort, [$type, $short, $dest, $_SESSION['id']]);
+        // Check if options are empty
+        if (!empty($options) && is_array($options)) {
+            $options = json_encode($options);
+        }
+
+        $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`, `options`) VALUES (?, ?, ?, ?, ?)";
+        $insertShort = query($insertShort, [$type, $short, $dest, $_SESSION['id'], $options]);
 
         $destLink = "<p>Destination URL: <a href='$dest' class='alert-link' target='_blank'>$dest</a></p>";
         if ($type == "custom") {
@@ -217,6 +223,43 @@ do {
         
         $res = ["status" => "OK", "message" => "The URL was deleted successfully."];
     }
+
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                  bookmark                                  */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "bookmark") {
+        $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
+
+        // Check if the user is logged in
+        if (empty($_SESSION['id'])) {
+            $res = ["status" => "ERROR", "message" => "You are not logged in."];
+            break;
+        }
+
+        if ($id == Null) {
+            $res = ["status" => "ERROR", "message" => "No ID specified."];
+            break;
+        }
+
+        $currentBookmarks_JSON = getUser($_SESSION['id'], "bookmarks");
+        $currentBookmarks_JSON = (!empty($currentBookmarks_JSON) ? $currentBookmarks_JSON : "[]");
+        $currentBookmarks = json_decode($currentBookmarks_JSON, True);
+        if (in_array($id, $currentBookmarks)) {
+            unset($currentBookmarks[array_search($id, $currentBookmarks)]);
+            $message = "The URL was removed from bookmarks successfully.";
+        } else {
+            array_push($currentBookmarks, $id);
+            $message = "The URL was bookmarked successfully.";
+        }
+        $newBookmarks = json_encode($currentBookmarks);
+        setUser($_SESSION['id'], "bookmarks", $newBookmarks);
+
+        $res = ["status" => "OK", "message" => $message];
+        break;
+    }
+
+
 
 } while (False);
 

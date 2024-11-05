@@ -25,6 +25,7 @@
                         }
                         $navUserBtn = navDropDown($userName, [
                             ["url" => "?do=profile", "text" => "Profile", "icon" => "person-vcard"],
+                            ["url" => "?do=bookmarks", "text" => "Bookmarks", "icon" => "bookmark"],
                             ["url" => "?do=logout", "text" => "Logout", "icon" => "power"],
                         ], "person");
                     }

@@ -26,7 +26,6 @@
             data-show-pagination-switch="true"
             data-show-search-clear-button="true"
             data-show-toggle="true"
-            data-click-to-select="true"
             >
             <thead>
                 <tr class="table table-primary">
@@ -36,6 +35,7 @@
                     <th data-field="shorturl" data-sortable="true">Short URL</th>
                     <th data-field="desturl" data-sortable="true">Destination URL</th>
                     <th data-field="user" data-sortable="true">User</th>
+                    <th data-field="options" data-sortable="false" data-visible="false">Options</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -51,9 +51,15 @@
                 $urlDest     = $url["dest"];
                 $urlType     = $url["type"];
                 $urlDestLink = "<a href='$urlDest' target='_blank'>$urlDest</a>";
+                $urlOptions  = (!empty($url["options"]) && json_validate($url["options"]) ? json_decode($url["options"]) : Null);
 
                 if ($urlType == "custom") {
                     $urlDestLink = "Custom";
+                }
+
+                $optionsText = "";
+                foreach ($urlOptions as $key => $value) {
+                    $optionsText .= "$key = $value<br>";
                 }
 
                 echo '
@@ -81,11 +87,17 @@
                             '.$username.'
                         </td>
                         <td>
+                            '.$optionsText.'
+                        </td>
+                        <td>
 
                             <a href="javascript:void(0);" class="url-action m-3" 
                                 data-action="edit"
                                 data-bs-toggle="modal"
                                 data-bs-target="#editUrlModal">'.icon("pencil", 1.5).'</a>
+
+                            <a href="javascript:void(0)" class="url-action m-3" 
+                                data-action="bookmark">'.icon("star", 1.5).'</a>
 
                             <a href="javascript:void(0);" class="url-action m-3 link-danger" 
                                 data-bs-toggle="modal" 
@@ -99,7 +111,11 @@
         ?>
         </tbody>
         </table>
-        <button id="deleteSelectedBtn" class="btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+        <div class="btn-group">
+            <a href="?do=home" class="btn btn-success"><?= icon("plus-circle") ?> New URL</a>
+            <button id="deleteSelectedBtn" class="btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+        </div>
+
         </div>
     </div>
 
@@ -134,9 +150,13 @@
                                 <option value="https://" selected>https://</option>
                             </select>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 destURLInput">
                             <label for="editDestUrl" class="form-label">Destination URL</label>
                             <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
+                        </div>
+                        <div class="mb-3 customURLInput" style="display: hidden;">
+                            <label for="editCustomUrl" class="form-label">Custom URL</label>
+                            <textarea class="form-control codeBox codeInput" id="editCustomUrl" name="custom"></textarea>
                         </div>
                         <input type="hidden" id="editUrlId" name="id">
                         <input type="hidden" name="action" value="edit">

@@ -22,9 +22,10 @@ do {
     }
 
 
-    $url      = getUrl($p);
-    $type     = $url["type"] ?? Null;
-    $dest     = $url["dest"] ?? Null;
+    $url     = getUrl($p);
+    $type    = $url["type"] ?? Null;
+    $dest    = $url["dest"] ?? Null;
+    $options = $url["options"] ?? Null;
 
     # NOTE: Write to log
     if (!empty($url) && !empty($type) && !empty($dest)) {
@@ -52,6 +53,11 @@ do {
         jsRedirect();
         die();
     }
+    if (!empty($options) && is_string($options)) {
+        $options = json_decode($options, True);
+    }
+
+    $delay = $options["delay"] ?? 0;
     echo alert("Redirecting to <a href='$dest'>$dest</a>...", "info");
     jsRedirect($dest);
     die();

@@ -110,41 +110,44 @@ $protocol_tooltip = "
                             /*                                  REDIRECT                                  */
                             /* ────────────────────────────────────────────────────────────────────────── */
                             -->
-                            <tr class="urlInputRow" data-input="redirect">
-                                <td>
-                                    <span class="inline">  
-                                        <span class="text-danger mx-1">*</span>
-                                        Redirect URL <?= tooltip("
-                                        <h4>Redirect URL</h4> 
-                                        <p class='text-danger'>Required</p>
-                                        This is the URL the short URL will redirect to. Any URL should work.
-                                        <br><br>
-                                        <h5>Examples</h5>
-                                        <ul>
-                                            <li>
-                                                <code>example.com</code><br>
-                                            </li>
-                                            <li>
-                                                <code>example.com/path</code><br>
-                                            </li>
-                                            <li>
-                                                <code>http://example.com:1337/path</code><br>
-                                            </li>
-                                            <li>
-                                                <code>https://example.com/?var=val&anothervar=val</code><br>
-                                            </li>
-                                        </ul>
+                            <tbody class="urlInputRow" data-input="redirect">
+                                <tr>
+                                    <td>
+                                        <span class="inline">  
+                                            <span class="text-danger mx-1">*</span>
+                                            Redirect URL <?= tooltip("
+                                            <h4>Redirect URL</h4> 
+                                            <p class='text-danger'>Required</p>
+                                            This is the URL the short URL will redirect to. Any URL should work.
+                                            <br><br>
+                                            <h5>Examples</h5>
+                                            <ul>
+                                                <li>
+                                                    <code>example.com</code><br>
+                                                </li>
+                                                <li>
+                                                    <code>example.com/path</code><br>
+                                                </li>
+                                                <li>
+                                                    <code>http://example.com:1337/path</code><br>
+                                                </li>
+                                                <li>
+                                                    <code>https://example.com/?var=val&anothervar=val</code><br>
+                                                </li>
+                                            </ul>
 
-                                        <hr>
+                                            <hr>
 
-                                        $protocol_tooltip
-                                        ") ?>
-                                    </span>
-                                </td>
-                                <td>
-                                    <?= urlInput("redirect_dest") ?>
-                                </td>
-                            </tr>
+                                            $protocol_tooltip
+                                            ") ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <?= urlInput("redirect_dest") ?>
+                                    </td>
+                                </tr>
+                                </tbody>
+
 
                             <!--
                             /* ────────────────────────────────────────────────────────────────────────── */
@@ -192,6 +195,22 @@ $protocol_tooltip = "
                                     <div class="newUrlInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
                                 </td>
                             </tr>
+
+                            <!--
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            /*                                   OPTIONS                                  */
+                            /* ────────────────────────────────────────────────────────────────────────── */
+                            -->
+                            <tr class="urlOptions" data-type="redirect">
+                                <td>
+                                    Redirect delay (ms)
+                                </td>
+                                <td>
+                                    <input class="form-control" type="number" name="options[delay]" value="0">
+                                </td>
+                            </tr>
+
+
 
                             <tr>
                                 <td></td>

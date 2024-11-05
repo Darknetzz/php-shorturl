@@ -174,10 +174,11 @@
                 Dashboard
             </h4>
             <div class="card-body">
-                Welcome to the admin dashboard.
+                <h5>Welcome to the admin dashboard.</h5>
+                <hr>
                 <table class="table table-default">
                     <tr>
-                        <th colspan="100%">
+                        <th class="<?= $headerClass ?>" colspan="100%">
                             User Information
                         </th>
                     <tr>
@@ -193,7 +194,7 @@
                         <td><?= $_SESSION['id'] ?></td>
                     </tr>
                     <tr>
-                        <th colspan="100%">
+                        <th class="<?= $headerClass ?>" colspan="100%">
                             Application Information
                         </th>
                     </tr>
@@ -261,7 +262,7 @@
                                 $displayOpts = ($action != "test") ? "style='display:none;'" : "";
                                 echo "
                                     <div class='card testAPIInputs' data-action='$action' $displayOpts>
-                                        <h4 class='card-header bg-secondary-subtle'>Inputs for <span class='text-info'>$action</span></h4>
+                                        <h4 class='card-header $headerClass'>Inputs for <span class='text-info'>$action</span></h4>
                                         <div class='card-body'>
                                         <p>{$endpoint['description']}</p>
                                 ";

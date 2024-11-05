@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Oct 29, 2024 at 12:39 PM
+-- Generation Time: Nov 05, 2024 at 03:06 PM
 -- Server version: 8.0.39-0ubuntu0.22.04.1
--- PHP Version: 8.3.11
+-- PHP Version: 8.3.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -46,7 +46,9 @@ CREATE TABLE `urls` (
   `short` varchar(100) NOT NULL,
   `type` varchar(100) DEFAULT NULL,
   `dest` text,
-  `userid` int DEFAULT NULL
+  `userid` int DEFAULT NULL,
+  `datetime` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `options` json DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -60,7 +62,8 @@ CREATE TABLE `users` (
   `username` varchar(100) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `salt` varchar(255) NOT NULL,
-  `acl` int DEFAULT '0'
+  `acl` int DEFAULT '0',
+  `bookmarks` json DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --

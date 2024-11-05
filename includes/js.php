@@ -135,6 +135,9 @@
     /* ────────────────────────────────────────────────────────────────────────── */
     $(document).ready(function() {
 
+        // NOTE: js-utils
+        let utils = new Utils();
+
         // NOTE: Tooltips (Bootstrap)
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
@@ -262,27 +265,20 @@
         /*                              NOTE: home (add)                              */
         /* ────────────────────────────────────────────────────────────────────────── */
         $(".newUrlInput[name=type]").on("change", function() {
-            $(".urlInputRow").hide();
-            $(".urlInputRow[data-input=short]").show();
-            $(".newUrlInput").attr("disabled", true);
-
+            utils.hideObject(".urlInputRow");
+            utils.showObject(".urlInputRow[data-input=short]");
+            utils.hideObject(".urlOptions");
             var type = $(this).val();
             if (type == "redirect") {
-                $(".urlInputRow[data-input=redirect]").show();
+                utils.showObject(".urlInputRow[data-input=redirect]");
+                utils.showObject(".urlOptions[data-type=redirect]");
             } else if (type == "custom") {
-                $(".urlInputRow[data-input=custom]").show();
+                utils.showObject(".urlInputRow[data-input=custom]");
+                utils.showObject(".urlOptions[data-type=custom]");
             } else if (type == "alias") {
-                $(".urlInputRow[data-input=alias]").show();
+                utils.showObject(".urlInputRow[data-input=alias]");
+                utils.showObject(".urlOptions[data-type=alias]");
             }
-
-            $(".newUrlInput").each(function() {
-                if (!$(this).is(":visible")) {
-                    $(this).prop("disabled", true);
-                } else {
-                    $(this).prop("disabled", false);
-                }
-            });
-
         });
 
         /* ────────────────────────────────────────────────────────────────────────── */
@@ -317,6 +313,7 @@
                 editUrlId.val(id);
 
                 customLog("Edit action clicked.");
+                return;
             }
             if (action == "delete") {
                 var deleteUrlForm = $("#deleteUrlForm");
@@ -326,6 +323,12 @@
                 $("#confirmDeleteUrl").show();
                 $("#confirmDeleteUrl").prop("disabled", false);
                 $("#deleteUrlForm").show();
+                return;
+            }
+            if (action == "bookmark") {
+                customLog("Bookmark action clicked.");
+                api("POST", "bookmark", "id="+id);
+                return;
             }
         });
 

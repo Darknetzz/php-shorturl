@@ -58,14 +58,14 @@ function icon($icon, $size = 1, $color = Null) {
 /* ────────────────────────────────────────────────────────────────────────── */
 function tooltip($text = "Tooltip", $icon = "question-circle", $html = "true", $placement = "top") {
     return '
-        <button class="btn btn-default" type="button" 
+        <a class="btn btn-default"
             data-bs-toggle="tooltip" 
             data-bs-title="'.$text.'" 
             data-bs-placement="'.$placement.'" 
             data-bs-html="'.$html.'"
             title="'.$text.'">
             '. icon($icon) .'
-        </button>';
+        </a>';
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -111,6 +111,9 @@ function navDropdown($text, $links = [], $icon = Null) {
 /*                             FUNCTION jsRedirect                            */
 /* ────────────────────────────────────────────────────────────────────────── */
 function jsRedirect($url = "index.php", $time = 1000) {
+    if (!is_numeric($time)) {
+        $time = 0;
+    }
     $script = "
     <script>
         setTimeout(function(){
@@ -266,14 +269,29 @@ function getUrl($short, $return = NULL) {
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION getUser                              */
 /* ────────────────────────────────────────────────────────────────────────── */
-function getUser($id = 0) {
+function getUser($id = 0, $column = Null) {
     $result = query("SELECT * FROM users WHERE `id` = ?", [$id]);
 
     if (count($result) == 0) {
         return False;
     }
 
+    if ($column !== Null) {
+        if (!isset($result[0][$column])) {
+            die("getUser: Invalid column $column for user $id.");
+        }
+        return $result[0][$column];
+    }
+
     return $result[0];
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                              FUNCTION setUser                              */
+/* ────────────────────────────────────────────────────────────────────────── */
+function setUser($id, $column, $value) {
+    $update = "UPDATE users SET `$column` = ? WHERE `id` = ?";
+    query($update, [$value, $id]);
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */

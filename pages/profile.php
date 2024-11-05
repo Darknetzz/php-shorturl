@@ -16,6 +16,7 @@
             <p class="text-muted"><?= aclToText($_SESSION['acl']) ?></p>
             
             <div class="btn-group profileBtns" role="group">
+                <a class="btn btn-outline-info" href="?do=bookmarks">Bookmarks</a>
                 <a class="btn btn-outline-primary" href="?do=changepw">Change Password</a>
                 <a class="btn btn-outline-danger" href="?do=logout">Logout</a>
             </div>

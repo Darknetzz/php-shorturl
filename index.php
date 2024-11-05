@@ -41,6 +41,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.3/ace.min.js" integrity="sha512-faieT+YRcxd+aQZbK6m2iaKhYEKkDvwbn7n2WToge2+k6+YBlxbT/Wii5bVPUWpnXm186SPynzVfc+ME8a/a3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
+    <script src="assets/jsutils/utils.js"></script>
 
 </head>
 
