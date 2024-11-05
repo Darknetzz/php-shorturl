@@ -1,0 +1,3 @@
+[submodule "assets/jsutils"]
+	path = assets/jsutils
+	url = git@github.com:Darknetzz/js-utils.git
