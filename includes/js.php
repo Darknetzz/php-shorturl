@@ -103,7 +103,7 @@
                     playSound("error");
                     type = "danger";
                 } else if (status == "WARNING" || status == "WARN") {
-                    playSound();
+                    playSound("warning");
                     type = "warning";
                 }
                 console.groupCollapsed("API request successful.");
@@ -124,7 +124,10 @@
                 }
                 return true;
             },
-            error: function() {
+            error: function(response) {
+                console.error("API request failed:", response);
+                toast("API request failed", "danger", "Error");
+                playSound("error");
                 return false;
             }
         });
