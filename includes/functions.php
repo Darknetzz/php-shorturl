@@ -472,10 +472,9 @@ function listUrls(?array $urls = []) {
             if (!is_array($url)) {
                 die("listUrls() requires an array of URLs. Input: " . json_encode($url));
             }
+            $username = "Unknown";
             if (!empty($url["user"])) {
                 $username = getUser($url["user"], "username");
-            } else {
-                $username = "Unknown";
             }
 
             $urlId       = $url["id"];

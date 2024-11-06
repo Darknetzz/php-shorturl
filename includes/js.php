@@ -136,7 +136,7 @@
     $(document).ready(function() {
 
         // NOTE: js-utils
-        let utils = new Utils();
+        window.utils = new Utils();
 
         // NOTE: Tooltips (Bootstrap)
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');

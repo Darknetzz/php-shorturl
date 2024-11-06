@@ -89,6 +89,13 @@
                         "inputs"      => [],
                         "class"       => "text-warning",
                     ],
+
+                    "error"   => [
+                        "description" => "Error API Action (does nothing except return error)",
+                        "method"      => "POST",
+                        "inputs"      => [],
+                        "class"       => "text-danger",
+                    ],
                         
                     "createshort" => [
                         "description" => "Create Short URL",
@@ -491,8 +498,8 @@ $(document).ready(function() {
     // NOTE: Action
     $("#test_api_action").on("change", function() {
         var method = $("#test_api_action option:selected").data("method");
-        $(".testAPIInputs").hide();
-        $(".testAPIInputs[data-action='" + $(this).val() + "']").show();
+        utils.hideObject(".testAPIInputs");
+        utils.showObject(".testAPIInputs[data-action='" + $(this).val() + "']");
         // TODO: Fix
         $("#test_api_method").val(method);
     });
