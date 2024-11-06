@@ -1,4 +1,4 @@
-<div class="container-fluid d-flex justify-content-center">
+<div class="container-fluid">
     <?php
 
         if (!isset($_SESSION['id'])) {

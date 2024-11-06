@@ -110,22 +110,15 @@ function navDropdown($text, $links = [], $icon = Null) {
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                             FUNCTION jsRedirect                            */
 /* ────────────────────────────────────────────────────────────────────────── */
-function jsRedirect($url = "index.php", $time = 1000) {
-    if (!is_numeric($time)) {
-        $time = 0;
+function jsRedirect($url = "index.php", $time = 0) {
+    if (!is_numeric($time) || $time == 0) {
+        die("<script>window.location.href = '$url';</script>");
     }
-    $script = "
-    <script>
+    die("<script>
         setTimeout(function(){
             window.location.href = '$url';
         }, $time);
-    </script>";
-    die($script);
-    // if (headers_sent()) {
-    // echo $script;
-    // } else {
-    // return $script;
-    // }
+    </script>");
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -578,7 +571,7 @@ function listUrls(?array $urls = []) {
                             <label for="editShortUrl" class="form-label">Short URL</label>
                             <input type="text" class="form-control" id="editShortUrl" name="short" required>
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 protocolURLInput">
                             <label for="editDestProtocol" class="form-label">Destination Protocol</label>
                             <select class="form-select url-protocol" id="editDestProtocol" name="protocol" required>
                                 <option value="http://">http://</option>
@@ -589,7 +582,7 @@ function listUrls(?array $urls = []) {
                             <label for="editDestUrl" class="form-label">Destination URL</label>
                             <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
                         </div>
-                        <div class="mb-3 customURLInput" style="display: hidden;">
+                        <div class="mb-3 customURLInput">
                             <label for="editCustomUrl" class="form-label">Custom URL</label>
                             <textarea class="form-control codeBox codeInput" id="editCustomUrl" name="custom"></textarea>
                         </div>

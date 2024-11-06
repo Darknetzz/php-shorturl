@@ -299,21 +299,36 @@
             var id        = tr.data("id");
             var type      = tr.data("type");
             var short     = tr.data("shorturl");
-            var protocol  = short.split("://")[0] + "://";
             var dest      = tr.data("desturl");
+            var protocol  = dest.split("://")[0] + "://";
             var user      = tr.data("user");
 
             if (action == "edit") {
-                var editUrlForm  = $("#editUrlForm");
-                var editUrlType  = editUrlForm.find("#editUrlType");
-                var editShortUrl = editUrlForm.find("#editShortUrl");
-                var editProtocol = editUrlForm.find("#editDestProtocol");
-                var editDestUrl  = editUrlForm.find("#editDestUrl");
-                var editUrlId    = editUrlForm.find("#editUrlId");
+                var editUrlForm   = $("#editUrlForm");
+                var editUrlType   = editUrlForm.find("#editUrlType");
+                var editShortUrl  = editUrlForm.find("#editShortUrl");
+                var editProtocol  = editUrlForm.find("#editDestProtocol");
+                var editDestUrl   = editUrlForm.find("#editDestUrl");
+                var editUrlId     = editUrlForm.find("#editUrlId");
+                var editCustomUrl = editUrlForm.find("#editCustomUrl");
+
+                utils.hideObject(".destURLInput");
+                utils.hideObject(".customURLInput");
+                utils.hideObject(".protocolURLInput");
+                if (type == "custom") {
+                    utils.showObject(".customURLInput");
+                    utils.showObject(editCustomUrl);
+                    editCustomUrl.val(dest);
+                } else {
+                    utils.showObject(".destURLInput");
+                    utils.showObject(".protocolURLInput");
+                    editDestUrl.val(dest);
+                    editProtocol.val(protocol);
+                }
 
                 editUrlType.val(type);
                 editShortUrl.val(short);
-                editDestUrl.val(dest);
+                // editDestUrl.val(dest);
                 editUrlId.val(id);
 
                 customLog("Edit action clicked.");

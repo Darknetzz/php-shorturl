@@ -1,5 +1,5 @@
 
-<div class="container">
+<div class="container-fluid">
 <?php
 
 if (empty($_SESSION['id'])) {

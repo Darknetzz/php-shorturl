@@ -58,7 +58,8 @@ do {
     }
 
     $delay = $options["delay"] ?? 0;
-    echo alert("Redirecting to <a href='$dest'>$dest</a>...", "info");
+    $delaySeconds = round($delay / 1000);
+    echo alert("Redirecting to <a href='$dest'>$dest</a> in ".$delaySeconds." seconds...", "info");
     jsRedirect($dest);
     die();
 
