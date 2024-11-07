@@ -7,15 +7,16 @@ $include_dir = __DIR__ . DIRECTORY_SEPARATOR . "includes";
 $includes = [
     "session.php",
     "config.php",
+    "vars.php",
     "sqlcon.php",
     "functions.php",
     "css.php",
     "redirection.php",
     "navbar.php",
     "navigation.php",
-    "custom.php",
     "toast.php",
-    # "js.php", # NOTE: This is directly included in index.php
+    "js.php",
+    "custom.php",
 ];
 
 foreach ($includes as $include) {

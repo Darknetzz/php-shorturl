@@ -83,9 +83,9 @@
 
 </body>
 
-<?php require_once("includes/js.php") ?>
 
 <?php
+    // require_once("includes/js.php")
     $end_time          = microtime(True);
     $execution_time    = ($end_time - $start_time);         // Seconds
     $execution_time_ms = round($execution_time * 1000, 2);  // Convert to milliseconds

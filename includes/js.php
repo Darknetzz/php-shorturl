@@ -269,8 +269,8 @@
         /*                              NOTE: home (add)                              */
         /* ────────────────────────────────────────────────────────────────────────── */
         $(".newUrlInput[name=type]").on("change", function() {
-            utils.hideObject(".urlInputRow");
-            utils.showObject(".urlInputRow[data-input=short]");
+            utils.hideObject(".urlInputRow:not(.common)");
+            // utils.showObject(".urlInputRow[data-input=short]");
             utils.hideObject(".urlOptions");
             var type = $(this).val();
             if (type == "redirect") {

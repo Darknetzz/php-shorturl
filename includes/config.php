@@ -134,3 +134,11 @@ $cfg["url_types"] = [
  * Default: True
  */
 $cfg["urls_public"] = True;
+
+
+/**
+ * default_delay
+ * The default delay for redirection, in milliseconds.
+ * Default: 100
+ */
+$cfg["default_delay"] = 100;

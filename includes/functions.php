@@ -57,15 +57,8 @@ function icon($icon, $size = 1, $color = Null) {
 /*                              FUNCTION tooltip                              */
 /* ────────────────────────────────────────────────────────────────────────── */
 function tooltip($text = "Tooltip", $icon = "question-circle", $html = "true", $placement = "top") {
-    return '
-        <a class="btn btn-default"
-            data-bs-toggle="tooltip" 
-            data-bs-title="'.$text.'" 
-            data-bs-placement="'.$placement.'" 
-            data-bs-html="'.$html.'"
-            title="'.$text.'">
-            '. icon($icon) .'
-        </a>';
+    global $tooltip;
+    return $tooltip($text, $icon, $html, $placement);
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -408,6 +401,173 @@ function writeLog($event = Null) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*                             FUNCTION urlInputs                             */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlForm($action = "create", $values = []) {
+    global $cfg;
+    global $tooltip;
+    $shortVal = (isset($values["short"]) ? $values["short"] : Null);
+    $nameVal  = (isset($values["name"]) ? $values["name"] : Null);
+    $destVal  = (isset($values["dest"]) ? $values["dest"] : Null);
+    $typeVal  = (isset($values["type"]) ? $values["type"] : Null);
+    $typeOpts = "";
+    foreach ($cfg["url_types"] as $type) {
+        $selected = ($type["value"] == $typeVal ? "selected" : "");
+        $typeOpts .= "<option value='".$type["value"]."' $selected>".$type["name"]."</option>";
+    }
+
+    $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Submit">';
+    if ($action == "create") {
+        $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Create">';
+    } 
+    if ($action == "editshort") {
+        $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Update">';
+    }
+    $urlForm  = '
+        <form class="dynamic-form" action="index.php" method="POST" data-action="'.$action.'">
+        <input type="hidden" name="action" value="'.$action.'">
+        <table class="table table-default">
+
+            <tr class="urlInputRow" data-input="name">
+                <td>
+                    Name
+                </td>
+                <td>
+                        '.$tooltip["name"].'
+                </td>
+                <td>
+                    <div class="input-group m-1">
+                        <input class="form-control newUrlInput common" type="text" name="name" placeholder="Name" value="'.$nameVal.'">
+                    </div>
+                </td>
+            </tr>
+
+            <tr class="urlInputRow" data-input="short">
+                <td>
+                    Short URL
+                </td>
+                <td>
+                        '.$tooltip["short"].'
+                </td>
+                <td>
+                    <div class="input-group m-1">
+                        <span class="input-group-text">
+                            '.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].'/
+                        </span>
+                        <!--<input type="hidden" id="shortgen" name="shortgen" value="'.genStr($cfg["short_default"]).'">-->
+                        <input class="form-control newUrlInput common" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed" value="'.$shortVal.'">
+                    </div>
+                </td>
+            </tr>
+
+            <tr class="urlInputRow" data-input="type">
+                <td>
+                    <span class="text-danger mx-1">*</span>
+                    Type
+                </td>
+                <td>
+                        '.$tooltip["type"].'
+                </td>
+                <td>
+                    <div class="input-group m-1">
+                        <select class="form-select newUrlInput" name="type">
+                            '.$typeOpts.'
+                        </select>
+                    </div>
+                </td>
+            </tr>
+
+            <!--
+            /* ────────────────────────────────────────────────────────────────────────── */
+            /*                                  REDIRECT                                  */
+            /* ────────────────────────────────────────────────────────────────────────── */
+            -->
+            <tbody class="urlInputRow" data-input="redirect">
+                <tr>
+                    <td>
+                        <span class="inline">  
+                            <span class="text-danger mx-1">*</span>
+                            Redirect URL
+                        </span>
+                    </td>
+                    <td>
+                        '.$tooltip["redirect"].'
+                    </td>
+                    <td>
+                        <div>
+                            '.urlInput("redirect_dest").'
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+
+
+            <!--
+            /* ────────────────────────────────────────────────────────────────────────── */
+            /*                                   ALIAS                                    */
+            /* ────────────────────────────────────────────────────────────────────────── */
+            -->
+            <tr class="urlInputRow" data-input="alias" style="display:none;">
+                <td>
+                    <span>
+                        <span class="text-danger mx-1">*</span>
+                        Alias URL
+                    </span>
+                </td>
+                <td>
+                    '.$tooltip["alias"].'
+                </td>
+                <td>
+                    '.urlInput("alias_dest").'
+                </td>
+            </tr>
+
+            <!--
+            /* ────────────────────────────────────────────────────────────────────────── */
+            /*                                  CUSTOM                                   */
+            /* ────────────────────────────────────────────────────────────────────────── */
+            -->
+            <tr class="urlInputRow" data-input="custom" style="display:none;">
+                <td>
+                    <span class="text-danger mx-1">*</span>
+                    Custom Script
+                </td>
+                <td>
+                    '.$tooltip["custom"].'
+                </td>
+                <td>
+                    <div class="newUrlInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
+                </td>
+            </tr>
+
+            <!--
+            /* ────────────────────────────────────────────────────────────────────────── */
+            /*                                   OPTIONS                                  */
+            /* ────────────────────────────────────────────────────────────────────────── */
+            -->
+            <tr class="urlOptions" data-type="redirect">
+                <td>
+                    Redirect delay (ms)
+                </td>
+                <td>
+                    '.$tooltip["delay"].'
+                </td>
+                <td>
+                    <input class="form-control m-1" type="number" name="options[delay]" value="'.$cfg["default_delay"].'">
+                </td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="100%">
+                    '.$submitBtn.'
+                </td>
+            </tr>
+        </table>
+    </form>';
+    return $urlForm;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION listUrls                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 function listUrls(?array $urls = []) {
@@ -557,58 +717,77 @@ function listUrls(?array $urls = []) {
             <button id="deleteSelectedBtn" class="btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
         </div>
 
-
-            <!-- Edit URL Modal -->
-    <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editUrlModalLabel">Edit URL</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editUrlForm" class="dynamic-form" action="includes/api.php" method="POST">
-                        <div class="mb-3">
-                            <label for="editUrlType" class="form-label">Type</label>
-                            <select class="form-select" id="editUrlType" name="type" required>
-                                ';
-                                    foreach ($cfg["url_types"] as $type) {
-                                        $urlsTable .= '<option value="'.$type["value"].'">'.$type["name"].'</option>';
-                                    }
-        $urlsTable .= '
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editShortUrl" class="form-label">Short URL</label>
-                            <input type="text" class="form-control" id="editShortUrl" name="short" required>
-                        </div>
-                        <div class="mb-3 protocolURLInput">
-                            <label for="editDestProtocol" class="form-label">Destination Protocol</label>
-                            <select class="form-select url-protocol" id="editDestProtocol" name="protocol" required>
-                                <option value="http://">http://</option>
-                                <option value="https://" selected>https://</option>
-                            </select>
-                        </div>
-                        <div class="mb-3 destURLInput">
-                            <label for="editDestUrl" class="form-label">Destination URL</label>
-                            <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
-                        </div>
-                        <div class="mb-3 customURLInput">
-                            <label for="editCustomUrl" class="form-label">Custom URL</label>
-                            <textarea class="form-control codeBox codeInput" id="editCustomUrl" name="custom"></textarea>
-                        </div>
-                        <input type="hidden" id="editUrlId" name="id">
-                        <input type="hidden" name="action" value="edit">
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveEditUrl">Save changes</button>
+        <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editUrlModalLabel">Edit URL</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        '.urlForm().'
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    ';
 
+    // <!-- Edit URL Modal
+    // <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
+    //     <div class="modal-dialog">
+    //         <div class="modal-content">
+    //             <div class="modal-header">
+    //                 <h5 class="modal-title" id="editUrlModalLabel">Edit URL</h5>
+    //                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    //             </div>
+    //             <div class="modal-body">
+    //                 <form id="editUrlForm" class="dynamic-form" action="includes/api.php" method="POST">
+    //                     <div class="mb-3">
+    //                         <label for="editUrlType" class="form-label">Type</label>
+    //                         <select class="form-select" id="editUrlType" name="type" required>
+    //                             ';
+    //                                 foreach ($cfg["url_types"] as $type) {
+    //                                     $urlsTable .= '<option value="'.$type["value"].'">'.$type["name"].'</option>';
+    //                                 }
+    //     $urlsTable .= '
+    //                         </select>
+    //                     </div>
+    //                     <div class="mb-3">
+    //                         <label for="editNameUrl" class="form-label">Short URL</label>
+    //                         <input type="text" class="form-control" id="editNameUrl" name="short" required>
+    //                     </div>
+    //                     <div class="mb-3">
+    //                         <label for="editShortUrl" class="form-label">Short URL</label>
+    //                         <input type="text" class="form-control" id="editShortUrl" name="short" required>
+    //                     </div>
+    //                     <div class="mb-3 protocolURLInput">
+    //                         <label for="editDestProtocol" class="form-label">Destination Protocol</label>
+    //                         <select class="form-select url-protocol" id="editDestProtocol" name="protocol" required>
+    //                             <option value="http://">http://</option>
+    //                             <option value="https://" selected>https://</option>
+    //                         </select>
+    //                     </div>
+    //                     <div class="mb-3 destURLInput">
+    //                         <label for="editDestUrl" class="form-label">Destination URL</label>
+    //                         <input type="text" class="form-control urlValidate" id="editDestUrl" name="dest" required>
+    //                     </div>
+    //                     <div class="mb-3 customURLInput">
+    //                         <label for="editCustomUrl" class="form-label">Custom URL</label>
+    //                         <textarea class="form-control codeBox codeInput" id="editCustomUrl" name="custom"></textarea>
+    //                     </div>
+    //                     <input type="hidden" id="editUrlId" name="id">
+    //                     <input type="hidden" name="action" value="edit">
+    //                 </form>
+    //             </div>
+    //             <div class="modal-footer">
+    //                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+    //                 <button type="button" class="btn btn-primary" id="saveEditUrl">Save changes</button>
+    //             </div>
+    //         </div>
+    //     </div>
+    // </div>
+
+    $urlsTable = '
     <!-- Delete URL Modal -->
     <div class="modal fade" id="deleteUrlModal" tabindex="-1" aria-labelledby="deleteUrlModalLabel" aria-hidden="true">
         <div class="modal-dialog">
