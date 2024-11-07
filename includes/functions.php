@@ -444,6 +444,7 @@ function listUrls(?array $urls = []) {
                     <th data-field="state" data-checkbox="true"></th>
                     <th data-field="id" data-sortable="true" data-visible="false">ID</th>
                     <th data-field="type" data-sortable="true">Type</th>
+                    <th data-field="name" data-sortable="true">Name</th>
                     <th data-field="shorturl" data-sortable="true">Short URL</th>
                     <th data-field="desturl" data-sortable="true">Destination URL</th>
                     <th data-field="user" data-sortable="true">User</th>
@@ -472,6 +473,7 @@ function listUrls(?array $urls = []) {
 
             $urlId       = $url["id"];
             $urlShort    = $url["short"];
+            $urlName     = (!empty($url["name"]) ? $url["name"] : $urlShort);
             $urlDest     = $url["dest"];
             $urlType     = $url["type"];
             $urlDestLink = "<a href='$urlDest' target='_blank'>$urlDest</a>";
@@ -493,21 +495,30 @@ function listUrls(?array $urls = []) {
 
             $urlsTable .= '
                 <tr
-                    data-type="'.$url["type"].'" 
-                    data-id="'.$url["id"].'"
-                    data-shorturl="'.$url["short"].'"
-                    data-desturl="'.$url["dest"].'"
+                    data-type="'.$urlType.'" 
+                    data-id="'.$urlId.'"
+                    data-name="'.$urlName.'"
+                    data-shorturl="'.$urlShort.'"
+                    data-desturl="'.$urlDest.'"
                     data-user="'.$username.'"
                 >
-                    <td data-value="'.$url["id"].'"></td>
+                    <td data-value="'.$urlId.'"></td>
                     <td>
-                        '.$url["id"].'
+                        '.$urlId.'
                     </td>
                     <td>
-                        '.$url["type"].'
+                        '.$urlId.'
                     </td>
                     <td>
-                        <a href="'.$url["short"].'" target="_blank">'.$url["short"].'</a>
+                        <a href="javascript:void(0);" class="url-action m-3" 
+                            data-action="edit"
+                            data-bs-toggle="modal"
+                            data-bs-target="#editUrlModal">
+                                '.$urlName.'
+                        </a>
+                    </td>
+                    <td>
+                        <a href="'.$urlShort.'" target="_blank">'.$urlShort.'</a>
                     </td>
                     <td>
                         '.$urlDestLink.'
@@ -556,7 +567,7 @@ function listUrls(?array $urls = []) {
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="editUrlForm" class="dynamic-form">
+                    <form id="editUrlForm" class="dynamic-form" action="includes/api.php" method="POST">
                         <div class="mb-3">
                             <label for="editUrlType" class="form-label">Type</label>
                             <select class="form-select" id="editUrlType" name="type" required>

@@ -224,9 +224,10 @@
 
         // NOTE: .dynamic-form
         // Submit form to `api.php` when the button is clicked
+        // $(document).on(".dynamic-form", "submit", function(e) {
         $(".dynamic-form").on("submit", function(e) {
             e.preventDefault();
-            var form = $(this);
+            var form     = utils.getObject(".dynamic-form");
             var formdata = form.serialize();
             var method   = form.find("[name='method']").val() || form.attr("method") || form.data("method");
             var action   = form.find("[name='action']").val() || form.data("action");
@@ -234,8 +235,8 @@
             var url      = form.attr("action") || "includes/api.php";
 
             if (!method || !action) {
-            customError("Form method or action not specified.");
-            return;
+                customError("Form method or action not specified.");
+                return;
             }
 
             console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
