@@ -18,26 +18,49 @@
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
+    /*                           checkAudioOutputDevice                           */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    function checkAudioOutputDevice() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+            console.error("enumerateDevices() not supported.");
+            return false;
+        }
+        return navigator.mediaDevices.enumerateDevices()
+        .then(devices => {
+            const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput');
+            return audioOutputDevices.length > 0;
+        })
+        .catch(error => {
+            console.error("Error enumerating devices:", error);
+            return false;
+        });
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
     /*                            playNotificationSound                           */
     /* ────────────────────────────────────────────────────────────────────────── */
     function playSound(sound = "notification") {
         var soundEnabled = <?= ($cfg["notification_sound"] !== False ? "true" : "false") ?>;
-        if (soundEnabled) {
-            customLog("Playing sound: Notification sound is enabled.");
-            var audioFile = "assets/" + sound + ".mp3";
-            var audio = new Audio(audioFile);
-            audio.volume = 0.5;
-            audio.play().then(() => {
-                audio.onended = () => {
-                    customLog("Notification sound ended.");
-                    audio.remove();
-                };
-            }).catch(error => {
-                customError("Error playing sound:", error);
-            });
+        if (!checkAudioOutputDevice()) {
+            customError("No audio output device detected.");
             return;
         }
-        customLog("Not playing sound: Notification sound is disabled.");
+        if (!soundEnabled) {
+            customLog("Not playing sound: Notification sound is disabled.");
+            return;
+        }
+        customLog("Playing sound: Notification sound is enabled.");
+        var audioFile = "assets/" + sound + ".mp3";
+        var audio = new Audio(audioFile);
+        audio.volume = 0.5;
+        audio.play().then(() => {
+            audio.onended = () => {
+                customLog("Notification sound ended.");
+                audio.remove();
+            };
+        }).catch(error => {
+            customError("Error playing sound:", error);
+        });
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
@@ -268,7 +291,7 @@
         /* ────────────────────────────────────────────────────────────────────────── */
         /*                              NOTE: home (add)                              */
         /* ────────────────────────────────────────────────────────────────────────── */
-        $(".newUrlInput[name=type]").on("change", function() {
+        $(".urlTypeInput").on("change", function() {
             utils.hideObject(".urlInputRow:not(.common)");
             // utils.showObject(".urlInputRow[data-input=short]");
             utils.hideObject(".urlOptions");
@@ -293,36 +316,62 @@
         var urls        = [];
 
         // NOTE: .url-action
-        $(".url-action").on("click", function() {
+        // # WARNING: Buggy event listener
+        $(document).on("click", ".url-action", function() {
+            if (typeof utils === 'undefined') {
+                console.error("window.utils is not defined.");
+                return;
+            }
+
             var actionObj = $(this);
-            var action    = actionObj.data("action");
+            utils.log("URL action clicked.");
+            utils.log("Action Object:", actionObj);
+
+            if (actionObj.length == 0) {
+                utils.error("Action object not found.");
+                return;
+            }
+
+            // Log the element's attributes or properties
+            utils.log("Action Object HTML:", actionObj.html());
+            utils.log("Action Object Attributes:", actionObj[0].attributes);
+
+            var action    = actionObj.attr("data-action");
+            utils.log("Action type: " + action);
             var tr        = actionObj.closest("tr");
             var id        = tr.data("id");
             var type      = tr.data("type");
             var short     = tr.data("shorturl");
             var dest      = tr.data("desturl");
-            var protocol  = dest.split("://")[0] + "://";
+            var protocol  = tr.data("protocol");
             var user      = tr.data("user");
 
             if (action == "edit") {
-                var editUrlForm   = $("#editUrlForm");
-                var editUrlType   = editUrlForm.find("#editUrlType");
-                var editShortUrl  = editUrlForm.find("#editShortUrl");
-                var editProtocol  = editUrlForm.find("#editDestProtocol");
-                var editDestUrl   = editUrlForm.find("#editDestUrl");
-                var editUrlId     = editUrlForm.find("#editUrlId");
-                var editCustomUrl = editUrlForm.find("#editCustomUrl");
+                var editUrlForm   = $("#urlForm");
+                if (editUrlForm.length == 0) {
+                    utils.error("Edit form not found.");
+                    return;
+                }
+                editUrlForm.prepend("THIS ONE");
+                return;
+                var editUrlName   = editUrlForm.find(".urlNameInput");
+                var editUrlType   = editUrlForm.find(".urlTypeInput");
+                var editShortUrl  = editUrlForm.find(".urlShortInput");
+                var editProtocol  = editUrlForm.find(".urlProtocolInput");
+                var editDestUrl   = editUrlForm.find(".urlDestInput");
+                var editUrlId     = editUrlForm.find(".urlIdInput");
+                var editCustomUrl = editUrlForm.find(".urlCustomInput");
 
-                utils.hideObject(".destURLInput");
-                utils.hideObject(".customURLInput");
-                utils.hideObject(".protocolURLInput");
+                utils.hideObject(editDestUrl);
+                utils.hideObject(editCustomUrl);
+                utils.hideObject(editProtocol);
                 if (type == "custom") {
-                    utils.showObject(".customURLInput");
+                    utils.showObject(urlCustomInput);
                     utils.showObject(editCustomUrl);
                     editCustomUrl.val(dest);
                 } else {
-                    utils.showObject(".destURLInput");
-                    utils.showObject(".protocolURLInput");
+                    utils.showObject(editDestUrl);
+                    utils.showObject(editProtocol);
                     editDestUrl.val(dest);
                     editProtocol.val(protocol);
                 }

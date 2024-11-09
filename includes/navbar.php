@@ -11,7 +11,7 @@
                     <?php
 
                     # NOTE: Admin
-                    if ($_SESSION['acl'] > 0) {
+                    if (isset($_SESSION['acl']) && $_SESSION['acl'] > 0) {
                         echo navBtn("Admin", "?do=admin", "gear");
                     }
 

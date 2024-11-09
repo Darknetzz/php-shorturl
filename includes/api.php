@@ -1,25 +1,29 @@
 <?php
 
-// if (__DIR__ !== "includes") {
-//     die("This file cannot be accessed directly.");
-// }
-
-if (basename(__DIR__) !== "includes") {
-    die("This file cannot be accessed directly.");
-}
-
-$includes_fullpath = __DIR__ . DIRECTORY_SEPARATOR . "_includes.php";
-if (!file_exists($includes_fullpath)) {
-    die("Include file not found: " . $includes_fullpath);
-}
-require_once($includes_fullpath);
-
 do {
+
+    if (basename(__DIR__) !== "includes") {
+        $res = ["status" => "ERROR", "message" => "This file cannot be accessed directly."];
+        break;
+    }
+
+    // $includes_fullpath = basename(__DIR__) . DIRECTORY_SEPARATOR . "_includes.php";
+    $includes_fullpath = "_includes.php";
+    if (!file_exists($includes_fullpath)) {
+        $res = ["status" => "ERROR", "message" => "Include file not found: " . $includes_fullpath];
+        break;
+    }
+    require_once($includes_fullpath);
 
     $action       = (!empty($_REQUEST["action"]) ? $_REQUEST["action"] : Null);
 
     if ($action == Null) {
         $res = ["status" => "WARN", "message" => "No action specified."];
+        break;
+    }
+
+    if (!empty($_SESSION['id'])) {
+        $res = ["status" => "ERROR", "message" => "You are not logged in."];
         break;
     }
 
@@ -51,7 +55,7 @@ do {
             "message" => "You are now logged out.", 
             "redirect" => "index.php"
         ];
-        die();
+        break;
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */

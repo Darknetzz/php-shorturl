@@ -352,12 +352,12 @@ function urlInput($name = "url", $placeholder = "Destination URL (ex. example.co
     return '
     <div class="input-group m-2">
         <div class="input-group-text p-0">
-            <select class="form-select border-0 url-protocol newUrlInput" name="protocol">
+            <select class="form-select border-0 url-protocol urlInputProtocol" name="protocol">
                 <option value="http://" '.($cfg["default_protocol"] == "http://" ? "selected" : "").'>http://</option>
                 <option value="https://" '.($cfg["default_protocol"] == "https://" ? "selected" : "").'>https://</option>
             </select>
         </div>
-        <input class="form-control urlValidate newUrlInput" type="text" name="'.$name.'"
+        <input class="form-control urlValidate urlNameInput" type="text" name="'.$name.'"
             placeholder="'.$placeholder.'"
             >
     </div>
@@ -424,8 +424,8 @@ function urlForm($action = "create", $values = []) {
         $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Update">';
     }
     $urlForm  = '
-        <form class="dynamic-form" action="index.php" method="POST" data-action="'.$action.'">
-        <input type="hidden" name="action" value="'.$action.'">
+        <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
+        <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">
         <table class="table table-default">
 
             <tr class="urlInputRow" data-input="name">
@@ -437,7 +437,7 @@ function urlForm($action = "create", $values = []) {
                 </td>
                 <td>
                     <div class="input-group m-1">
-                        <input class="form-control newUrlInput common" type="text" name="name" placeholder="Name" value="'.$nameVal.'">
+                        <input class="form-control urlNameInput common" type="text" name="name" placeholder="Name" value="'.$nameVal.'">
                     </div>
                 </td>
             </tr>
@@ -455,7 +455,7 @@ function urlForm($action = "create", $values = []) {
                             '.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].'/
                         </span>
                         <!--<input type="hidden" id="shortgen" name="shortgen" value="'.genStr($cfg["short_default"]).'">-->
-                        <input class="form-control newUrlInput common" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed" value="'.$shortVal.'">
+                        <input class="form-control urlShortInput common" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed" value="'.$shortVal.'">
                     </div>
                 </td>
             </tr>
@@ -470,7 +470,7 @@ function urlForm($action = "create", $values = []) {
                 </td>
                 <td>
                     <div class="input-group m-1">
-                        <select class="form-select newUrlInput" name="type">
+                        <select class="form-select urlTypeInput" name="type">
                             '.$typeOpts.'
                         </select>
                     </div>
@@ -536,7 +536,7 @@ function urlForm($action = "create", $values = []) {
                     '.$tooltip["custom"].'
                 </td>
                 <td>
-                    <div class="newUrlInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
+                    <div class="urlCustomInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
                 </td>
             </tr>
 
@@ -553,7 +553,7 @@ function urlForm($action = "create", $values = []) {
                     '.$tooltip["delay"].'
                 </td>
                 <td>
-                    <input class="form-control m-1" type="number" name="options[delay]" value="'.$cfg["default_delay"].'">
+                    <input class="form-control m-1 urlDelayInput" type="number" name="options[delay]" value="'.$cfg["default_delay"].'">
                 </td>
             </tr>
             <tr>
@@ -787,7 +787,7 @@ function listUrls(?array $urls = []) {
     //     </div>
     // </div>
 
-    $urlsTable = '
+    $urlsTable .= '
     <!-- Delete URL Modal -->
     <div class="modal fade" id="deleteUrlModal" tabindex="-1" aria-labelledby="deleteUrlModalLabel" aria-hidden="true">
         <div class="modal-dialog">
