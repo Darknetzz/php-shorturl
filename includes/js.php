@@ -464,7 +464,7 @@
             }
 
             // Buttons
-            var deleteSelectedBtn = $("#deleteSelectedBtn");
+            var deleteSelectedBtn = $(".deleteSelectedBtn");
             if (urlsChecked > 0) {
                 deleteSelectedBtn.removeAttr("disabled");
                 deleteSelectedBtn.attr("data-urls", urls);
@@ -477,7 +477,7 @@
         });
 
         // NOTE: #deleteSelectedBtn
-        $("#deleteSelectedBtn").on("click", function() {
+        $(".deleteSelectedBtn").on("click", function() {
             // variable urls fetched from global scope
             var ids      = urls.join(",");
             customLog("Deleting urls: " + urls);
@@ -495,7 +495,7 @@
             });
 
             // Buttons
-            var deleteSelectedBtn = $("#deleteSelectedBtn");
+            var deleteSelectedBtn = $(".deleteSelectedBtn");
                 deleteSelectedBtn.attr("disabled", true);
                 deleteSelectedBtn.attr("data-urls", "");
             urls        = [];

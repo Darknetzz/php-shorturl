@@ -22,7 +22,7 @@ do {
         break;
     }
 
-    if (!empty($_SESSION['id'])) {
+    if (empty($_SESSION['id'])) {
         $res = ["status" => "ERROR", "message" => "You are not logged in."];
         break;
     }
@@ -84,7 +84,7 @@ do {
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                                 createShort                                */
     /* ────────────────────────────────────────────────────────────────────────── */
-    if ($action == "createshort") {
+    if ($action == "create") {
 
         $type     = (!empty($_POST['type']) ? $_POST['type'] : Null);
         $protocol = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
@@ -94,10 +94,10 @@ do {
         $options  = (!empty($_POST['options']) ? $_POST['options'] : Null);
 
         // Check if the user is logged in
-        if (empty($_SESSION['id'])) {
-            $res = ["status" => "ERROR", "message" => "You are not logged in."];
-            break;
-        }
+        // if (empty($_SESSION['id'])) {
+        //     $res = ["status" => "ERROR", "message" => "You are not logged in."];
+        //     break;
+        // }
 
         // If $short is empty, use $shortGen
         if ($short == Null) {
@@ -173,10 +173,10 @@ do {
         $dest  = (!empty($_POST['dest']) ? $_POST['dest'] : Null);
 
         // Check if the user is logged in
-        if (empty($_SESSION['id'])) {
-            $res = ["status" => "ERROR", "message" => "You are not logged in."];
-            break;
-        }
+        // if (empty($_SESSION['id'])) {
+        //     $res = ["status" => "ERROR", "message" => "You are not logged in."];
+        //     break;
+        // }
 
         if ($id == Null) {
             $res = ["status" => "ERROR", "message" => "No ID specified."];
@@ -213,10 +213,10 @@ do {
         $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
 
         // Check if the user is logged in
-        if (empty($_SESSION['id'])) {
-            $res = ["status" => "ERROR", "message" => "You are not logged in."];
-            break;
-        }
+        // if (empty($_SESSION['id'])) {
+        //     $res = ["status" => "ERROR", "message" => "You are not logged in."];
+        //     break;
+        // }
 
         if ($id == Null) {
             $res = ["status" => "ERROR", "message" => "No ID specified."];
@@ -244,10 +244,10 @@ do {
         $id = (!empty($_POST['id']) ? $_POST['id'] : Null);
 
         // Check if the user is logged in
-        if (empty($_SESSION['id'])) {
-            $res = ["status" => "ERROR", "message" => "You are not logged in."];
-            break;
-        }
+        // if (empty($_SESSION['id'])) {
+        //     $res = ["status" => "ERROR", "message" => "You are not logged in."];
+        //     break;
+        // }
 
         if ($id == Null) {
             $res = ["status" => "ERROR", "message" => "No ID specified."];

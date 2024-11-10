@@ -584,7 +584,10 @@ function listUrls(?array $urls = []) {
 
     $urlsTable = '
         <div id="table-toolbar">
-            <!-- Table Toolbar -->
+            <div class="btn-group">
+                <a href="?do=home" class="btn btn-success"><?= icon("plus-circle") ?> New URL</a>
+                <button class="deleteSelectedBtn btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+            </div>
         </div>
         <table id="urlTable" class="table table-default" 
             data-toggle="table"
@@ -714,7 +717,7 @@ function listUrls(?array $urls = []) {
 
         <div class="btn-group">
             <a href="?do=home" class="btn btn-success"><?= icon("plus-circle") ?> New URL</a>
-            <button id="deleteSelectedBtn" class="btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+            <button class="deleteSelectedBtn btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
         </div>
 
         <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
