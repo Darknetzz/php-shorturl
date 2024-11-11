@@ -22,7 +22,7 @@ do {
         break;
     }
 
-    if (empty($_SESSION['id'])) {
+    if (empty($_SESSION['id']) && $action !== "login") {
         $res = ["status" => "ERROR", "message" => "You are not logged in."];
         break;
     }
