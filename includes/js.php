@@ -21,35 +21,24 @@
     /*                           checkAudioOutputDevice                           */
     /* ────────────────────────────────────────────────────────────────────────── */
     function checkAudioOutputDevice() {
-        if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
-            console.error("enumerateDevices() not supported.");
+        var soundEnabled = <?= ($cfg["notification_sound"] !== False ? "true" : "false") ?>;
+        if (!soundEnabled) {
+            customLog("Not playing sound: Notification sound is disabled.");
             return false;
         }
-        return navigator.mediaDevices.enumerateDevices()
-        .then(devices => {
-            const audioOutputDevices = devices.filter(device => device.kind === 'audiooutput');
-            return audioOutputDevices.length > 0;
-        })
-        .catch(error => {
-            console.error("Error enumerating devices:", error);
+        if (!navigator.mediaCapabilities.propertyIsEnumerable) {
+            customError("No audio output device detected.");
             return false;
-        });
+        }
+        customLog("Playing sound: Notification sound is enabled.");
+        return true;
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                            playNotificationSound                           */
     /* ────────────────────────────────────────────────────────────────────────── */
     function playSound(sound = "notification") {
-        var soundEnabled = <?= ($cfg["notification_sound"] !== False ? "true" : "false") ?>;
-        if (!checkAudioOutputDevice()) {
-            customError("No audio output device detected.");
-            return;
-        }
-        if (!soundEnabled) {
-            customLog("Not playing sound: Notification sound is disabled.");
-            return;
-        }
-        customLog("Playing sound: Notification sound is enabled.");
+        checkAudioOutputDevice();
         var audioFile = "assets/" + sound + ".mp3";
         var audio = new Audio(audioFile);
         audio.volume = 0.5;
