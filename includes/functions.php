@@ -420,8 +420,11 @@ function urlForm($action = "create", $values = []) {
     if ($action == "create") {
         $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Create">';
     } 
-    if ($action == "editshort") {
-        $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Update">';
+    if ($action == "edit") {
+        $submitBtn = '
+            <a class="btn btn-primary" target="_blank" href="'.$shortVal.'">Open</a>
+            <input class="btn btn-success" name="action" type="submit" value="Update">
+        ';
     }
     $urlForm  = '
         <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
@@ -728,7 +731,7 @@ function listUrls(?array $urls = []) {
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        '.urlForm().'
+                        '.urlForm('edit', $url).'
                     </div>
                 </div>
             </div>
