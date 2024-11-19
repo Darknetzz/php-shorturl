@@ -15,6 +15,11 @@ do {
         break;
     }
 
+    // If the last character is / - remove it
+    if (substr($p, -1) === "/") {
+        $p = substr($p, 0, -1);
+    }
+
     // Check if it contains / - if it does, remove everything before it
     if (strpos($p, '/') !== false) {
         $p = substr(strrchr($p, '/'), 1);
