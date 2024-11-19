@@ -328,6 +328,7 @@
             var action    = actionObj.attr("data-action");
             utils.log("Action type: " + action);
             var tr        = actionObj.closest("tr");
+            var name      = tr.data("name");
             var id        = tr.data("id");
             var type      = tr.data("type");
             var short     = tr.data("shorturl");
@@ -341,7 +342,6 @@
                     utils.error("Edit form not found.");
                     return;
                 }
-                editUrlForm.prepend("THIS ONE");
                 return;
                 var editUrlName   = editUrlForm.find(".urlNameInput");
                 var editUrlType   = editUrlForm.find(".urlTypeInput");
@@ -365,6 +365,7 @@
                     editProtocol.val(protocol);
                 }
 
+                editUrlName.val(name);
                 editUrlType.val(type);
                 editShortUrl.val(short);
                 // editDestUrl.val(dest);

@@ -46,7 +46,7 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                                FUNCTION icon                               */
 /* ────────────────────────────────────────────────────────────────────────── */
-function icon($icon, $size = 1, $color = Null) {
+function icon($icon, $size = 1.2, $color = Null) {
     $style = "style='";
     $style .= ($color == Null ? "" : "color:$color;");
     $style .= "font-size:".$size."rem;'";
@@ -71,7 +71,7 @@ function navBtn($text, $url = Null, $icon = Null) {
     $currentUrl  = $_SERVER['REQUEST_URI'];
     $activeClass = (strpos($currentUrl, $url) !== False) ? 'active link-white' : '';
     return "
-        <li class='nav-item'>
+        <li class='nav-item mx-2'>
             <a class='nav-link $activeClass' href='$url'>".icon($icon)." $text</a>
         </li>
     ";
@@ -661,8 +661,8 @@ function listUrls(?array $urls = []) {
 
             $urlsTable .= '
                 <tr
-                    data-type="'.$urlType.'" 
                     data-id="'.$urlId.'"
+                    data-type="'.$urlType.'" 
                     data-name="'.$urlName.'"
                     data-shorturl="'.$urlShort.'"
                     data-desturl="'.$urlDest.'"

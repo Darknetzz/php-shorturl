@@ -6,8 +6,9 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                    <?= navBtn("Generate", "?do=home", "plus-circle") ?>
+                    <?= navBtn("Create", "?do=home", "bookmark-plus") ?>
                     <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
+                    <?= navBtn("Bookmarks", "?do=bookmarks", "star-fill text-warning") ?>
                     <?php
 
                     # NOTE: Admin
@@ -25,8 +26,8 @@
                         }
                         $navUserBtn = navDropDown($userName, [
                             ["url" => "?do=profile", "text" => "Profile", "icon" => "person-vcard"],
-                            ["url" => "?do=bookmarks", "text" => "Bookmarks", "icon" => "bookmark"],
-                            ["url" => "?do=logout", "text" => "Logout", "icon" => "power"],
+                            // ["url" => "?do=bookmarks", "text" => "Bookmarks", "icon" => "star-fill text-warning"],
+                            ["url" => "?do=logout", "text" => "Logout", "icon" => "power text-danger"],
                         ], "person");
                     }
                     echo $navUserBtn;
