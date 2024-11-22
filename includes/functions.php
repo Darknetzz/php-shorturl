@@ -404,170 +404,201 @@ function writeLog($event = Null) {
 /*                             FUNCTION urlInputs                             */
 /* ────────────────────────────────────────────────────────────────────────── */
 function urlForm($action = "create", $values = []) {
-    global $cfg;
-    global $tooltip;
-    $shortVal = (isset($values["short"]) ? $values["short"] : Null);
-    $nameVal  = (isset($values["name"]) ? $values["name"] : Null);
-    $destVal  = (isset($values["dest"]) ? $values["dest"] : Null);
-    $typeVal  = (isset($values["type"]) ? $values["type"] : Null);
-    $typeOpts = "";
-    foreach ($cfg["url_types"] as $type) {
-        $selected = ($type["value"] == $typeVal ? "selected" : "");
-        $typeOpts .= "<option value='".$type["value"]."' $selected>".$type["name"]."</option>";
-    }
+    global $urlForm;
+    return $urlForm($action, $values);
+    // global $cfg;
+    // global $tooltip;
+    // $shortTypeVal = (isset($values["short_type"]) ? $values["short_type"] : Null);
+    // $destTypeVal  = (isset($values["dest_type"]) ? $values["dest_type"] : Null);
+    // $shortVal     = (isset($values["short"]) ? $values["short"] : Null);
+    // $nameVal      = (isset($values["name"]) ? $values["name"] : Null);
+    // $destVal      = (isset($values["dest"]) ? $values["dest"] : Null);
+    // $destTypeOpts = "";
 
-    $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Submit">';
-    if ($action == "create") {
-        $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Create">';
-    } 
-    if ($action == "edit") {
-        $submitBtn = '
-            <a class="btn btn-primary" target="_blank" href="'.$shortVal.'">Open</a>
-            <input class="btn btn-success" name="action" type="submit" value="Update">
-        ';
-    }
-    $urlForm  = '
-        <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
-        <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">
-        <table class="table table-default">
+    // $shortTypeOpts = "";
+    // foreach ($cfg["short_types"] as $type) {
+    //     $selected = ($type["value"] == $shortTypeVal ? "selected" : "");
+    //     $shortTypeOpts .= "<option value='".$type["value"]."' $selected>".$type["name"]."</option>";
+    // }
 
-            <tr class="urlInputRow" data-input="name">
-                <td>
-                    Name
-                </td>
-                <td>
-                        '.$tooltip["name"].'
-                </td>
-                <td>
-                    <div class="input-group m-1">
-                        <input class="form-control urlNameInput common" type="text" name="name" placeholder="Name" value="'.$nameVal.'">
-                    </div>
-                </td>
-            </tr>
+    // foreach ($cfg["dest_types"] as $type) {
+    //     $selected = ($type["value"] == $destTypeVal ? "selected" : "");
+    //     $destTypeOpts .= "<option value='".$type["value"]."' $selected>".$type["name"]."</option>";
+    // }
 
-            <tr class="urlInputRow" data-input="short">
-                <td>
-                    Short URL
-                </td>
-                <td>
-                        '.$tooltip["short"].'
-                </td>
-                <td>
-                    <div class="input-group m-1">
-                        <span class="input-group-text">
-                            '.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].'/
-                        </span>
-                        <!--<input type="hidden" id="shortgen" name="shortgen" value="'.genStr($cfg["short_default"]).'">-->
-                        <input class="form-control urlShortInput common" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed" value="'.$shortVal.'">
-                    </div>
-                </td>
-            </tr>
+    // $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Submit">';
+    // if ($action == "create") {
+    //     $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Create">';
+    // } 
+    // if ($action == "edit") {
+    //     $submitBtn = '
+    //         <a class="btn btn-primary" target="_blank" href="'.$shortVal.'">Open</a>
+    //         <input class="btn btn-success" name="action" type="submit" value="Update">
+    //     ';
+    // }
+    // $urlForm  = '
+    //     <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
+    //     <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">
+    //     <table class="table table-default">
 
-            <tr class="urlInputRow" data-input="type">
-                <td>
-                    <span class="text-danger mx-1">*</span>
-                    Type
-                </td>
-                <td>
-                        '.$tooltip["type"].'
-                </td>
-                <td>
-                    <div class="input-group m-1">
-                        <select class="form-select urlTypeInput" name="type">
-                            '.$typeOpts.'
-                        </select>
-                    </div>
-                </td>
-            </tr>
+    //         <tr class="urlInputRow" data-input="name">
+    //             <td>
+    //                 Name
+    //             </td>
+    //             <td>
+    //                 '.$tooltip["name"].'
+    //             </td>
+    //             <td>
+    //                 <div class="input-group m-1">
+    //                     <input class="form-control urlNameInput common" type="text" name="name" placeholder="Name" value="'.$nameVal.'">
+    //                 </div>
+    //                 <p class="form-text">The name of this short url. This is just for identification purposes.</p>
+    //             </td>
+    //         </tr>
 
-            <!--
-            /* ────────────────────────────────────────────────────────────────────────── */
-            /*                                  REDIRECT                                  */
-            /* ────────────────────────────────────────────────────────────────────────── */
-            -->
-            <tbody class="urlInputRow" data-input="redirect">
-                <tr>
-                    <td>
-                        <span class="inline">  
-                            <span class="text-danger mx-1">*</span>
-                            Redirect URL
-                        </span>
-                    </td>
-                    <td>
-                        '.$tooltip["redirect"].'
-                    </td>
-                    <td>
-                        <div>
-                            '.urlInput("redirect_dest").'
-                        </div>
-                    </td>
-                </tr>
-            </tbody>
+    //         <tr class="urlInputRow" data-input="short_type">
+    //             <td>
+    //                 <span class="text-danger mx-1">*</span>
+    //                 Short type
+    //             </td>
+    //             <td>
+    //                     '.$tooltip["short_type"].'
+    //             </td>
+    //             <td>
+    //                 <div class="input-group m-1">
+    //                     <select class="form-select urlTypeInput" name="short_type" id="shortTypeOpts">
+    //                         '.$shortTypeOpts.'
+    //                     </select>
+    //                 </div>
+    //                 <p class="form-text">The type of short URL this will be.</p>
+    //             </td>
+    //         </tr>
+
+    //         <tr class="urlInputRow" data-input="short">
+    //             <td>
+    //                 Short URL
+    //             </td>
+    //             <td>
+    //                     '.$tooltip["short"].'
+    //             </td>
+    //             <td>
+    //                 <div class="input-group m-1">
+    //                     <span class="input-group-text">
+    //                         '.(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http').'://'.$_SERVER['HTTP_HOST'].'/
+    //                     </span>
+    //                     <!--<input type="hidden" id="shortgen" name="shortgen" value="'.genStr($cfg["short_default"]).'">-->
+    //                     <input class="form-control urlShortInput common" type="text" name="short" placeholder="Short URL" pattern="[A-Za-z0-9]*" title="Only alphanumeric characters are allowed" value="'.$shortVal.'">
+    //                     <p class="form-text">The "short" part of the url. This must be unique and will function as the ID.</p>
+    //                 </div>
+    //             </td>
+    //         </tr>
+
+    //         <tr class="urlInputRow" data-input="dest_type">
+    //             <td>
+    //                 <span class="text-danger mx-1">*</span>
+    //                 Destination type
+    //             </td>
+    //             <td>
+    //                     '.$tooltip["dest_type"].'
+    //             </td>
+    //             <td>
+    //                 <div class="input-group m-1">
+    //                     <select class="form-select urlTypeInput" name="type" id="destTypeOpts">
+    //                         '.$destTypeOpts.'
+    //                     </select>
+    //                 </div>
+    //                 <p class="form-text">The destination type of this shortened URL.</p>
+    //             </td>
+    //         </tr>
+
+    //         <!--
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         /*                                  REDIRECT                                  */
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         -->
+    //         <tbody class="urlInputRow" data-input="redirect">
+    //             <tr>
+    //                 <td>
+    //                     <span class="inline">  
+    //                         <span class="text-danger mx-1">*</span>
+    //                         Redirect URL
+    //                     </span>
+    //                 </td>
+    //                 <td>
+    //                     '.$tooltip["redirect"].'
+    //                 </td>
+    //                 <td>
+    //                     <div>
+    //                         '.urlInput("redirect_dest").'
+    //                     </div>
+    //                 </td>
+    //             </tr>
+    //         </tbody>
 
 
-            <!--
-            /* ────────────────────────────────────────────────────────────────────────── */
-            /*                                   ALIAS                                    */
-            /* ────────────────────────────────────────────────────────────────────────── */
-            -->
-            <tr class="urlInputRow" data-input="alias" style="display:none;">
-                <td>
-                    <span>
-                        <span class="text-danger mx-1">*</span>
-                        Alias URL
-                    </span>
-                </td>
-                <td>
-                    '.$tooltip["alias"].'
-                </td>
-                <td>
-                    '.urlInput("alias_dest").'
-                </td>
-            </tr>
+    //         <!--
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         /*                                   ALIAS                                    */
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         -->
+    //         <tr class="urlInputRow" data-input="alias" style="display:none;">
+    //             <td>
+    //                 <span>
+    //                     <span class="text-danger mx-1">*</span>
+    //                     Alias URL
+    //                 </span>
+    //             </td>
+    //             <td>
+    //                 '.$tooltip["alias"].'
+    //             </td>
+    //             <td>
+    //                 '.urlInput("alias_dest").'
+    //             </td>
+    //         </tr>
 
-            <!--
-            /* ────────────────────────────────────────────────────────────────────────── */
-            /*                                  CUSTOM                                   */
-            /* ────────────────────────────────────────────────────────────────────────── */
-            -->
-            <tr class="urlInputRow" data-input="custom" style="display:none;">
-                <td>
-                    <span class="text-danger mx-1">*</span>
-                    Custom Script
-                </td>
-                <td>
-                    '.$tooltip["custom"].'
-                </td>
-                <td>
-                    <div class="urlCustomInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
-                </td>
-            </tr>
+    //         <!--
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         /*                                  CUSTOM                                   */
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         -->
+    //         <tr class="urlInputRow" data-input="custom" style="display:none;">
+    //             <td>
+    //                 <span class="text-danger mx-1">*</span>
+    //                 Custom Script
+    //             </td>
+    //             <td>
+    //                 '.$tooltip["custom"].'
+    //             </td>
+    //             <td>
+    //                 <div class="urlCustomInput codeBox codeInput" name="custom_dest" placeholder="Custom Script"></div>
+    //             </td>
+    //         </tr>
 
-            <!--
-            /* ────────────────────────────────────────────────────────────────────────── */
-            /*                                   OPTIONS                                  */
-            /* ────────────────────────────────────────────────────────────────────────── */
-            -->
-            <tr class="urlOptions" data-type="redirect">
-                <td>
-                    Redirect delay (ms)
-                </td>
-                <td>
-                    '.$tooltip["delay"].'
-                </td>
-                <td>
-                    <input class="form-control m-1 urlDelayInput" type="number" name="options[delay]" value="'.$cfg["default_delay"].'">
-                </td>
-            </tr>
-            <tr>
-                <td></td>
-                <td colspan="100%">
-                    '.$submitBtn.'
-                </td>
-            </tr>
-        </table>
-    </form>';
-    return $urlForm;
+    //         <!--
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         /*                                   OPTIONS                                  */
+    //         /* ────────────────────────────────────────────────────────────────────────── */
+    //         -->
+    //         <tr class="urlOptions" data-type="redirect">
+    //             <td>
+    //                 Redirect delay (ms)
+    //             </td>
+    //             <td>
+    //                 '.$tooltip["delay"].'
+    //             </td>
+    //             <td>
+    //                 <input class="form-control m-1 urlDelayInput" type="number" name="options[delay]" value="'.$cfg["default_delay"].'">
+    //             </td>
+    //         </tr>
+    //         <tr>
+    //             <td></td>
+    //             <td colspan="100%">
+    //                 '.$submitBtn.'
+    //             </td>
+    //         </tr>
+    //     </table>
+    // </form>';
+    // return $urlForm;
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -723,7 +754,7 @@ function listUrls(?array $urls = []) {
             <button class="deleteSelectedBtn btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
         </div>
 
-        <div class="modal fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
+        <div class="modal modal-lg fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">

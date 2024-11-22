@@ -107,27 +107,6 @@ $cfg["notification_sound"] = True;
  */
 $cfg["form_disable_timeout"] = 1000;
 
-
-/**
- * url_types
- * The types of URLs supported by the application.
- * Default: Array of URL types with "name" and "value" keys
- */
-$cfg["url_types"] = [
-    [
-        "name"  => "Redirect",
-        "value" => "redirect"
-    ],
-    [
-        "name"  => "Alias",
-        "value" => "alias",
-    ],
-    [
-        "name"  => "Custom",
-        "value" => "custom",
-    ],
-];
-
 /**
  * urls_public
  * Whether shortened URLs are public. Everyone can see it in the URL list.

@@ -32,4 +32,10 @@
         margin          : 0.5rem;
         white-space     : pre;
     }
+
+    .dynamic-form {
+        /* display: flex; */
+        /* flex-wrap: wrap; */
+        max-width: 1500px;
+    }
 </style>

@@ -277,25 +277,76 @@
             });
         });
 
-        /* ────────────────────────────────────────────────────────────────────────── */
-        /*                              NOTE: home (add)                              */
-        /* ────────────────────────────────────────────────────────────────────────── */
-        $(".urlTypeInput").on("change", function() {
-            utils.hideObject(".urlInputRow:not(.common)");
-            // utils.showObject(".urlInputRow[data-input=short]");
-            utils.hideObject(".urlOptions");
-            var type = $(this).val();
-            if (type == "redirect") {
-                utils.showObject(".urlInputRow[data-input=redirect]");
-                utils.showObject(".urlOptions[data-type=redirect]");
-            } else if (type == "custom") {
-                utils.showObject(".urlInputRow[data-input=custom]");
-                utils.showObject(".urlOptions[data-type=custom]");
-            } else if (type == "alias") {
-                utils.showObject(".urlInputRow[data-input=alias]");
-                utils.showObject(".urlOptions[data-type=alias]");
+        /* ───────────────────────────────────────────────────────────────────── */
+        /*                             shortTypeInput                            */
+        /* ───────────────────────────────────────────────────────────────────── */
+        $("#shortTypeInput").on("change", function() {
+            inputsToShow = {
+                "path"     : ".urlInputRow[data-input=short_path]",
+                "subdomain": ".urlInputRow[data-input=short_domain]",
+                "custom"   : ".urlInputRow[data-input=short_custom]",
+            };
+            for (var input in inputsToShow) {
+                utils.hideObject(inputsToShow[input]);
             }
+            utils.showObject(inputsToShow[$(this).val()]);
+            utils.showObject(".urlInputRow[data-input=dest_type]");
         });
+
+        /* ───────────────────────────────────────────────────────────────────── */
+        /*                               shortInput                              */
+        /* ───────────────────────────────────────────────────────────────────── */
+        $(".shortInput").on("keyup", function() {
+            $(".shortInputPreview").remove();
+            var shortType  = $("#shortTypeInput").val();
+            var shortVal   = $(this).val();
+            utils.log("Short input changed:", shortVal);
+            if (shortType.length == 0 || shortVal.length == 0) {
+                return;
+            }
+            var previewObj = $("<span class='shortInputPreview'></span>");
+            if (shortType == "path") {
+                var preview = "<?= $cfg["base_url"] ?>/" + shortVal;
+            }
+            if (shortType == "subdomain") {
+                var preview = shortVal + ".<?= $cfg["base_domain"] ?>";
+            }
+            if (shortType == "custom") {
+                var preview = shortVal;
+            }
+            previewHTML = previewObj.html();
+            $(this).closest(".urlInputDescription").append(previewHTML);
+        });
+
+        /* ────────────────────────────────────────────────────────────────────────── */
+        /*                              destTypeInput                                 */
+        /* ────────────────────────────────────────────────────────────────────────── */
+        $("#destTypeInput").on("change", function() {
+            inputsToShow = {
+                "redirect": ".urlInputRow[data-input=redirect]",
+                "custom"  : ".urlInputRow[data-input=custom]",
+                "alias"   : ".urlInputRow[data-input=alias]",
+            };
+            for (var input in inputsToShow) {
+                utils.hideObject(inputsToShow[input]);
+            }
+            utils.showObject(inputsToShow[$(this).val()]);
+        });
+            // utils.hideObject(".urlInputRow");
+            // // utils.showObject(".urlInputRow[data-input=short]");
+            // utils.hideObject(".urlOptions");
+            // var type = $(this).val();
+            // if (type == "redirect") {
+            //     utils.showObject(".urlInputRow[data-input=redirect]");
+            //     utils.showObject(".urlOptions[data-type=redirect]");
+            // } else if (type == "custom") {
+            //     utils.showObject(".urlInputRow[data-input=custom]");
+            //     utils.showObject(".urlOptions[data-type=custom]");
+            // } else if (type == "alias") {
+            //     utils.showObject(".urlInputRow[data-input=alias]");
+            //     utils.showObject(".urlOptions[data-type=alias]");
+            // }
+        // });
 
         /* ────────────────────────────────────────────────────────────────────────── */
         /*                                 NOTE: urls                                 */
