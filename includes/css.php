@@ -14,6 +14,7 @@
         border-radius   : 0.25rem;
         max-width       : 500px;
         text-align      : left;
+        opacity         : 1;
     }
 
     .inline {

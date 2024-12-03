@@ -1,5 +1,7 @@
-
 <div class="container-fluid">
+    <div class="card m-3 border border-primary">
+                <h1 class="card-header text-bg-primary">Bookmarks</h1>
+                <div class="card-body">
 <?php
 
 if (empty($_SESSION['id'])) {
@@ -31,4 +33,6 @@ echo listUrls($bookmarks);
 
 ?>
 
+        </div>
+    </div>
 </div>

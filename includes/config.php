@@ -35,6 +35,12 @@ $cfg["base_domain"] = $_SERVER['HTTP_HOST'];
  */
 $cfg["base_url"] = $cfg["protocol"] . "://" . $cfg["base_domain"];
 
+/**
+ * base_uri
+    * The base URI of the application, derived from the server's REQUEST_URI.
+    * Default: Value of $_SERVER['REQUEST_URI']
+    */
+$cfg["base_uri"] = $_SERVER['REQUEST_URI'];
 
 /**
  * base_path
@@ -89,7 +95,7 @@ $cfg["logging"] = True;
  * The default protocol to use for URLs.
  * Default: "http://"
  */
-$cfg["default_protocol"] = "http://";
+$cfg["default_protocol"] = $cfg["protocol"] . "://";
 
 
 /**

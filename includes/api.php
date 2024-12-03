@@ -86,12 +86,13 @@ do {
     /* ────────────────────────────────────────────────────────────────────────── */
     if ($action == "create") {
 
-        $type     = (!empty($_POST['type']) ? $_POST['type'] : Null);
-        $protocol = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
-        $short    = (!empty($_POST['short']) ? $_POST['short'] : Null);
-        $shortGen = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
-        $dest     = (!empty($_POST[$type.'_dest']) ? $_POST[$type.'_dest'] : Null);
-        $options  = (!empty($_POST['options']) ? $_POST['options'] : Null);
+        $short_type = (!empty($_POST['short_type']) ? $_POST['short_type'] : Null);
+        $protocol   = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
+        $short      = (!empty($_POST['short']) ? $_POST['short'] : Null);
+        $shortGen   = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
+        $dest_type  = (!empty($_POST['dest_type']) ? $_POST['dest_type'] : Null);
+        $dest       = (!empty($_POST[$type.'_dest']) ? $_POST[$type.'_dest'] : Null);
+        $options    = (!empty($_POST['options']) ? $_POST['options'] : Null);
 
         // Check if the user is logged in
         // if (empty($_SESSION['id'])) {
@@ -100,7 +101,7 @@ do {
         // }
 
         // If $short is empty, use $shortGen
-        if ($short == Null) {
+        if ($short_type == Null) {
             $short = $shortGen;
         }
 
@@ -108,13 +109,13 @@ do {
         $short = preg_replace('/[^a-zA-Z0-9]/', '', $short);
 
         // Check if $type or $dest is empty
-        if ($type == Null) {
-            $res = ["status" => "ERROR", "message" => "URL must have a valid type."];
+        if ($short_type == Null) {
+            $res = ["status" => "ERROR", "message" => "Short URL must have a valid type."];
             break;
         }
 
         // Verify the destination URL if type != custom
-        if ($type != "custom") {
+        if ($short_type != "custom") {
             $dest = urlValidate($dest);
         }
 

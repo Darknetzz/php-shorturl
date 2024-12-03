@@ -286,7 +286,8 @@
                 "subdomain": ".urlInputRow[data-input=short_domain]",
                 "custom"   : ".urlInputRow[data-input=short_custom]",
             };
-            for (var input in inputsToShow) {
+            for (input in inputsToShow) {
+                utils.log("hiding input", input);
                 utils.hideObject(inputsToShow[input]);
             }
             utils.showObject(inputsToShow[$(this).val()]);
@@ -297,11 +298,12 @@
         /*                               shortInput                              */
         /* ───────────────────────────────────────────────────────────────────── */
         $(".shortInput").on("keyup", function() {
-            $(".shortInputPreview").remove();
+            utils.hideObject(".shortInputPreview");
             var shortType  = $("#shortTypeInput").val();
             var shortVal   = $(this).val();
             utils.log("Short input changed:", shortVal);
             if (shortType.length == 0 || shortVal.length == 0) {
+                utils.error("Short type or value is empty.");
                 return;
             }
             var previewObj = $("<span class='shortInputPreview'></span>");
@@ -323,9 +325,9 @@
         /* ────────────────────────────────────────────────────────────────────────── */
         $("#destTypeInput").on("change", function() {
             inputsToShow = {
-                "redirect": ".urlInputRow[data-input=redirect]",
-                "custom"  : ".urlInputRow[data-input=custom]",
-                "alias"   : ".urlInputRow[data-input=alias]",
+                "redirect": ".urlInputRow[data-input=dest_redirect]",
+                "custom"  : ".urlInputRow[data-input=dest_custom]",
+                "alias"   : ".urlInputRow[data-input=dest_alias]",
             };
             for (var input in inputsToShow) {
                 utils.hideObject(inputsToShow[input]);

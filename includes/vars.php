@@ -153,6 +153,7 @@ return '
         data-bs-toggle="tooltip" 
         data-bs-title="'.$text.'" 
         data-bs-placement="'.$placement.'" 
+        data-bs-custom-class="input-tooltip" 
         data-bs-html="'.$html.'"
         title="'.$text.'">
         <span class="bi bi-'.$icon.'" style="font-size:1.5rem;"></span>
@@ -338,8 +339,8 @@ $urlInputs = [
     ],
     "short_domain"    => [
         "id"          => "shortDomainInput",
+        "title"       => "Subdomain",
         "name"        => "short_domain",
-        "name"        => "Domain",
         "type"        => "text",
         "class"       => "form-control urlInput shortInput",
         "placeholder" => "",
@@ -347,11 +348,11 @@ $urlInputs = [
         "required"    => True,
         "hidden"      => True,
         "tooltip"     => $tooltip["short"],
-        "description" => "The subdomain that you want to use. Should only consist of alphanumeric characters and period (.).",
+        "description" => "<b class='text-warning'>Requires additional DNS setup.</b> The subdomain that you want to use. Should only consist of alphanumeric characters and period (.).",
     ],
     "short_custom"    => [
         "id"          => "shortCustomInput",
-        "title"        => "Custom URL",
+        "title"       => "Custom URL",
         "name"        => "short_custom",
         "type"        => "text",
         "class"       => "form-control urlInput shortInput",
@@ -360,7 +361,7 @@ $urlInputs = [
         "required"    => True,
         "hidden"      => True,
         "tooltip"     => $tooltip["short"],
-        "description" => "Custom URL that you want to use.",
+        "description" => "<b class='text-warning'>Requires the custom URL to point at this webserver.</b> Custom URL that you want to use.",
     ],
     "dest_type"  => [
         "id"          => "destTypeInput",
@@ -392,7 +393,7 @@ $urlInputs = [
     "redirect"   => [
         "id"          => "redirectInput",
         "title"       => "Redirect URL",
-        "name"        => "short_redirect",
+        "name"        => "dest_redirect",
         "type"        => "text",
         "class"       => "form-control urlInput destInput",
         "placeholder" => "http://example.com",
@@ -405,7 +406,7 @@ $urlInputs = [
     "alias"      => [
         "id"          => "aliasInput",
         "title"       => "Alias URL",
-        "name"        => "short_alias",
+        "name"        => "dest_alias",
         "type"        => "text",
         "class"       => "form-control urlInput destInput",
         "placeholder" => "http://example.com",
@@ -418,7 +419,7 @@ $urlInputs = [
     "custom"     => [
         "id"          => "customInput",
         "title"       => "Custom Script",
-        "name"        => "short_custom",
+        "name"        => "dest_custom",
         "type"        => "textarea",
         "class"       => "form-control urlInput destInput",
         "placeholder" => "",
