@@ -46,7 +46,7 @@ function alert($msg, $type = "info", $icon = Null, $persistent = False, $dismiss
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                                FUNCTION icon                               */
 /* ────────────────────────────────────────────────────────────────────────── */
-function icon($icon, $size = 1.2, $color = Null) {
+function icon($icon = "question-square", $size = 1.2, $color = Null) {
     $style = "style='";
     $style .= ($color == Null ? "" : "color:$color;");
     $style .= "font-size:".$size."rem;'";
@@ -673,7 +673,7 @@ function listUrls(?array $urls = []) {
             $urlName     = (!empty($url["name"]) ? $url["name"] : $urlShort);
             $urlDest     = $url["dest"];
             $urlType     = $url["type"];
-            $urlDestLink = "<a href='$urlDest' target='_blank'>$urlDest</a>";
+            $urlDestLink = "<a href='$urlDest' target='_blank'>".icon("box-arrow-in-up-right")." $urlDest</a>";
             $urlOptions  = (!empty($url["options"]) && json_validate($url["options"]) ? json_decode($url["options"]) : []);
 
             if ($urlType == "custom") {
@@ -715,7 +715,7 @@ function listUrls(?array $urls = []) {
                         </a>
                     </td>
                     <td>
-                        <a href="'.$urlShort.'" target="_blank">'.$urlShort.'</a>
+                        <a href="'.$urlShort.'" target="_blank">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>
                     </td>
                     <td>
                         '.$urlDestLink.'
