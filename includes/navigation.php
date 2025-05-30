@@ -20,7 +20,7 @@ do {
     }
 
     if (empty($do)) {
-        require_once("pages/home.php");
+        require_once("pages/urls.php");
         break;
     }
 

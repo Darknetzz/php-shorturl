@@ -1,12 +1,12 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-body-tertiary">
     <div class="container-fluid">
-        <a class="navbar-brand" href="?do=home"><?= $cfg["title"] ?></a>
+        <a class="navbar-brand" href="?do=create"><?= $cfg["title"] ?></a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                    <?= navBtn("Create", "?do=home", "bookmark-plus") ?>
+                    <?= navBtn("Create", "?do=create", "bookmark-plus") ?>
                     <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
                     <?= navBtn("Bookmarks", "?do=bookmarks", "star-fill text-warning") ?>
                     <?php
