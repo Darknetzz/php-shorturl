@@ -673,7 +673,7 @@ function listUrls(?array $urls = []) {
             $urlName     = (!empty($url["name"]) ? $url["name"] : $urlShort);
             $urlDest     = $url["dest"];
             $urlType     = $url["type"];
-            $urlDestLink = "<a href='$urlDest' target='_blank'>".icon("box-arrow-in-up-right")." $urlDest</a>";
+            $urlDestLink = "<a href='$urlDest' target='_blank' class='link-info link-underline-opacity-0'>".icon("box-arrow-in-up-right")." $urlDest</a>";
             $urlOptions  = (!empty($url["options"]) && json_validate($url["options"]) ? json_decode($url["options"]) : []);
 
             if ($urlType == "custom") {
@@ -707,15 +707,15 @@ function listUrls(?array $urls = []) {
                         '.$urlId.'
                     </td>
                     <td>
-                        <a href="javascript:void(0);" class="url-action m-3" 
+                        <a href="javascript:void(0);" class="url-action m-3 link-info link-underline-opacity-0" 
                             data-action="edit"
                             data-bs-toggle="modal"
                             data-bs-target="#editUrlModal">
-                                '.$urlName.'
+                                '.icon('gear-wide-connected') .' '.$urlName.'
                         </a>
                     </td>
                     <td>
-                        <a href="'.$urlShort.'" target="_blank">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>
+                        <a href="'.$urlShort.'" target="_blank" class="link-info link-underline-opacity-0">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>
                     </td>
                     <td>
                         '.$urlDestLink.'
@@ -728,12 +728,12 @@ function listUrls(?array $urls = []) {
                     </td>
                     <td>
 
-                        <a href="javascript:void(0);" class="url-action m-3" 
+                        <a href="javascript:void(0);" class="url-action m-3 link-info link-underline-opacity-0" 
                             data-action="edit"
                             data-bs-toggle="modal"
                             data-bs-target="#editUrlModal">'.icon("pencil", 1.5).'</a>
 
-                        <a href="javascript:void(0)" class="url-action m-3" 
+                        <a href="javascript:void(0)" class="url-action m-3 link-info" 
                             data-action="bookmark">'.$favoriteIcon.'</a>
 
                         <a href="javascript:void(0);" class="url-action m-3 link-danger" 
