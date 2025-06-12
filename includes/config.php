@@ -127,3 +127,11 @@ $cfg["urls_public"] = True;
  * Default: 100
  */
 $cfg["default_delay"] = 100;
+
+
+/**
+ * debug_mode
+    * Whether debug mode is enabled.
+    * Default: False
+ */
+$cfg["debug_mode"] = False;

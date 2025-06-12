@@ -16,3 +16,4 @@ Not quite ready for public use yet, but if you're very curious:
 - [x] Logs
 - [ ] Edit URLs
 - [ ] Edit settings
+- [ ] Create/distribute as docker container
