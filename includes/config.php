@@ -132,6 +132,6 @@ $cfg["default_delay"] = 100;
 /**
  * debug_mode
     * Whether debug mode is enabled.
-    * Default: False
+    * Default: True
  */
-$cfg["debug_mode"] = False;
+$cfg["debug_mode"] = True;

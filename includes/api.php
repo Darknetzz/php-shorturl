@@ -1,5 +1,7 @@
 <?php
 
+header("Content-Type: application/json; charset=UTF-8");
+
 do {
 
     if (basename(__DIR__) !== "includes") {
@@ -281,12 +283,15 @@ do {
 } while (False);
 
 if (!empty($res)) {
-    $res["debug"]        = $_REQUEST;
+    $res["debug"] = $_REQUEST;
     echo json_encode($res);
     die();
 }
 
-echo json_encode(["status" => "WARN", "message" => "Action <code>".$action."</code> is invalid or empty."]);
+echo json_encode([
+    "status"  => "WARN",
+    "message" => "Action <code>".$action."</code> is invalid or empty."
+]);
 
 
 ?>
