@@ -1,6 +1,6 @@
 <?php
 
-header("Content-Type: application/json; charset=UTF-8");
+// header("Content-Type: application/json; charset=UTF-8");
 
 do {
 
@@ -284,14 +284,14 @@ do {
 
 if (!empty($res)) {
     $res["debug"] = $_REQUEST;
-    echo json_encode($res);
-    die();
+    die(json_encode($res));
 }
 
-echo json_encode([
+die(json_encode([
+    "debug"   => $_REQUEST,
     "status"  => "WARN",
     "message" => "Action <code>".$action."</code> is invalid or empty."
-]);
+]));
 
 
 ?>

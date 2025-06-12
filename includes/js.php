@@ -100,6 +100,7 @@
                 try {
                     var data = JSON.parse(response);
                 } catch (e) {
+                    console.error(e);
                     console.error("Invalid JSON response:", response);
                     toast("Invalid JSON response", "danger", "Error");
                     return false;
