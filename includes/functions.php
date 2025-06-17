@@ -673,7 +673,7 @@ function listUrls(?array $urls = []) {
             $urlName     = (!empty($url["name"]) ? $url["name"] : $urlShort);
             $urlDest     = $url["dest"];
             $urlType     = $url["type"];
-            $urlDestLink = "<a href='$urlDest' target='_blank' class='link-info link-underline-opacity-0'>".icon("box-arrow-in-up-right")." $urlDest</a>";
+            $urlDestLink = "<a href='$urlDest' target='_blank' class='link-info link-underline-opacity-0'><span class='badge bg-primary'>".icon("box-arrow-in-up-right")." $urlDest</span></a>";
             $urlOptions  = (!empty($url["options"]) && json_validate($url["options"]) ? json_decode($url["options"]) : []);
 
             if ($urlType == "custom") {
@@ -715,7 +715,8 @@ function listUrls(?array $urls = []) {
                         </a>
                     </td>
                     <td>
-                        <a href="'.$urlShort.'" target="_blank" class="link-info link-underline-opacity-0">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>
+                        <!--<a href="'.$urlShort.'" target="_blank" class="link-info link-underline-opacity-0">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>-->
+                        <a href="'.$urlShort.'" target="_blank" class="link-info link-underline-opacity-0"><span class="badge bg-primary">'.icon("box-arrow-in-up-right").' '.$urlShort.'</span></a>
                     </td>
                     <td>
                         '.$urlDestLink.'
