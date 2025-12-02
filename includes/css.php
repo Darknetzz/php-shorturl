@@ -8,13 +8,16 @@
     }
 
     .tooltip-inner {
-        background-color: #343a40;
-        color           : #fff;
-        border          : 1px solid #ffffff;
-        border-radius   : 0.25rem;
-        max-width       : 500px;
-        text-align      : left;
-        opacity         : 1;
+        background-color        : #343a40;
+        color                   : #fff;
+        border                  : 1px solid #ffffff;
+        border-radius           : 0.25rem;
+        max-width               : 500px;
+        max-height              : 200px;
+        overflow-y              : auto;
+        -webkit-overflow-scrolling: touch;
+        text-align              : left;
+        opacity                 : 1;
     }
 
     .inline {
