@@ -13,9 +13,8 @@
         border                  : 1px solid #ffffff;
         border-radius           : 0.25rem;
         max-width               : 500px;
-        max-height              : 200px;
+        max-height              : min(200px, 40vh);
         overflow-y              : auto;
-        -webkit-overflow-scrolling: touch;
         text-align              : left;
         opacity                 : 1;
     }
