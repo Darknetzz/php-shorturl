@@ -428,7 +428,7 @@
         }
 
         function buildShortPreview(shortType, shortVal) {
-            shortVal = $.trim(shortVal || "");
+            shortVal = String(shortVal || "").trim();
             if (shortType === "path") {
                 if (!shortVal) {
                     return {
