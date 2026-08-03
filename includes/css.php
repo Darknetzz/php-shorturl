@@ -27,6 +27,10 @@
         opacity                 : 1;
     }
 
+    .tooltip.show {
+        pointer-events: auto;
+    }
+
     .inline {
         display: inline-flex;
     }

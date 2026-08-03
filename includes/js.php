@@ -157,9 +157,32 @@
         // NOTE: js-utils
         window.utils = new Utils();
 
-        // NOTE: Tooltips (Bootstrap)
+        // NOTE: Tooltips (Bootstrap) — click to pin, click outside to dismiss
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => {
+            const tip = new bootstrap.Tooltip(tooltipTriggerEl, { trigger: 'click', html: true });
+            tooltipTriggerEl.addEventListener('show.bs.tooltip', () => {
+                tooltipTriggerList.forEach(other => {
+                    if (other !== tooltipTriggerEl) {
+                        bootstrap.Tooltip.getInstance(other)?.hide();
+                    }
+                });
+            });
+            return tip;
+        });
+
+        document.addEventListener('click', (e) => {
+            const target = e.target;
+            if (!(target instanceof Element)) {
+                return;
+            }
+            if (target.closest('[data-bs-toggle="tooltip"]') || target.closest('.tooltip')) {
+                return;
+            }
+            tooltipTriggerList.forEach(el => {
+                bootstrap.Tooltip.getInstance(el)?.hide();
+            });
+        });
 
 
         // NOTE: Ace Editor
@@ -284,6 +307,12 @@
         /* ───────────────────────────────────────────────────────────────────── */
         /*                    URL form field visibility (DRY)                     */
         /* ───────────────────────────────────────────────────────────────────── */
+        var shortTypeRows = {
+            "path"     : "short_path",
+            "subdomain": "short_domain",
+            "custom"   : "short_custom",
+        };
+
         function urlFormRow(inputName) {
             return ".urlInputRow[data-input='" + inputName + "']";
         }
@@ -300,16 +329,11 @@
 
         function updateShortTypeRows() {
             var shortType = $("#shortTypeInput").val();
-            var shortRows = {
-                "path"     : "short_path",
-                "subdomain": "short_domain",
-                "custom"   : "short_custom",
-            };
 
-            setUrlFormRows(Object.values(shortRows), false);
+            setUrlFormRows(Object.values(shortTypeRows), false);
 
-            if (shortRows[shortType]) {
-                utils.showObject(urlFormRow(shortRows[shortType]));
+            if (shortTypeRows[shortType]) {
+                utils.showObject(urlFormRow(shortTypeRows[shortType]));
                 utils.showObject(urlFormRow("dest_type"));
             } else {
                 utils.hideObject(urlFormRow("dest_type"));
@@ -382,6 +406,7 @@
         $("#shortTypeInput").on("change", function() {
             updateShortTypeRows();
             updateDestTypeRows();
+            updateShortPreview();
         });
 
         $("#destTypeInput").on("change", updateDestTypeRows);
@@ -393,30 +418,87 @@
         updateUrlFormRows();
 
         /* ───────────────────────────────────────────────────────────────────── */
-        /*                               shortInput                              */
+        /*                         short URL live preview                         */
         /* ───────────────────────────────────────────────────────────────────── */
-        $(".shortInput").on("keyup", function() {
-            utils.hideObject(".shortInputPreview");
-            var shortType  = $("#shortTypeInput").val();
-            var shortVal   = $(this).val();
-            utils.log("Short input changed:", shortVal);
-            if (shortType.length == 0 || shortVal.length == 0) {
-                utils.error("Short type or value is empty.");
+        var shortPreviewBaseUrl    = <?= json_encode($cfg["base_url"]) ?>;
+        var shortPreviewBaseDomain = <?= json_encode($cfg["base_domain"]) ?>;
+
+        function escapeHtml(value) {
+            return $("<div>").text(value == null ? "" : String(value)).html();
+        }
+
+        function buildShortPreview(shortType, shortVal) {
+            shortVal = $.trim(shortVal || "");
+            if (shortType === "path") {
+                if (!shortVal) {
+                    return {
+                        text: shortPreviewBaseUrl + "/<auto>",
+                        href: null,
+                        muted: true,
+                    };
+                }
+                var pathUrl = shortPreviewBaseUrl + "/" + shortVal;
+                return { text: pathUrl, href: pathUrl, muted: false };
+            }
+            if (shortType === "subdomain") {
+                if (!shortVal) {
+                    return null;
+                }
+                var host = shortVal + "." + shortPreviewBaseDomain;
+                return { text: host, href: "<?= $cfg["protocol"] ?>://" + host, muted: false };
+            }
+            if (shortType === "custom") {
+                if (!shortVal) {
+                    return null;
+                }
+                var href = /^(https?:)?\/\//i.test(shortVal) ? shortVal : null;
+                return { text: shortVal, href: href, muted: false };
+            }
+            return null;
+        }
+
+        function updateShortPreview($form) {
+            $form = $form && $form.length ? $form : $("#urlForm");
+            if (!$form.length) {
                 return;
             }
-            var previewObj = $("<span class='shortInputPreview'></span>");
-            if (shortType == "path") {
-                var preview = "<?= $cfg["base_url"] ?>/" + shortVal;
+
+            $form.find(".shortInputPreview").attr("hidden", true).empty();
+
+            var shortType = $form.find("#shortTypeInput").val();
+            var inputName = shortTypeRows[shortType];
+            if (!inputName) {
+                return;
             }
-            if (shortType == "subdomain") {
-                var preview = shortVal + ".<?= $cfg["base_domain"] ?>";
+
+            var $row = $form.find(urlFormRow(inputName));
+            // Only skip if this row itself is hidden (ignore parent modal visibility).
+            if (!$row.length || $row.get(0).style.display === "none") {
+                return;
             }
-            if (shortType == "custom") {
-                var preview = shortVal;
+
+            var preview = buildShortPreview(shortType, $row.find(".shortInput").val());
+            if (!preview) {
+                return;
             }
-            previewHTML = previewObj.html();
-            $(this).closest(".urlInputDescription").append(previewHTML);
+
+            var label = '<span class="text-muted">Preview:</span> ';
+            var body  = preview.muted
+                ? '<code class="text-muted user-select-all">' + escapeHtml(preview.text) + '</code>'
+                : '<code class="user-select-all">' + escapeHtml(preview.text) + '</code>';
+
+            if (preview.href) {
+                body = '<a href="' + escapeHtml(preview.href) + '" target="_blank" rel="noopener" class="link-info link-underline-opacity-0">' + body + '</a>';
+            }
+
+            $row.find(".shortInputPreview").html(label + body).removeAttr("hidden");
+        }
+
+        $(document).on("input keyup change", ".shortInput", function() {
+            updateShortPreview($(this).closest("form"));
         });
+
+        updateShortPreview();
 
         /* ────────────────────────────────────────────────────────────────────────── */
         /*                                 NOTE: urls                                 */
@@ -464,6 +546,23 @@
                     return;
                 }
                 editUrlForm.find(".openUrlBtn").attr("href", short || "#");
+
+                // Existing shorts are stored as path slugs; show them in the live preview.
+                var shortType = "path";
+                if (/^(https?:)?\/\//i.test(short || "")) {
+                    shortType = "custom";
+                } else if ((short || "").indexOf(".") !== -1) {
+                    shortType = "subdomain";
+                }
+                editUrlForm.find("#shortTypeInput").val(shortType);
+                updateShortTypeRows();
+                updateDestTypeRows();
+
+                var shortInputName = shortTypeRows[shortType];
+                if (shortInputName) {
+                    editUrlForm.find(urlFormRow(shortInputName) + " .shortInput").val(short || "");
+                }
+                updateShortPreview(editUrlForm);
                 return;
                 var editUrlName   = editUrlForm.find(".urlNameInput");
                 var editUrlType   = editUrlForm.find(".urlTypeInput");
