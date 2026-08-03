@@ -509,40 +509,29 @@
             }
 
             var preview   = buildShortPreview(shortType, shortVal);
-            var copyValue = preview.href || (!preview.muted ? preview.text : "");
+            // Only real URLs are copyable — placeholders like <auto> are not.
+            var copyValue = preview.muted ? "" : (preview.href || preview.text || "");
             var $url      = $preview.find(".shortPreviewUrl");
-            var $link     = $preview.find(".shortPreviewLink");
             var $copy     = $preview.find(".shortPreviewCopyBtn");
 
             $url.text(preview.text).toggleClass("text-muted", !!preview.muted);
 
-            if (preview.href) {
-                $link.attr("href", preview.href).removeAttr("aria-disabled");
-            } else {
-                $link.removeAttr("href").attr("aria-disabled", "true");
-            }
-
             if (copyValue) {
+                $preview.attr("data-copy", copyValue).addClass("is-copyable");
                 $copy.attr("data-copy", copyValue).prop("disabled", false);
             } else {
+                $preview.removeAttr("data-copy").removeClass("is-copyable");
                 $copy.removeAttr("data-copy").prop("disabled", true);
             }
         }
 
-        function copyShortPreviewUrl(text, $btn) {
+        function copyShortPreviewUrl(text) {
             if (!text) {
                 return;
             }
 
             var onDone = function() {
                 toast("URL copied to clipboard", "success", "Copied", "clipboard-check");
-                if ($btn && $btn.length) {
-                    var original = $btn.html();
-                    $btn.prop("disabled", true).html('<span class="bi bi-check2"></span> Copied');
-                    setTimeout(function() {
-                        $btn.prop("disabled", false).html(original);
-                    }, 1500);
-                }
             };
 
             var onFail = function() {
@@ -554,7 +543,7 @@
                 return;
             }
 
-            var $temp = $("<textarea>").val(text).appendTo("body").select();
+            var $temp = $("<textarea>").val(text).css({ position: "fixed", left: "-9999px" }).appendTo("body").select();
             try {
                 if (document.execCommand("copy")) {
                     onDone();
@@ -571,9 +560,9 @@
             updateShortPreview($(this).closest("form"));
         });
 
-        $(document).on("click", ".shortPreviewCopyBtn", function(e) {
+        $(document).on("click", ".shortInputPreview.is-copyable", function(e) {
             e.preventDefault();
-            copyShortPreviewUrl($(this).attr("data-copy"), $(this));
+            copyShortPreviewUrl($(this).attr("data-copy"));
         });
 
         updateShortPreview();

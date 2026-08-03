@@ -748,13 +748,11 @@ $urlForm = function($action = "create", $values = []) {
             <p class="text-muted">
                 Here you can create new short URLs. Hover over the question mark icons for more information.
             </p>
-            <div class="shortInputPreview alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2">
+            <div class="shortInputPreview alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2" role="group" aria-label="Short URL preview">
                 <span class="badge text-bg-info flex-shrink-0">Preview</span>
-                <a class="shortPreviewLink link-info link-underline-opacity-0 flex-grow-1 min-w-0" target="_blank" rel="noopener" aria-disabled="true">
-                    <code class="shortPreviewUrl user-select-all text-muted"></code>
-                </a>
+                <code class="shortPreviewUrl flex-grow-1 min-w-0 text-muted" title="Click to copy"></code>
                 <button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn flex-shrink-0" title="Copy URL" disabled>
-                    '.icon("clipboard").' Copy
+                    <span class="shortPreviewCopyLabel">'.icon("clipboard").' Copy</span>
                 </button>
             </div>
             <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">

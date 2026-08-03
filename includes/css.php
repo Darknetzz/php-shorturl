@@ -57,29 +57,41 @@
     .shortInputPreview {
         border-width: 1px;
         border-style: solid;
+        height: 3rem;
         min-height: 3rem;
+        max-height: 3rem;
         flex-wrap: nowrap;
-    }
-
-    .shortInputPreview .shortPreviewLink {
-        display: block;
         overflow: hidden;
+        box-sizing: border-box;
     }
 
     .shortInputPreview .shortPreviewUrl {
         display: block;
+        margin: 0;
         font-size: 1.05rem;
         font-weight: 600;
+        line-height: 1.25rem;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        user-select: all;
+        cursor: default;
+        background: transparent;
+        border: 0;
+        padding: 0;
+        user-select: none;
+    }
+
+    .shortInputPreview.is-copyable .shortPreviewUrl {
+        cursor: pointer;
     }
 
     .shortInputPreview .shortPreviewCopyBtn {
         flex-shrink: 0;
         white-space: nowrap;
-        min-width: 5.5rem;
+        width: 5.75rem;
+        height: 2rem;
+        padding-top: 0;
+        padding-bottom: 0;
     }
 
     .url-protocol {
