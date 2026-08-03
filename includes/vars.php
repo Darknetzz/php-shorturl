@@ -529,7 +529,7 @@ $urlInputs = [
         "title"       => "Custom Script",
         "name"        => "dest_custom",
         "type"        => "textarea",
-        "class"       => "form-control urlInput destInput",
+        "class"       => "form-control urlInput destInput codeInput codeBox",
         "placeholder" => "",
         "default"     => "",
         "required"    => False,
@@ -729,7 +729,7 @@ $renderUrlInputControl = function(string $inputName, array $input): string {
         return $html.'</select>';
     }
     if ($type === "textarea") {
-        return '<textarea '.$data.' '.$attributes.'>'.$value.'</textarea>';
+        return '<textarea '.$data.' '.$attributes.'>'.htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8").'</textarea>';
     }
     return '<input '.$data.' type="'.$type.'" value="'.$value.'" '.$attributes.'>';
 };
@@ -774,7 +774,12 @@ $urlForm = function($action = "create", $values = []) {
             $thisInput .= $renderUrlInputControl($groupedName, $groupedInput);
         }
 
-        $inputWrapClass = (($input["type"] ?? "") === "checkbox") ? "" : "input-group m-1";
+        $inputWrapClass = "input-group m-1";
+        if (($input["type"] ?? "") === "checkbox") {
+            $inputWrapClass = "";
+        } elseif (str_contains($input["class"] ?? "", "codeInput")) {
+            $inputWrapClass = "m-1 w-100";
+        }
         $form .= '
         <tr id="'.$rowid.'" class="urlInputRow" data-input="'.($input["name"] ?? $inputName).'" style="'.$i["style"].'">
                 <td>

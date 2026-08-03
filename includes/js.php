@@ -187,22 +187,38 @@
 
         // NOTE: Ace Editor
         const codeInputs = $(".codeInput");
-        codeInputs.prop("contenteditable", true);
         codeInputs.each(function() {
-            var thisObj   = $(this)[0];
-            var inputName = $(this).attr("name");
+            var $el       = $(this);
+            var el        = this;
+            var inputName = $el.attr("name");
+            var initialValue = "";
+            var $syncTarget;
+            var editorHost;
+
             customLog("Highlighting code input for " + inputName);
 
-            // Create a hidden textarea
-            var hiddenTextarea = $("<textarea></textarea>")
-                .attr("name", inputName)
-                .css("display", "none");
+            if (el.tagName === "TEXTAREA") {
+                initialValue = $el.val();
+                $el.hide();
+                $syncTarget = $el;
+                var $editorDiv = $("<div></div>")
+                    .addClass("codeBox aceEditorHost")
+                    .css({ width: "100%", minHeight: "250px" });
+                $el.after($editorDiv);
+                editorHost = $editorDiv[0];
+            } else {
+                initialValue = $el.text();
+                $syncTarget = $("<textarea></textarea>")
+                    .attr("name", inputName)
+                    .css("display", "none");
+                $el.after($syncTarget);
+                if (inputName) {
+                    $el.removeAttr("name");
+                }
+                editorHost = el;
+            }
 
-            // Insert the hidden textarea after the code input
-            $(this).after(hiddenTextarea);
-
-            // Ace Options
-            aceOpts = {
+            var aceOpts = {
                 mode: "ace/mode/html",
                 theme: "ace/theme/monokai",
                 showPrintMargin: false,
@@ -210,22 +226,25 @@
                 useSoftTabs: true,
                 wrap: true,
                 autoScrollEditorIntoView: true,
-                maxLines: 0,
+                maxLines: Infinity,
                 minLines: 10,
             };
 
-            // Initialize Ace Editor
-            var editor = ace.edit(thisObj, aceOpts);
-            editor.name = inputName;
-
-            // Update hidden textarea value when Ace Editor content changes
-            editor.getSession().on('change', function() {
-                hiddenTextarea.val(editor.getValue());
+            var editor = ace.edit(editorHost, aceOpts);
+            editor.setValue(initialValue || "", -1);
+            editor.session.on("change", function() {
+                $syncTarget.val(editor.getValue());
             });
-
-            // Initial update of hidden textarea
-            hiddenTextarea.val(editor.getValue());
+            $syncTarget.val(editor.getValue());
+            $(editorHost).data("aceEditor", editor);
         });
+
+        function resizeVisibleAceEditors($scope) {
+            ($scope || $(document)).find(".ace_editor").each(function() {
+                var editor = ace.edit(this);
+                editor.resize();
+            });
+        }
 
         var endTime   = performance.now();
         var timeTaken = endTime - startTime;
@@ -319,10 +338,12 @@
 
         function setUrlFormRows(rows, visible) {
             rows.forEach(function(name) {
+                var $row = $(urlFormRow(name));
                 if (visible) {
-                    utils.showObject(urlFormRow(name));
+                    utils.showObject($row);
+                    resizeVisibleAceEditors($row);
                 } else {
-                    utils.hideObject(urlFormRow(name));
+                    utils.hideObject($row);
                 }
             });
         }
