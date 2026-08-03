@@ -777,7 +777,7 @@ $urlForm = function($action = "create", $values = []) {
         $inputWrapClass = (($input["type"] ?? "") === "checkbox") ? "" : "input-group m-1";
         $isShortInput   = strpos($input["class"] ?? "", "shortInput") !== false;
         $previewHtml    = $isShortInput
-            ? '<div class="shortInputPreview form-text mt-1" hidden></div>'
+            ? '<div class="shortInputPreview alert alert-info py-2 px-3 mt-2 mb-0 d-flex align-items-center gap-2 flex-wrap" hidden></div>'
             : '';
         $form .= '
         <tr id="'.$rowid.'" class="urlInputRow" data-input="'.($input["name"] ?? $inputName).'" style="'.$i["style"].'">

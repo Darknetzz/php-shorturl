@@ -482,20 +482,74 @@
                 return;
             }
 
-            var label = '<span class="text-muted">Preview:</span> ';
-            var body  = preview.muted
-                ? '<code class="text-muted user-select-all">' + escapeHtml(preview.text) + '</code>'
-                : '<code class="user-select-all">' + escapeHtml(preview.text) + '</code>';
+            var copyValue = preview.href || (!preview.muted ? preview.text : "");
+            var urlClass  = "shortPreviewUrl user-select-all" + (preview.muted ? " text-muted" : "");
+            var urlHtml   = '<code class="' + urlClass + '">' + escapeHtml(preview.text) + '</code>';
 
             if (preview.href) {
-                body = '<a href="' + escapeHtml(preview.href) + '" target="_blank" rel="noopener" class="link-info link-underline-opacity-0">' + body + '</a>';
+                urlHtml = '<a href="' + escapeHtml(preview.href) + '" target="_blank" rel="noopener" class="link-info link-underline-opacity-0">' + urlHtml + '</a>';
             }
 
-            $row.find(".shortInputPreview").html(label + body).removeAttr("hidden");
+            var copyBtn = copyValue
+                ? '<button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn" data-copy="' + escapeHtml(copyValue) + '" title="Copy URL">' +
+                    '<span class="bi bi-clipboard"></span> Copy' +
+                  '</button>'
+                : '';
+
+            $row.find(".shortInputPreview").html(
+                '<div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">' +
+                    '<span class="badge text-bg-info">Preview</span>' +
+                    urlHtml +
+                '</div>' +
+                copyBtn
+            ).removeAttr("hidden");
+        }
+
+        function copyShortPreviewUrl(text, $btn) {
+            if (!text) {
+                return;
+            }
+
+            var onDone = function() {
+                toast("URL copied to clipboard", "success", "Copied", "clipboard-check");
+                if ($btn && $btn.length) {
+                    var original = $btn.html();
+                    $btn.prop("disabled", true).html('<span class="bi bi-check2"></span> Copied');
+                    setTimeout(function() {
+                        $btn.prop("disabled", false).html(original);
+                    }, 1500);
+                }
+            };
+
+            var onFail = function() {
+                toast("Could not copy URL", "danger", "Error", "clipboard-x");
+            };
+
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(onDone).catch(onFail);
+                return;
+            }
+
+            var $temp = $("<textarea>").val(text).appendTo("body").select();
+            try {
+                if (document.execCommand("copy")) {
+                    onDone();
+                } else {
+                    onFail();
+                }
+            } catch (e) {
+                onFail();
+            }
+            $temp.remove();
         }
 
         $(document).on("input keyup change", ".shortInput", function() {
             updateShortPreview($(this).closest("form"));
+        });
+
+        $(document).on("click", ".shortPreviewCopyBtn", function(e) {
+            e.preventDefault();
+            copyShortPreviewUrl($(this).attr("data-copy"), $(this));
         });
 
         updateShortPreview();

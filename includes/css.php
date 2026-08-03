@@ -54,6 +54,23 @@
         max-width: 1500px;
     }
 
+    .shortInputPreview {
+        border-width: 1px;
+        border-style: solid;
+    }
+
+    .shortInputPreview .shortPreviewUrl {
+        font-size: 1.05rem;
+        font-weight: 600;
+        word-break: break-all;
+        user-select: all;
+    }
+
+    .shortInputPreview .shortPreviewCopyBtn {
+        flex-shrink: 0;
+        white-space: nowrap;
+    }
+
     /* Page content (not the navbar's nested container-fluid) */
     body > .container-fluid {
         max-width: var(--content-width);
