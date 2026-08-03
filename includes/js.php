@@ -463,10 +463,17 @@
                 return;
             }
 
-            $form.find(".shortInputPreview").attr("hidden", true).empty();
-
             var shortType = $form.find("#shortTypeInput").val();
             var inputName = shortTypeRows[shortType];
+
+            $form.find(".shortInputPreview").each(function() {
+                var $preview = $(this);
+                var rowName  = $preview.closest(".urlInputRow").attr("data-input");
+                if (rowName !== inputName) {
+                    $preview.attr("hidden", true);
+                }
+            });
+
             if (!inputName) {
                 return;
             }
@@ -477,32 +484,49 @@
                 return;
             }
 
-            var preview = buildShortPreview(shortType, $row.find(".shortInput").val());
+            var $preview = $row.find(".shortInputPreview");
+            var preview  = buildShortPreview(shortType, $row.find(".shortInput").val());
             if (!preview) {
+                $preview.attr("hidden", true);
                 return;
             }
 
             var copyValue = preview.href || (!preview.muted ? preview.text : "");
-            var urlClass  = "shortPreviewUrl user-select-all" + (preview.muted ? " text-muted" : "");
-            var urlHtml   = '<code class="' + urlClass + '">' + escapeHtml(preview.text) + '</code>';
 
-            if (preview.href) {
-                urlHtml = '<a href="' + escapeHtml(preview.href) + '" target="_blank" rel="noopener" class="link-info link-underline-opacity-0">' + urlHtml + '</a>';
+            // Build stable DOM once, then update in place to avoid collapse/expand flicker.
+            if (!$preview.find(".shortPreviewUrl").length) {
+                $preview.html(
+                    '<div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">' +
+                        '<span class="badge text-bg-info">Preview</span>' +
+                        '<a class="shortPreviewLink link-info link-underline-opacity-0" target="_blank" rel="noopener">' +
+                            '<code class="shortPreviewUrl user-select-all"></code>' +
+                        '</a>' +
+                    '</div>' +
+                    '<button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn invisible" title="Copy URL" disabled>' +
+                        '<span class="bi bi-clipboard"></span> Copy' +
+                    '</button>'
+                );
             }
 
-            var copyBtn = copyValue
-                ? '<button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn" data-copy="' + escapeHtml(copyValue) + '" title="Copy URL">' +
-                    '<span class="bi bi-clipboard"></span> Copy' +
-                  '</button>'
-                : '';
+            var $url  = $preview.find(".shortPreviewUrl");
+            var $link = $preview.find(".shortPreviewLink");
+            var $copy = $preview.find(".shortPreviewCopyBtn");
 
-            $row.find(".shortInputPreview").html(
-                '<div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">' +
-                    '<span class="badge text-bg-info">Preview</span>' +
-                    urlHtml +
-                '</div>' +
-                copyBtn
-            ).removeAttr("hidden");
+            $url.text(preview.text).toggleClass("text-muted", !!preview.muted);
+
+            if (preview.href) {
+                $link.attr("href", preview.href).removeAttr("aria-disabled");
+            } else {
+                $link.removeAttr("href").attr("aria-disabled", "true");
+            }
+
+            if (copyValue) {
+                $copy.attr("data-copy", copyValue).prop("disabled", false).removeClass("invisible");
+            } else {
+                $copy.removeAttr("data-copy").prop("disabled", true).addClass("invisible");
+            }
+
+            $preview.removeAttr("hidden");
         }
 
         function copyShortPreviewUrl(text, $btn) {
@@ -543,7 +567,7 @@
             $temp.remove();
         }
 
-        $(document).on("input keyup change", ".shortInput", function() {
+        $(document).on("input", ".shortInput", function() {
             updateShortPreview($(this).closest("form"));
         });
 
