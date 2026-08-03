@@ -591,43 +591,87 @@ function buildUrlExpiryOptions(array $post, ?array $options = Null): array|strin
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*                         FUNCTION formatRelativeTime                        */
+/* ────────────────────────────────────────────────────────────────────────── */
+function formatRelativeTime(int $timestamp, ?int $now = Null): string {
+    $now  = $now ?? time();
+    $diff = $timestamp - $now;
+    $abs  = abs($diff);
+
+    if ($abs < 60) {
+        $value = $abs;
+        $unit  = "second";
+    } elseif ($abs < 3600) {
+        $value = (int) round($abs / 60);
+        $unit  = "minute";
+    } elseif ($abs < 86400) {
+        $value = (int) round($abs / 3600);
+        $unit  = "hour";
+    } elseif ($abs < 604800) {
+        $value = (int) round($abs / 86400);
+        $unit  = "day";
+    } elseif ($abs < 2629800) {
+        $value = (int) round($abs / 604800);
+        $unit  = "week";
+    } elseif ($abs < 31557600) {
+        $value = (int) round($abs / 2629800);
+        $unit  = "month";
+    } else {
+        $value = (int) round($abs / 31557600);
+        $unit  = "year";
+    }
+
+    if ($value !== 1) {
+        $unit .= "s";
+    }
+
+    if ($diff === 0 || ($diff > 0 && $abs < 60)) {
+        return $diff >= 0 ? "in a moment" : "just now";
+    }
+    return $diff > 0 ? "in $value $unit" : "$value $unit ago";
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*                         FUNCTION formatUrlOptions                          */
 /* ────────────────────────────────────────────────────────────────────────── */
 function formatUrlOptions(array $options): string {
     if (empty($options)) {
-        return "";
+        return '<span class="text-muted">—</span>';
     }
 
     $parts = [];
+
     if (!empty($options["expires_at"])) {
-        $parts[] = "expires_at = ".htmlspecialchars((string) $options["expires_at"], ENT_QUOTES, "UTF-8");
+        $expiresAt = strtotime((string) $options["expires_at"]);
+        if ($expiresAt !== False) {
+            $full     = gmdate("Y-m-d H:i:s", $expiresAt) . " UTC";
+            $relative = formatRelativeTime($expiresAt);
+            $isPast   = $expiresAt <= time();
+            $label    = $isPast ? "Expired $relative" : "Expires $relative";
+            $class    = $isPast ? "text-bg-warning" : "text-bg-info";
+            $parts[]  = '<span class="badge '.$class.'" title="'.htmlspecialchars($full, ENT_QUOTES, "UTF-8").'">'
+                .icon("clock").' '.htmlspecialchars($label, ENT_QUOTES, "UTF-8")
+                .'</span>';
+        }
     }
+
     if (!empty($options["max_clicks"])) {
-        $clicks = (int) ($options["clicks"] ?? 0);
-        $max    = (int) $options["max_clicks"];
-        $parts[] = "clicks = $clicks / $max";
-    }
-    if (!empty($options["on_expire"])) {
-        $parts[] = "on_expire = ".htmlspecialchars((string) $options["on_expire"], ENT_QUOTES, "UTF-8");
-    }
-    if (!empty($options["confirm"])) {
-        $parts[] = "confirm = yes";
-        if (!empty($options["confirm_message"])) {
-            $parts[] = "confirm_message = ".htmlspecialchars((string) $options["confirm_message"], ENT_QUOTES, "UTF-8");
-        }
+        $clicks  = (int) ($options["clicks"] ?? 0);
+        $max     = (int) $options["max_clicks"];
+        $isPast  = $max > 0 && $clicks >= $max;
+        $label   = $clicks." / ".$max." clicks";
+        $class   = $isPast ? "text-bg-warning" : "text-bg-secondary";
+        $title   = $isPast ? "Click limit reached" : "Click limit";
+        $parts[] = '<span class="badge '.$class.'" title="'.htmlspecialchars($title, ENT_QUOTES, "UTF-8").'">'
+            .icon("mouse").' '.htmlspecialchars($label, ENT_QUOTES, "UTF-8")
+            .'</span>';
     }
 
-    foreach ($options as $key => $value) {
-        if (in_array($key, ["expires_at", "max_clicks", "clicks", "on_expire", "confirm", "confirm_message"], True)) {
-            continue;
-        }
-        if (is_array($value) || is_object($value)) {
-            $value = json_encode($value);
-        }
-        $parts[] = htmlspecialchars((string) $key, ENT_QUOTES, "UTF-8")." = ".htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
+    if (empty($parts)) {
+        return '<span class="text-muted">—</span>';
     }
 
-    return implode("<br>", $parts);
+    return '<div class="d-flex flex-wrap gap-1">'.implode("", $parts).'</div>';
 }
 
 
@@ -978,7 +1022,7 @@ function listUrls(?array $urls = []) {
                     <th data-field="shorturl" data-sortable="true">Short URL</th>
                     <th data-field="desturl" data-sortable="true">Destination URL</th>
                     <th data-field="user" data-sortable="true">User</th>
-                    <th data-field="options" data-sortable="false" data-visible="false">Options</th>
+                    <th data-field="limits" data-sortable="false">Limits</th>
                     <th>Actions</th>
                 </tr>
             </thead>
