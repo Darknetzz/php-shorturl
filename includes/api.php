@@ -290,6 +290,23 @@ do {
     }
 
 
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                               saveSettings                                 */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "saveSettings") {
+        $contentWidth = (isset($_POST["content_width"]) ? (int) $_POST["content_width"] : Null);
+
+        if ($contentWidth === Null || $contentWidth < 40 || $contentWidth > 100) {
+            $res = ["status" => "ERROR", "message" => "Content width must be between 40 and 100."];
+            break;
+        }
+
+        setUserSettings($_SESSION["id"], ["content_width" => $contentWidth]);
+        $res = ["status" => "OK", "message" => "Settings saved."];
+        break;
+    }
+
+
 
 } while (False);
 

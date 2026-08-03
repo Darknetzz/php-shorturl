@@ -282,6 +282,53 @@ function setUser($id, $column, $value) {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*                         FUNCTION defaultUserSettings                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+function defaultUserSettings(): array {
+    return [
+        "content_width" => 100,
+    ];
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                           FUNCTION getUserSettings                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+function getUserSettings($id = Null): array {
+    $defaults = defaultUserSettings();
+    $id       = ($id !== Null ? $id : ($_SESSION['id'] ?? Null));
+
+    if (empty($id)) {
+        return $defaults;
+    }
+
+    $json = getUser($id, "settings");
+    if (empty($json)) {
+        return $defaults;
+    }
+
+    $decoded = json_decode($json, True);
+    if (!is_array($decoded)) {
+        return $defaults;
+    }
+
+    return array_merge($defaults, $decoded);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                           FUNCTION setUserSettings                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+function setUserSettings($id, array $settings): array {
+    $merged = array_merge(getUserSettings($id), $settings);
+
+    if (isset($merged["content_width"])) {
+        $merged["content_width"] = max(40, min(100, (int) $merged["content_width"]));
+    }
+
+    setUser($id, "settings", json_encode($merged));
+    return $merged;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION createURL                            */
 /* ────────────────────────────────────────────────────────────────────────── */
 function createURL($short, $dest, $type, $user) {

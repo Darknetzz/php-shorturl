@@ -1,4 +1,12 @@
+<?php
+    $contentWidth = (int) (getUserSettings()["content_width"] ?? 100);
+    $contentWidth = max(40, min(100, $contentWidth));
+?>
 <style>
+    :root {
+        --content-width: <?= $contentWidth ?>%;
+    }
+
     .toast-container {
         position: fixed;
         bottom  : 1rem;
@@ -40,5 +48,12 @@
         /* display: flex; */
         /* flex-wrap: wrap; */
         max-width: 1500px;
+    }
+
+    /* Page content (not the navbar's nested container-fluid) */
+    body > .container-fluid {
+        max-width: var(--content-width);
+        margin-left: auto;
+        margin-right: auto;
     }
 </style>

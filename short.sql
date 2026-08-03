@@ -63,7 +63,8 @@ CREATE TABLE `users` (
   `password` varchar(255) DEFAULT NULL,
   `salt` varchar(255) NOT NULL,
   `acl` int DEFAULT '0',
-  `bookmarks` json DEFAULT NULL
+  `bookmarks` json DEFAULT NULL,
+  `settings` json DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
