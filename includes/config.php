@@ -128,6 +128,12 @@ $cfg["urls_public"] = True;
  */
 $cfg["default_delay"] = 100;
 
+/**
+ * default_confirm_message
+ * Shown on the confirm-before-redirect page when no custom message is set.
+ */
+$cfg["default_confirm_message"] = "You are about to follow a short link. Do you want to continue to the destination?";
+
 
 /**
  * debug_mode

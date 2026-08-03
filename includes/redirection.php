@@ -41,6 +41,11 @@ do {
         urlHandleExpired($url, $options);
     }
 
+    // Confirm before logging / counting clicks / following the destination.
+    if (urlRequiresConfirm($options) && empty($_GET["confirm"])) {
+        urlHandleConfirm($url, $options, (string) ($dest ?? ""), (string) ($type ?? ""));
+    }
+
     # NOTE: Write to log
     if (!empty($url) && !empty($type) && !empty($dest)) {
         $urlText  = "#". $url["id"] . " - " . $url["short"];

@@ -461,6 +461,64 @@ function urlHandleExpired(array $url, array $options): void {
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
+/*                       FUNCTION urlRequiresConfirm                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlRequiresConfirm(array $options): bool {
+    return !empty($options["confirm"]);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                        FUNCTION urlConfirmMessage                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlConfirmMessage(array $options): string {
+    global $cfg;
+
+    $custom = isset($options["confirm_message"]) ? trim((string) $options["confirm_message"]) : "";
+    if ($custom !== "") {
+        return htmlspecialchars($custom, ENT_QUOTES, "UTF-8");
+    }
+
+    $default = $cfg["default_confirm_message"] ?? "You are about to follow a short link. Do you want to continue?";
+    return htmlspecialchars((string) $default, ENT_QUOTES, "UTF-8");
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                        FUNCTION urlHandleConfirm                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlHandleConfirm(array $url, array $options, string $dest, string $type): void {
+    $short   = htmlspecialchars((string) ($url["short"] ?? ""), ENT_QUOTES, "UTF-8");
+    $message = urlConfirmMessage($options);
+    $accept  = htmlspecialchars($short."?confirm=1", ENT_QUOTES, "UTF-8");
+    $destSafe = htmlspecialchars($dest, ENT_QUOTES, "UTF-8");
+
+    $destHint = "";
+    if ($type !== "custom" && $dest !== "") {
+        $destHint = "<p class='text-muted mb-3'>Destination: <code>$destSafe</code></p>";
+    }
+
+    echo '
+        <div class="container py-5" style="max-width: 40rem;">
+            <div class="card border-warning">
+                <div class="card-header text-bg-warning">
+                    '.icon("shield-exclamation").' Confirm redirect
+                </div>
+                <div class="card-body">
+                    <p class="fs-5">'.$message.'</p>
+                    '.$destHint.'
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-success" href="'.$accept.'">'.icon("box-arrow-up-right").' Continue</a>
+                        <button type="button" class="btn btn-secondary" onclick="if (history.length > 1) { history.back(); } else { window.location.href = \'index.php\'; }">
+                            '.icon("arrow-left").' Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    ';
+    die();
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
 /*                      FUNCTION buildUrlExpiryOptions                        */
 /* ────────────────────────────────────────────────────────────────────────── */
 function buildUrlExpiryOptions(array $post, ?array $options = Null): array|string {
@@ -517,6 +575,18 @@ function buildUrlExpiryOptions(array $post, ?array $options = Null): array|strin
         $options["on_expire"] = ($onExpire === "delete") ? "delete" : "keep";
     }
 
+    if (!empty($post["enable_confirm"])) {
+        $options["confirm"] = True;
+        $confirmMessage = isset($post["confirm_message"]) ? trim((string) $post["confirm_message"]) : "";
+        if ($confirmMessage !== "") {
+            // Keep messages short enough for storage / display.
+            if (strlen($confirmMessage) > 1000) {
+                return "Confirm message must be 1000 characters or fewer.";
+            }
+            $options["confirm_message"] = $confirmMessage;
+        }
+    }
+
     return $options;
 }
 
@@ -540,9 +610,15 @@ function formatUrlOptions(array $options): string {
     if (!empty($options["on_expire"])) {
         $parts[] = "on_expire = ".htmlspecialchars((string) $options["on_expire"], ENT_QUOTES, "UTF-8");
     }
+    if (!empty($options["confirm"])) {
+        $parts[] = "confirm = yes";
+        if (!empty($options["confirm_message"])) {
+            $parts[] = "confirm_message = ".htmlspecialchars((string) $options["confirm_message"], ENT_QUOTES, "UTF-8");
+        }
+    }
 
     foreach ($options as $key => $value) {
-        if (in_array($key, ["expires_at", "max_clicks", "clicks", "on_expire"], True)) {
+        if (in_array($key, ["expires_at", "max_clicks", "clicks", "on_expire", "confirm", "confirm_message"], True)) {
             continue;
         }
         if (is_array($value) || is_object($value)) {

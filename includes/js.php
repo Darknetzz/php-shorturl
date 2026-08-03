@@ -368,10 +368,15 @@
             }
         }
 
+        function updateConfirmFormRows() {
+            setUrlFormRows(["confirm_message"], $("#enableConfirmInput").is(":checked"));
+        }
+
         function updateUrlFormRows() {
             updateShortTypeRows();
             updateDestTypeRows();
             updateExpireFormRows();
+            updateConfirmFormRows();
         }
 
         $("#shortTypeInput").on("change", function() {
@@ -383,6 +388,7 @@
 
         $("#enableExpireTimeInput, #enableMaxClicksInput").on("change", updateExpireFormRows);
         $("#expireTimeModeInput").on("change", updateExpireFormRows);
+        $("#enableConfirmInput").on("change", updateConfirmFormRows);
 
         updateUrlFormRows();
 

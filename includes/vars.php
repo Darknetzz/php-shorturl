@@ -381,6 +381,19 @@ $tooltip["on_expire"] = "
     What happens when the time or click limit is reached.
     ".$listTypes($selectOptions["on_expire_actions"]);
 
+$tooltip["enable_confirm"] = "
+    <h4>Confirm redirect</h4>
+    <p class='text-success'>Optional</p>
+    Enable to show a confirmation page before following the destination.
+    Visitors must accept to continue, or cancel to go back.
+";
+
+$tooltip["confirm_message"] = "
+    <h4>Confirm message</h4>
+    <p class='text-success'>Optional</p>
+    Custom message on the confirmation page. If empty, the default message is used.
+";
+
 # NOTE: $urlInputs
 # This array contains all the inputs for the URL form.
 # id         : The ID of the input.
@@ -653,6 +666,34 @@ $urlInputs = [
         "hidden"      => True,
         "tooltip"     => $tooltip["on_expire"],
         "description" => "Keep the URL with an expired message, or delete it when the limit is reached.",
+    ],
+    "enable_confirm" => [
+        "id"          => "enableConfirmInput",
+        "title"       => "Confirm redirect",
+        "name"        => "enable_confirm",
+        "type"        => "checkbox",
+        "class"       => "form-check-input urlInput",
+        "default"     => False,
+        "required"    => False,
+        "hidden"      => False,
+        "tooltip"     => $tooltip["enable_confirm"],
+        "description" => "Show a confirmation page before following the destination. Disabled by default.",
+        "label"       => "Require confirmation before redirect",
+    ],
+    "confirm_message" => [
+        "id"          => "confirmMessageInput",
+        "title"       => "Confirm message",
+        "name"        => "confirm_message",
+        "type"        => "textarea",
+        "class"       => "form-control urlInput",
+        "placeholder" => $cfg["default_confirm_message"],
+        "default"     => "",
+        "value"       => "",
+        "attributes"  => "rows=\"3\"",
+        "required"    => False,
+        "hidden"      => True,
+        "tooltip"     => $tooltip["confirm_message"],
+        "description" => "Optional custom message. Leave empty to use the default.",
     ],
 ];
 
