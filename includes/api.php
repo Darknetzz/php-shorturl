@@ -89,12 +89,27 @@ do {
     if ($action == "create") {
 
         $short_type = (!empty($_POST['short_type']) ? $_POST['short_type'] : Null);
-        $protocol   = (!empty($_POST['protocol']) ? $_POST['protocol'] : "https://");
-        $short      = (!empty($_POST['short']) ? $_POST['short'] : Null);
-        $shortGen   = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
         $dest_type  = (!empty($_POST['dest_type']) ? $_POST['dest_type'] : Null);
-        $dest       = (!empty($_POST[$type.'_dest']) ? $_POST[$type.'_dest'] : Null);
+        $protocol   = (!empty($_POST['protocol']) ? $_POST['protocol'] : $cfg["default_protocol"]);
+        $shortGen   = (!empty($_POST['shortgen']) ? $_POST['shortgen'] : genStr($cfg["short_default"]));
         $options    = (!empty($_POST['options']) ? $_POST['options'] : Null);
+
+        $shortFields = [
+            "path"      => "short_path",
+            "subdomain" => "short_domain",
+            "custom"    => "short_custom",
+        ];
+        $destFields = [
+            "redirect" => "dest_redirect",
+            "alias"    => "dest_alias",
+            "custom"   => "dest_custom",
+        ];
+
+        $shortField = $shortFields[$short_type] ?? Null;
+        $destField  = $destFields[$dest_type] ?? Null;
+        $short      = ($shortField && !empty($_POST[$shortField])) ? $_POST[$shortField] : Null;
+        $dest       = ($destField && !empty($_POST[$destField])) ? $_POST[$destField] : Null;
+        $type       = $dest_type;
 
         // Check if the user is logged in
         // if (empty($_SESSION['id'])) {
@@ -102,23 +117,30 @@ do {
         //     break;
         // }
 
-        // If $short is empty, use $shortGen
-        if ($short_type == Null) {
-            $short = $shortGen;
-        }
-
-        // Remove all symbols except from short URL
-        $short = preg_replace('/[^a-zA-Z0-9]/', '', $short);
-
         // Check if $type or $dest is empty
         if ($short_type == Null) {
             $res = ["status" => "ERROR", "message" => "Short URL must have a valid type."];
             break;
         }
 
-        // Verify the destination URL if type != custom
-        if ($short_type != "custom") {
-            $dest = urlValidate($dest);
+        if ($dest_type == Null) {
+            $res = ["status" => "ERROR", "message" => "Destination must have a valid type."];
+            break;
+        }
+
+        // If short is empty on path type, generate one
+        if ($short_type === "path" && $short == Null) {
+            $short = $shortGen;
+        }
+
+        // Remove all symbols except from short URL (custom short URLs keep their value as-is)
+        if ($short_type !== "custom") {
+            $short = preg_replace('/[^a-zA-Z0-9]/', '', (string) $short);
+        }
+
+        // Verify the destination URL if dest type != custom
+        if ($dest_type != "custom") {
+            $dest = urlValidate($dest, $protocol);
         }
 
         // Check if the $dest URL is empty after validation
@@ -134,7 +156,7 @@ do {
         }
 
         // Validate and sanitize the short URL
-        if (strlen($short) < $cfg["short_min"] || strlen($short) > $cfg["short_max"]) {
+        if ($short_type !== "custom" && (strlen($short) < $cfg["short_min"] || strlen($short) > $cfg["short_max"])) {
             $res = ["status" => "ERROR", "message" => "The short URL must be between ".$cfg["short_min"]." and ".$cfg["short_max"]." characters long."];
             break;
         }

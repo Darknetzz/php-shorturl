@@ -275,8 +275,8 @@
         });
 
         // NOTE: .alert
-        // Fade out the alert message after 2 seconds
-        $(".alert").not(".alert-persistent").fadeTo(2000, 500).slideUp(500, function(){
+        // Fade out flash alerts after 2 seconds (not persistent alerts / URL preview)
+        $(".alert").not(".alert-persistent, .shortInputPreview").fadeTo(2000, 500).slideUp(500, function(){
             $(this).slideUp(500);
         });
 
