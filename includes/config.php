@@ -122,6 +122,15 @@ $cfg["urls_public"] = True;
 
 
 /**
+ * allow_anonymous_create
+ * Whether non-logged-in users can create short URLs.
+ * Overridable from Admin → Settings.
+ * Default: False
+ */
+$cfg["allow_anonymous_create"] = False;
+
+
+/**
  * default_delay
  * The default delay for redirection, in milliseconds.
  * Default: 100

@@ -24,12 +24,13 @@ do {
         break;
     }
 
-    if (empty($_SESSION['id']) && $action !== "login") {
+    if (empty($_SESSION['id']) && !isPublicApiAction($action)) {
         $res = ["status" => "ERROR", "message" => "You are not logged in."];
         break;
     }
 
-    writeLog("API Request from user ".$_SESSION['id']." API action: ".$action);
+    $apiUser = ($_SESSION['id'] ?? "Guest");
+    writeLog("API Request from user ".$apiUser." API action: ".$action);
 
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                                    test                                    */
@@ -183,8 +184,14 @@ do {
             $options = Null;
         }
 
+        $userid = (!empty($_SESSION['id']) ? (int) $_SESSION['id'] : Null);
+        if ($userid === Null && !guestCanCreateUrls()) {
+            $res = ["status" => "ERROR", "message" => "You are not logged in."];
+            break;
+        }
+
         $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`, `options`) VALUES (?, ?, ?, ?, ?)";
-        $insertShort = query($insertShort, [$type, $short, $dest, $_SESSION['id'], $options]);
+        $insertShort = query($insertShort, [$type, $short, $dest, $userid, $options]);
 
         $destLink = "<p>Destination URL: <a href='$dest' class='alert-link' target='_blank'>$dest</a></p>";
         if ($type == "custom") {
@@ -409,6 +416,31 @@ do {
             "status"         => "OK",
             "message"        => "Settings saved.",
             "content_width"  => $contentWidth,
+        ];
+        break;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                             saveAppSettings                                */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "saveAppSettings") {
+        if (empty($_SESSION["acl"]) || $_SESSION["acl"] < 1) {
+            $res = ["status" => "ERROR", "message" => "You do not have permission to change app settings."];
+            break;
+        }
+
+        $allowAnonymousCreate = (isset($_POST["allow_anonymous_create"])
+            ? filter_var($_POST["allow_anonymous_create"], FILTER_VALIDATE_BOOLEAN)
+            : False);
+
+        $saved = setAppSettings([
+            "allow_anonymous_create" => $allowAnonymousCreate,
+        ]);
+
+        $res = [
+            "status"                 => "OK",
+            "message"                => "App settings saved.",
+            "allow_anonymous_create" => $saved["allow_anonymous_create"],
         ];
         break;
     }

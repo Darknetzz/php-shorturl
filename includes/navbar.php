@@ -6,9 +6,13 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
-                    <?= navBtn("Create", "?do=create", "bookmark-plus") ?>
-                    <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
-                    <?= navBtn("Bookmarks", "?do=bookmarks", "star-fill text-warning") ?>
+                    <?php if (!empty($_SESSION['id']) || guestCanCreateUrls()) { ?>
+                        <?= navBtn("Create", "?do=create", "bookmark-plus") ?>
+                    <?php } ?>
+                    <?php if (!empty($_SESSION['id'])) { ?>
+                        <?= navBtn("URLs", "?do=urls", "bookmarks") ?>
+                        <?= navBtn("Bookmarks", "?do=bookmarks", "star-fill text-warning") ?>
+                    <?php } ?>
                     <?php
 
                     # NOTE: Admin

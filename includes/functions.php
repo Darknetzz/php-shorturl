@@ -147,19 +147,27 @@ function query($query, array $params = []) {
 
     # Declare types
     if (count($params) > 0) {
+        $bindParams = [];
         foreach ($params as $param) {
             if (is_int($param)) {
                 $types .= "i";
+                $bindParams[] = $param;
             } elseif (is_float($param)) {
                 $types .= "d";
-            } elseif (is_string($param)) {
+                $bindParams[] = $param;
+            } elseif (is_bool($param)) {
+                $types .= "i";
+                $bindParams[] = (int) $param;
+            } elseif ($param === Null) {
                 $types .= "s";
+                $bindParams[] = Null;
             } else {
-                $types .= "b";
+                $types .= "s";
+                $bindParams[] = (string) $param;
             }
         }
-        if ($types !== "" && !empty($params)) {
-            $stmt->bind_param($types, ...$params);
+        if ($types !== "" && !empty($bindParams)) {
+            $stmt->bind_param($types, ...$bindParams);
         }
     }
 
@@ -288,6 +296,118 @@ function defaultUserSettings(): array {
     return [
         "content_width" => 75,
     ];
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                          FUNCTION defaultAppSettings                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+function defaultAppSettings(): array {
+    return [
+        "allow_anonymous_create" => False,
+    ];
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                          FUNCTION ensureSettingsTable                      */
+/* ────────────────────────────────────────────────────────────────────────── */
+function ensureSettingsTable(): void {
+    global $sqlcon;
+
+    static $ready = False;
+    if ($ready || !$sqlcon || $sqlcon->connect_error) {
+        return;
+    }
+
+    $sqlcon->query("CREATE TABLE IF NOT EXISTS `settings` (
+        `key` varchar(100) NOT NULL,
+        `value` text,
+        PRIMARY KEY (`key`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
+    $ready = True;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                            FUNCTION getAppSettings                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+function getAppSettings(): array {
+    $defaults = defaultAppSettings();
+    ensureSettingsTable();
+
+    $rows = query("SELECT `key`, `value` FROM `settings`");
+    if (empty($rows)) {
+        return $defaults;
+    }
+
+    $stored = [];
+    foreach ($rows as $row) {
+        $key = $row["key"] ?? Null;
+        if ($key === Null || !array_key_exists($key, $defaults)) {
+            continue;
+        }
+        $decoded = json_decode($row["value"] ?? "", True);
+        $stored[$key] = (json_last_error() === JSON_ERROR_NONE) ? $decoded : $row["value"];
+    }
+
+    return array_merge($defaults, $stored);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                            FUNCTION setAppSettings                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+function setAppSettings(array $settings): array {
+    $defaults = defaultAppSettings();
+    $merged   = array_merge(getAppSettings(), $settings);
+    ensureSettingsTable();
+
+    foreach ($defaults as $key => $default) {
+        if (!array_key_exists($key, $merged)) {
+            continue;
+        }
+        $value = $merged[$key];
+        if (is_bool($default)) {
+            $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        }
+        query(
+            "INSERT INTO `settings` (`key`, `value`) VALUES (?, ?)
+             ON DUPLICATE KEY UPDATE `value` = VALUES(`value`)",
+            [$key, json_encode($value)]
+        );
+        $merged[$key] = $value;
+    }
+
+    applyAppSettings($merged);
+    return $merged;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                           FUNCTION applyAppSettings                        */
+/* ────────────────────────────────────────────────────────────────────────── */
+function applyAppSettings(?array $settings = Null): void {
+    global $cfg;
+
+    $settings = ($settings !== Null ? $settings : getAppSettings());
+    foreach ($settings as $key => $value) {
+        $cfg[$key] = $value;
+    }
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                          FUNCTION guestCanCreateUrls                       */
+/* ────────────────────────────────────────────────────────────────────────── */
+function guestCanCreateUrls(): bool {
+    global $cfg;
+    return !empty($cfg["allow_anonymous_create"]);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                         FUNCTION isPublicApiAction                         */
+/* ────────────────────────────────────────────────────────────────────────── */
+function isPublicApiAction(?string $action): bool {
+    $public = ["login"];
+    if (guestCanCreateUrls()) {
+        $public = array_merge($public, ["create", "checkShort", "checkDest"]);
+    }
+    return in_array($action, $public, True);
 }
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -1231,5 +1351,8 @@ function listUrls(?array $urls = []) {
     ';
     return $urlsTable;
 }
+
+/* Load DB-backed app settings into $cfg (overrides config.php defaults). */
+applyAppSettings();
 
 ?>

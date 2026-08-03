@@ -409,17 +409,51 @@
                 Settings
             </h4>
             <div class="card-body">
+                <?php
+                    $appSettings = getAppSettings();
+                    $allowAnonymousCreate = !empty($appSettings["allow_anonymous_create"]);
+                ?>
+                <form class="dynamic-form" method="POST" data-action="saveAppSettings">
+                    <h5 class="mb-3">Access</h5>
+                    <div class="form-check form-switch mb-3">
+                        <input type="hidden" name="allow_anonymous_create" value="0">
+                        <input
+                            class="form-check-input"
+                            type="checkbox"
+                            role="switch"
+                            id="allowAnonymousCreate"
+                            name="allow_anonymous_create"
+                            value="1"
+                            <?= $allowAnonymousCreate ? "checked" : "" ?>
+                        >
+                        <label class="form-check-label" for="allowAnonymousCreate">
+                            Allow non-logged-in users to create URLs
+                        </label>
+                        <div class="form-text">
+                            When enabled, guests can open the Create page and shorten links without signing in.
+                            Those URLs are stored without a user owner.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><?= icon("floppy2") ?> Save settings</button>
+                </form>
+
+                <hr class="my-4">
+                <h5 class="mb-3">Config (read-only)</h5>
                 <table class="table table-default">
                 <?php
                     foreach ($cfg as $key => $val) {
                         if (is_array($val)) {
                             $input = "<pre>".json_encode($val, JSON_PRETTY_PRINT)."</pre>";
+                        } elseif (is_bool($val)) {
+                            $input = "<input type='text' class='form-control' value='".($val ? "true" : "false")."' disabled>";
                         } else {
-                            $input = "<input type='text' class='form-control' value='$val'>";
+                            $escaped = htmlspecialchars((string) $val, ENT_QUOTES, "UTF-8");
+                            $input = "<input type='text' class='form-control' value='$escaped' disabled>";
                         }
+                        $keyLabel = htmlspecialchars((string) $key, ENT_QUOTES, "UTF-8");
                         echo "
                         <tr>
-                            <td>$key</td>
+                            <td>$keyLabel</td>
                             <td>$input</td>
                         </tr>";
                     }

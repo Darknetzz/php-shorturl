@@ -15,6 +15,21 @@ do {
     }
 
     if (!isset($_SESSION['id'])) {
+        $guestPages = ["login"];
+        if (guestCanCreateUrls()) {
+            $guestPages[] = "create";
+        }
+
+        if (empty($do) && guestCanCreateUrls()) {
+            require_once("pages/create.php");
+            break;
+        }
+
+        if (!empty($do) && in_array($do, $guestPages, True) && file_exists("pages/$do.php")) {
+            require_once("pages/$do.php");
+            break;
+        }
+
         require_once("pages/login.php");
         break;
     }
