@@ -57,18 +57,29 @@
     .shortInputPreview {
         border-width: 1px;
         border-style: solid;
+        min-height: 3rem;
+        flex-wrap: nowrap;
+    }
+
+    .shortInputPreview .shortPreviewLink {
+        display: block;
+        overflow: hidden;
     }
 
     .shortInputPreview .shortPreviewUrl {
+        display: block;
         font-size: 1.05rem;
         font-weight: 600;
-        word-break: break-all;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         user-select: all;
     }
 
     .shortInputPreview .shortPreviewCopyBtn {
         flex-shrink: 0;
         white-space: nowrap;
+        min-width: 5.5rem;
     }
 
     .url-protocol {

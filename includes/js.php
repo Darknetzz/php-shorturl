@@ -523,9 +523,9 @@
             }
 
             if (copyValue) {
-                $copy.attr("data-copy", copyValue).prop("disabled", false).removeClass("invisible");
+                $copy.attr("data-copy", copyValue).prop("disabled", false);
             } else {
-                $copy.removeAttr("data-copy").prop("disabled", true).addClass("invisible");
+                $copy.removeAttr("data-copy").prop("disabled", true);
             }
         }
 

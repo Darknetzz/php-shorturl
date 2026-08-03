@@ -748,6 +748,15 @@ $urlForm = function($action = "create", $values = []) {
             <p class="text-muted">
                 Here you can create new short URLs. Hover over the question mark icons for more information.
             </p>
+            <div class="shortInputPreview alert alert-info py-2 px-3 mb-3 d-flex align-items-center gap-2">
+                <span class="badge text-bg-info flex-shrink-0">Preview</span>
+                <a class="shortPreviewLink link-info link-underline-opacity-0 flex-grow-1 min-w-0" target="_blank" rel="noopener" aria-disabled="true">
+                    <code class="shortPreviewUrl user-select-all text-muted"></code>
+                </a>
+                <button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn flex-shrink-0" title="Copy URL" disabled>
+                    '.icon("clipboard").' Copy
+                </button>
+            </div>
             <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">
             <table class="table table-default">
                 <tbody>
@@ -809,30 +818,6 @@ $urlForm = function($action = "create", $values = []) {
 
             </tr>
         ';
-
-        // Keep preview outside the short_* rows so show/hide of those fields never collapses it.
-        if (($input["name"] ?? $inputName) === "short_type") {
-            $form .= '
-            <tr class="urlPreviewRow">
-                <td>URL Preview</td>
-                <td></td>
-                <td>
-                    <div class="shortInputPreview alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2 flex-wrap">
-                        <div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">
-                            <span class="badge text-bg-info">Preview</span>
-                            <a class="shortPreviewLink link-info link-underline-opacity-0" target="_blank" rel="noopener" aria-disabled="true">
-                                <code class="shortPreviewUrl user-select-all text-muted"></code>
-                            </a>
-                        </div>
-                        <button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn invisible" title="Copy URL" disabled>
-                            '.icon("clipboard").' Copy
-                        </button>
-                    </div>
-                </td>
-                <td></td>
-            </tr>
-            ';
-        }
     }
     $submitBtn = '<button class="btn btn-success" name="action" type="submit" value="Submit">'.icon("send").' Submit</button>';
     if ($action == "create") {
