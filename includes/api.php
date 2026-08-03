@@ -197,6 +197,87 @@ do {
             <p>Short URL: <a href='$short' class='alert-link' target='_blank'>$short</a></p>
             $destLink
         "];
+        break;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                 checkShort                                 */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "checkShort") {
+        $short = (!empty($_POST["short"]) ? $_POST["short"] : Null);
+        $short = preg_replace('/[^a-zA-Z0-9]/', '', (string) $short);
+
+        if ($short === "") {
+            $res = [
+                "status"    => "OK",
+                "available" => True,
+                "empty"     => True,
+                "message"   => "Leave empty to auto-generate.",
+            ];
+            break;
+        }
+
+        if (strlen($short) < $cfg["short_min"] || strlen($short) > $cfg["short_max"]) {
+            $res = [
+                "status"    => "ERROR",
+                "available" => False,
+                "message"   => "Must be between ".$cfg["short_min"]." and ".$cfg["short_max"]." characters.",
+            ];
+            break;
+        }
+
+        if (urlExists($short)) {
+            $res = [
+                "status"    => "ERROR",
+                "available" => False,
+                "message"   => "Already taken.",
+            ];
+            break;
+        }
+
+        $res = [
+            "status"    => "OK",
+            "available" => True,
+            "short"     => $short,
+            "message"   => "Available.",
+        ];
+        break;
+    }
+
+    /* ────────────────────────────────────────────────────────────────────────── */
+    /*                                  checkDest                                 */
+    /* ────────────────────────────────────────────────────────────────────────── */
+    if ($action == "checkDest") {
+        $dest     = (!empty($_POST["dest"]) ? $_POST["dest"] : Null);
+        $protocol = (!empty($_POST["protocol"]) ? $_POST["protocol"] : $cfg["default_protocol"]);
+
+        if ($dest === Null || trim((string) $dest) === "") {
+            $res = [
+                "status"  => "ERROR",
+                "valid"   => False,
+                "empty"   => True,
+                "message" => "Destination URL is required.",
+            ];
+            break;
+        }
+
+        $validated = urlValidate($dest, $protocol);
+        if (empty($validated)) {
+            $res = [
+                "status"  => "ERROR",
+                "valid"   => False,
+                "message" => "Destination URL is not valid.",
+            ];
+            break;
+        }
+
+        $res = [
+            "status"  => "OK",
+            "valid"   => True,
+            "dest"    => $validated,
+            "message" => "Valid destination.",
+        ];
+        break;
     }
 
     /* ────────────────────────────────────────────────────────────────────────── */

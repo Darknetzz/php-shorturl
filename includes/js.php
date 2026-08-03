@@ -89,7 +89,9 @@
     /* ────────────────────────────────────────────────────────────────────────── */
     /*                                     api                                    */
     /* ────────────────────────────────────────────────────────────────────────── */
-    function api(method, action, data, callback = null) {
+    function api(method, action, data, callback = null, options = null) {
+        options = options || {};
+        var silent   = !!options.silent;
         var url      = "includes/api.php";
         var formdata = "action=" + action + "&" + data;
         $.ajax({
@@ -102,7 +104,9 @@
                 } catch (e) {
                     console.error(e);
                     console.error("Invalid JSON response:", response);
-                    toast("Invalid JSON response", "danger", "Error");
+                    if (!silent) {
+                        toast("Invalid JSON response", "danger", "Error");
+                    }
                     return false;
                 }
                 var status      = data["status"];
@@ -110,16 +114,22 @@
                 var redirect    = data["redirect"];
                 var type        = "info";
                 if (status == "OK") {
-                    playSound("notification");
+                    if (!silent) {
+                        playSound("notification");
+                    }
                     type = "success";
                     if (data["content_width"] != null) {
                         document.documentElement.style.setProperty("--content-width", data["content_width"] + "%");
                     }
                 } else if (status == "ERROR") {
-                    playSound("error");
+                    if (!silent) {
+                        playSound("error");
+                    }
                     type = "danger";
                 } else if (status == "WARNING" || status == "WARN") {
-                    playSound("warning");
+                    if (!silent) {
+                        playSound("warning");
+                    }
                     type = "warning";
                 }
                 console.groupCollapsed("API request successful.");
@@ -133,7 +143,9 @@
                         return true;
                     }
                 }
-                toast(message, type, status.toUpperCase());
+                if (!silent) {
+                    toast(message, type, status.toUpperCase());
+                }
 
                 if (data["redirect"] != null) {
                     window.location.href = data["redirect"];
@@ -142,8 +154,10 @@
             },
             error: function(response) {
                 console.error("API request failed:", response);
-                toast("API request failed", "danger", "Error");
-                playSound("error");
+                if (!silent) {
+                    toast("API request failed", "danger", "Error");
+                    playSound("error");
+                }
                 return false;
             }
         });
@@ -282,14 +296,13 @@
 
         // NOTE: .dynamic-form
         // Submit form to `api.php` when the button is clicked
-        // $(document).on(".dynamic-form", "submit", function(e) {
         $(".dynamic-form").on("submit", function(e) {
             e.preventDefault();
-            var form     = utils.getObject(".dynamic-form");
+            var form     = $(this);
             var formdata = form.serialize();
             var method   = form.find("[name='method']").val() || form.attr("method") || form.data("method");
             var action   = form.find("[name='action']").val() || form.data("action");
-            var output   = form.data("output") || null; // NOTE: Output element to display the response
+            var output   = form.data("output") || null;
             var url      = form.attr("action") || "includes/api.php";
 
             if (!method || !action) {
@@ -297,30 +310,43 @@
                 return;
             }
 
-            console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
-                customLog("Method: " + method);
-                customLog("Action: " + action);
-                customLog("Data: " + formdata);
-            console.groupEnd();
+            var submitForm = function() {
+                console.groupCollapsed(`%c.dynamic-form submitted`, 'color: cyan;');
+                    customLog("Method: " + method);
+                    customLog("Action: " + action);
+                    customLog("Data: " + formdata);
+                console.groupEnd();
 
+                formdata = form.serialize() + "&action=" + action;
 
-            formdata += "&action=" + action;
-            
-            <?php if (!empty($cfg["form_disable_timeout"]) && $cfg["form_disable_timeout"] > 0) { ?>
-                // Recursively disable all form elements
-                formElements = form.find("[name]");
-                // And re-enable them after the specified timeout
-                formElements.prop("disabled", true);
-                setTimeout(function() {
-                    formElements.prop("disabled", false);
-                }, <?= $cfg["form_disable_timeout"] ?>);
-            <?php } ?>
+                <?php if (!empty($cfg["form_disable_timeout"]) && $cfg["form_disable_timeout"] > 0) { ?>
+                    var formElements = form.find("[name]");
+                    formElements.prop("disabled", true);
+                    setTimeout(function() {
+                        formElements.prop("disabled", false);
+                    }, <?= $cfg["form_disable_timeout"] ?>);
+                <?php } ?>
 
-            api(method, action, formdata, function(data) {
-                if (output != null) {
-                    $(output).html(JSON.stringify(data, null, 2));
-                }
-            });
+                api(method, action, formdata, function(data) {
+                    if (output != null) {
+                        $(output).html(JSON.stringify(data, null, 2));
+                    }
+                });
+            };
+
+            if (form.is("#urlForm") && action === "create") {
+                validateUrlForm(form, function(ok, message) {
+                    if (!ok) {
+                        toast(message || "Please fix the highlighted fields.", "danger", "ERROR", "exclamation-circle");
+                        playSound("error");
+                        return;
+                    }
+                    submitForm();
+                });
+                return;
+            }
+
+            submitForm();
         });
 
         /* ───────────────────────────────────────────────────────────────────── */
@@ -556,10 +582,6 @@
             $temp.remove();
         }
 
-        $(document).on("input", ".shortInput", function() {
-            updateShortPreview($(this).closest("form"));
-        });
-
         $(document).on("click", ".shortInputPreview.is-copyable", function(e) {
             e.preventDefault();
             copyShortPreviewUrl($(this).attr("data-copy"));
@@ -692,6 +714,222 @@
             $("tr[data-id='" + $(this).data("id") + "']").remove();
         });
 
+        // NOTE: live URL form validation (destination + short availability)
+        var shortMinLen = <?= (int) $cfg["short_min"] ?>;
+        var shortMaxLen = <?= (int) $cfg["short_max"] ?>;
+        var urlFormValidation = {
+            shortTimer: null,
+            destTimer: null,
+            shortOk: true,
+            destOk: true,
+        };
+
+        function debounce(timerKey, fn, wait) {
+            clearTimeout(urlFormValidation[timerKey]);
+            urlFormValidation[timerKey] = setTimeout(fn, wait);
+        }
+
+        function fieldFeedbackTarget($input) {
+            var $cell = $input.closest("td");
+            var $feedback = $cell.find(".urlFieldFeedback");
+            if (!$feedback.length) {
+                $feedback = $('<div class="urlFieldFeedback form-text mt-1" aria-live="polite"></div>');
+                $input.closest(".input-group").after($feedback);
+            }
+            return $feedback;
+        }
+
+        function setFieldValidation($input, state, message) {
+            if (!$input || !$input.length) {
+                return;
+            }
+            $input.removeClass("is-valid is-invalid");
+            var $feedback = fieldFeedbackTarget($input);
+            if (!state) {
+                $feedback.removeClass("text-success text-danger text-muted").text("");
+                return;
+            }
+            if (state === "ok") {
+                $input.addClass("is-valid");
+                $feedback.removeClass("text-danger text-muted").addClass("text-success").text(message || "");
+                return;
+            }
+            if (state === "pending") {
+                $feedback.removeClass("text-success text-danger").addClass("text-muted").text(message || "Checking…");
+                return;
+            }
+            $input.addClass("is-invalid");
+            $feedback.removeClass("text-success text-muted").addClass("text-danger").text(message || "");
+        }
+
+        function activeShortInput($form) {
+            var shortType = $form.find("#shortTypeInput").val();
+            var inputName = shortTypeRows[shortType];
+            if (!inputName) {
+                return $();
+            }
+            return $form.find(urlFormRow(inputName) + " .shortInput");
+        }
+
+        function activeDestInput($form) {
+            var destType = $form.find("#destTypeInput").val();
+            if (destType === "redirect") {
+                return $form.find("#redirectInput");
+            }
+            if (destType === "alias") {
+                return $form.find("#aliasInput");
+            }
+            return $();
+        }
+
+        function checkShortAvailability($form, done) {
+            var $input = activeShortInput($form);
+            var shortType = $form.find("#shortTypeInput").val();
+
+            if (!$input.length || shortType === "custom") {
+                urlFormValidation.shortOk = true;
+                setFieldValidation($input, null);
+                if (done) {
+                    done(true);
+                }
+                return;
+            }
+
+            var shortVal = String($input.val() || "").replace(/[^a-zA-Z0-9]/g, "");
+            if (!shortVal) {
+                if (shortType === "path") {
+                    urlFormValidation.shortOk = true;
+                    setFieldValidation($input, "ok", "Will be auto-generated.");
+                    if (done) {
+                        done(true);
+                    }
+                    return;
+                }
+                urlFormValidation.shortOk = false;
+                setFieldValidation($input, "error", "Required.");
+                if (done) {
+                    done(false, "Short URL is required.");
+                }
+                return;
+            }
+
+            if (shortVal.length < shortMinLen || shortVal.length > shortMaxLen) {
+                urlFormValidation.shortOk = false;
+                var lenMsg = "Must be between " + shortMinLen + " and " + shortMaxLen + " characters.";
+                setFieldValidation($input, "error", lenMsg);
+                if (done) {
+                    done(false, lenMsg);
+                }
+                return;
+            }
+
+            setFieldValidation($input, "pending", "Checking availability…");
+            api("POST", "checkShort", "short=" + encodeURIComponent(shortVal), function(data) {
+                urlFormValidation.shortOk = data.status === "OK" && data.available !== false;
+                setFieldValidation($input, urlFormValidation.shortOk ? "ok" : "error", data.message || "");
+                if (done) {
+                    done(urlFormValidation.shortOk, data.message);
+                }
+                return false;
+            }, { silent: true });
+        }
+
+        function checkDestValidity($form, done, opts) {
+            opts = opts || {};
+            var destType = $form.find("#destTypeInput").val();
+            var $input = activeDestInput($form);
+
+            if (destType === "custom") {
+                urlFormValidation.destOk = true;
+                if (done) {
+                    done(true);
+                }
+                return;
+            }
+
+            if (!$input.length) {
+                urlFormValidation.destOk = false;
+                if (done) {
+                    done(false, "Choose a destination URL.");
+                }
+                return;
+            }
+
+            var dest = String($input.val() || "").trim();
+            var protocol = $form.find(".url-protocol:not(:disabled)").first().val() || "<?= $cfg["default_protocol"] ?>";
+
+            if (!dest) {
+                urlFormValidation.destOk = false;
+                if (opts.reportEmpty) {
+                    setFieldValidation($input, "error", "Destination URL is required.");
+                } else {
+                    setFieldValidation($input, null);
+                }
+                if (done) {
+                    done(false, "Destination URL is required.");
+                }
+                return;
+            }
+
+            setFieldValidation($input, "pending", "Checking destination…");
+            api(
+                "POST",
+                "checkDest",
+                "dest=" + encodeURIComponent(dest) + "&protocol=" + encodeURIComponent(protocol),
+                function(data) {
+                    urlFormValidation.destOk = data.status === "OK" && data.valid !== false;
+                    setFieldValidation($input, urlFormValidation.destOk ? "ok" : "error", data.message || "");
+                    if (done) {
+                        done(urlFormValidation.destOk, data.message);
+                    }
+                    return false;
+                },
+                { silent: true }
+            );
+        }
+
+        function validateUrlForm($form, done) {
+            var pending = 2;
+            var ok = true;
+            var message = "";
+
+            var finish = function() {
+                pending--;
+                if (pending > 0) {
+                    return;
+                }
+                done(ok, message);
+            };
+
+            checkShortAvailability($form, function(shortOk, shortMsg) {
+                if (!shortOk) {
+                    ok = false;
+                    message = shortMsg || "Short URL is not available.";
+                }
+                finish();
+            });
+
+            checkDestValidity($form, function(destOk, destMsg) {
+                if (!destOk) {
+                    ok = false;
+                    message = message || destMsg || "Destination URL is not valid.";
+                }
+                finish();
+            }, { reportEmpty: true });
+        }
+
+        function scheduleShortCheck($form) {
+            debounce("shortTimer", function() {
+                checkShortAvailability($form);
+            }, 350);
+        }
+
+        function scheduleDestCheck($form) {
+            debounce("destTimer", function() {
+                checkDestValidity($form);
+            }, 350);
+        }
+
         // NOTE: .urlValidate — peel http(s):// into the protocol prefix select
         function syncUrlProtocols(protocol, $scope) {
             var $protocols = $scope && $scope.length
@@ -702,21 +940,41 @@
 
         $(document).on("input", ".urlValidate", function() {
             var $input = $(this);
+            var $form  = $input.closest("form");
             var url    = String($input.val() || "");
             var match  = url.match(/^(https?:\/\/)/i);
 
-            if (!match) {
-                return;
+            if (match) {
+                var protocol = match[1].toLowerCase();
+                $input.val(url.slice(match[1].length));
+                syncUrlProtocols(protocol, $form);
             }
 
-            var protocol = match[1].toLowerCase();
-            $input.val(url.slice(match[1].length));
-            syncUrlProtocols(protocol, $input.closest("form"));
+            scheduleDestCheck($form);
         });
 
         $(document).on("change", ".url-protocol", function() {
-            syncUrlProtocols($(this).val(), $(this).closest("form"));
+            var $form = $(this).closest("form");
+            syncUrlProtocols($(this).val(), $form);
+            scheduleDestCheck($form);
         });
+
+        $(document).on("input", ".shortInput", function() {
+            var $form = $(this).closest("form");
+            updateShortPreview($form);
+            scheduleShortCheck($form);
+        });
+
+        $("#shortTypeInput, #destTypeInput").on("change", function() {
+            var $form = $("#urlForm");
+            scheduleShortCheck($form);
+            scheduleDestCheck($form);
+        });
+
+        if ($("#urlForm").length) {
+            scheduleShortCheck($("#urlForm"));
+            scheduleDestCheck($("#urlForm"));
+        }
 
 
         // NOTE: #urlTable
