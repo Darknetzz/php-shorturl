@@ -775,10 +775,6 @@ $urlForm = function($action = "create", $values = []) {
         }
 
         $inputWrapClass = (($input["type"] ?? "") === "checkbox") ? "" : "input-group m-1";
-        $isShortInput   = strpos($input["class"] ?? "", "shortInput") !== false;
-        $previewHtml    = $isShortInput
-            ? '<div class="shortInputPreview alert alert-info py-2 px-3 mt-2 mb-0 d-flex align-items-center gap-2 flex-wrap" hidden></div>'
-            : '';
         $form .= '
         <tr id="'.$rowid.'" class="urlInputRow" data-input="'.($input["name"] ?? $inputName).'" style="'.$i["style"].'">
                 <td>
@@ -793,12 +789,35 @@ $urlForm = function($action = "create", $values = []) {
                         '.$thisInput.'
                     </div>
                     <p class="form-text urlInputDescription">'.($input["description"] ?? "").'</p>
-                    '.$previewHtml.'
                 </td>
                 <td>
 
             </tr>
         ';
+
+        // Keep preview outside the short_* rows so show/hide of those fields never collapses it.
+        if (($input["name"] ?? $inputName) === "short_type") {
+            $form .= '
+            <tr class="urlPreviewRow">
+                <td>URL Preview</td>
+                <td></td>
+                <td>
+                    <div class="shortInputPreview alert alert-info py-2 px-3 mb-0 d-flex align-items-center gap-2 flex-wrap">
+                        <div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">
+                            <span class="badge text-bg-info">Preview</span>
+                            <a class="shortPreviewLink link-info link-underline-opacity-0" target="_blank" rel="noopener" aria-disabled="true">
+                                <code class="shortPreviewUrl user-select-all text-muted"></code>
+                            </a>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn invisible" title="Copy URL" disabled>
+                            '.icon("clipboard").' Copy
+                        </button>
+                    </div>
+                </td>
+                <td></td>
+            </tr>
+            ';
+        }
     }
     $submitBtn = '<button class="btn btn-success" name="action" type="submit" value="Submit">'.icon("send").' Submit</button>';
     if ($action == "create") {

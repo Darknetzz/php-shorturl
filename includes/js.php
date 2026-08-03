@@ -442,19 +442,31 @@
             }
             if (shortType === "subdomain") {
                 if (!shortVal) {
-                    return null;
+                    return {
+                        text: "<subdomain>." + shortPreviewBaseDomain,
+                        href: null,
+                        muted: true,
+                    };
                 }
                 var host = shortVal + "." + shortPreviewBaseDomain;
                 return { text: host, href: "<?= $cfg["protocol"] ?>://" + host, muted: false };
             }
             if (shortType === "custom") {
                 if (!shortVal) {
-                    return null;
+                    return {
+                        text: "<custom-url>",
+                        href: null,
+                        muted: true,
+                    };
                 }
                 var href = /^(https?:)?\/\//i.test(shortVal) ? shortVal : null;
                 return { text: shortVal, href: href, muted: false };
             }
-            return null;
+            return {
+                text: "Select a short URL type",
+                href: null,
+                muted: true,
+            };
         }
 
         function updateShortPreview($form) {
@@ -463,54 +475,23 @@
                 return;
             }
 
+            var $preview = $form.find(".shortInputPreview").first();
+            if (!$preview.length) {
+                return;
+            }
+
             var shortType = $form.find("#shortTypeInput").val();
             var inputName = shortTypeRows[shortType];
-
-            $form.find(".shortInputPreview").each(function() {
-                var $preview = $(this);
-                var rowName  = $preview.closest(".urlInputRow").attr("data-input");
-                if (rowName !== inputName) {
-                    $preview.attr("hidden", true);
-                }
-            });
-
-            if (!inputName) {
-                return;
+            var shortVal  = "";
+            if (inputName) {
+                shortVal = $form.find(urlFormRow(inputName) + " .shortInput").val();
             }
 
-            var $row = $form.find(urlFormRow(inputName));
-            // Only skip if this row itself is hidden (ignore parent modal visibility).
-            if (!$row.length || $row.get(0).style.display === "none") {
-                return;
-            }
-
-            var $preview = $row.find(".shortInputPreview");
-            var preview  = buildShortPreview(shortType, $row.find(".shortInput").val());
-            if (!preview) {
-                $preview.attr("hidden", true);
-                return;
-            }
-
+            var preview   = buildShortPreview(shortType, shortVal);
             var copyValue = preview.href || (!preview.muted ? preview.text : "");
-
-            // Build stable DOM once, then update in place to avoid collapse/expand flicker.
-            if (!$preview.find(".shortPreviewUrl").length) {
-                $preview.html(
-                    '<div class="d-flex align-items-center gap-2 flex-grow-1 flex-wrap min-w-0">' +
-                        '<span class="badge text-bg-info">Preview</span>' +
-                        '<a class="shortPreviewLink link-info link-underline-opacity-0" target="_blank" rel="noopener">' +
-                            '<code class="shortPreviewUrl user-select-all"></code>' +
-                        '</a>' +
-                    '</div>' +
-                    '<button type="button" class="btn btn-sm btn-outline-info shortPreviewCopyBtn invisible" title="Copy URL" disabled>' +
-                        '<span class="bi bi-clipboard"></span> Copy' +
-                    '</button>'
-                );
-            }
-
-            var $url  = $preview.find(".shortPreviewUrl");
-            var $link = $preview.find(".shortPreviewLink");
-            var $copy = $preview.find(".shortPreviewCopyBtn");
+            var $url      = $preview.find(".shortPreviewUrl");
+            var $link     = $preview.find(".shortPreviewLink");
+            var $copy     = $preview.find(".shortPreviewCopyBtn");
 
             $url.text(preview.text).toggleClass("text-muted", !!preview.muted);
 
@@ -525,8 +506,6 @@
             } else {
                 $copy.removeAttr("data-copy").prop("disabled", true).addClass("invisible");
             }
-
-            $preview.removeAttr("hidden");
         }
 
         function copyShortPreviewUrl(text, $btn) {
