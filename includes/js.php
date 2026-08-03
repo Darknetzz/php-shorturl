@@ -348,13 +348,11 @@
             var hasClickLimit = maxClicks !== undefined && String(maxClicks).trim() !== "";
 
             utils.hideObject(".urlInputRow[data-input=expire_relative_value]");
-            utils.hideObject(".urlInputRow[data-input=expire_relative_unit]");
             utils.hideObject(".urlInputRow[data-input=expire_absolute]");
             utils.hideObject(".urlInputRow[data-input=on_expire]");
 
             if (mode === "relative") {
                 utils.showObject(".urlInputRow[data-input=expire_relative_value]");
-                utils.showObject(".urlInputRow[data-input=expire_relative_unit]");
             }
             if (mode === "absolute") {
                 utils.showObject(".urlInputRow[data-input=expire_absolute]");

@@ -569,6 +569,7 @@ $urlInputs = [
         "attributes"  => "",
         "required"    => False,
         "hidden"      => True,
+        "group_with"  => "expire_relative_value",
         "tooltip"     => $tooltip["expire_relative_unit"],
         "description" => "Unit for the relative expiry duration.",
     ],
@@ -619,10 +620,36 @@ $urlInputs = [
     ],
 ];
 
+# FUNCTION: $renderUrlInputControl
+# Renders a single form control from a $urlInputs entry.
+$renderUrlInputControl = function(string $inputName, array $input): string {
+    $id          = $input["id"] ?? $inputName;
+    $class       = $input["class"] ?? "form-control";
+    $type        = $input["type"] ?? "text";
+    $placeholder = $input["placeholder"] ?? "";
+    $value       = $input["value"] ?? ($input["default"] ?? "");
+    $attributes  = $input["attributes"] ?? "";
+    $data        = 'id="'.$id.'" class="'.$class.'" name="'.$inputName.'" data-input="'.$inputName.'" placeholder="'.$placeholder.'"';
+
+    if ($type === "select") {
+        $html = '<select '.$data.' '.$attributes.'>';
+        foreach (($input["options"] ?? []) as $option) {
+            $selected = (($option["value"] ?? Null) == $value ? "selected" : "");
+            $html .= '<option value="'.($option["value"] ?? "").'" '.$selected.'>'.($option["name"] ?? "").'</option>';
+        }
+        return $html.'</select>';
+    }
+    if ($type === "textarea") {
+        return '<textarea '.$data.' '.$attributes.'>'.$value.'</textarea>';
+    }
+    return '<input '.$data.' type="'.$type.'" value="'.$value.'" '.$attributes.'>';
+};
+
 # FUNCTION: $urlForm
 $urlForm = function($action = "create", $values = []) {
     global $newTooltip;
     global $urlInputs;
+    global $renderUrlInputControl;
     $form = '
     <div class="d-flex justify-content-center">
         <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
@@ -634,6 +661,12 @@ $urlForm = function($action = "create", $values = []) {
                 <tbody>
     ';
     foreach ($urlInputs as $inputName => $input) {
+        // Fields with group_with are rendered inside another row's input-group.
+        if (!empty($input["group_with"])) {
+            continue;
+        }
+
+        $i = [];
         foreach ($input as $key => $value) {
             $i[$key] = (!empty($value) ? $value : Null);
         }
@@ -641,23 +674,13 @@ $urlForm = function($action = "create", $values = []) {
         $rowid         = $i["id"]."Row";
         $i["required"] = ($i["required"] !== False ? '<span class="form-text text-danger">*</span>' : '');
         $i["style"]    = ($i["hidden"] != False ? 'display:none;' : '');
-        $i["data"]     = 'id="'.$i["id"].'" class="'.$i["class"].'" name="'.$inputName.'" data-input="'.$inputName.'" placeholder="'.$i["placeholder"].'"';
+        $thisInput     = $renderUrlInputControl($inputName, $input);
 
-        # NOTE: Any input
-        $thisInput = '<input '.$i["data"].' type="'.$i["type"].'" value="'.$i["value"].'" '.$i["attributes"].'>';
-
-        # NOTE: Select input
-        if ($i["type"] == "select") {
-            $thisInput = '<select '.$i["data"].'>';
-            foreach ($i["options"] as $option) {
-                $selected = ($option["value"] == $i["value"] ? "selected" : "");
-                $thisInput .= '<option value="'.$option["value"].'" '.$selected.'>'.$option["name"].'</option>';
+        foreach ($urlInputs as $groupedName => $groupedInput) {
+            if (($groupedInput["group_with"] ?? Null) !== $inputName) {
+                continue;
             }
-            $thisInput .= '</select>';
-        } 
-        # NOTE: Textarea input
-        if ($i["type"] == "textarea") {
-            $thisInput = '<textarea '.$i["data"].'>'.$i["value"].'</textarea>';
+            $thisInput .= $renderUrlInputControl($groupedName, $groupedInput);
         }
 
         $form .= '
