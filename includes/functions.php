@@ -876,8 +876,8 @@ function listUrls(?array $urls = []) {
     $urlsTable = '
         <div id="table-toolbar">
             <div class="btn-group">
-                <a href="?do=create" class="btn btn-success"><?= icon("plus-circle") ?> New URL</a>
-                <button class="deleteSelectedBtn btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+                <a href="?do=create" class="btn btn-success">'.icon("plus-circle").' New URL</a>
+                <button class="deleteSelectedBtn btn btn-danger" disabled>'.icon("trash").' Delete Selected</button>
             </div>
         </div>
         <table id="urlTable" class="table table-default" 
@@ -1009,8 +1009,8 @@ function listUrls(?array $urls = []) {
         </table>
 
         <div class="btn-group">
-            <a href="?do=create" class="btn btn-success"><?= icon("plus-circle") ?> New URL</a>
-            <button class="deleteSelectedBtn btn btn-danger" disabled><?= icon("trash") ?> Delete Selected</button>
+            <a href="?do=create" class="btn btn-success">'.icon("plus-circle").' New URL</a>
+            <button class="deleteSelectedBtn btn btn-danger" disabled>'.icon("trash").' Delete Selected</button>
         </div>
 
         <div class="modal modal-lg fade" id="editUrlModal" tabindex="-1" aria-labelledby="editUrlModalLabel" aria-hidden="true">
@@ -1102,8 +1102,8 @@ function listUrls(?array $urls = []) {
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteUrl">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">'.icon("x-lg").' Close</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteUrl">'.icon("trash").' Delete</button>
                 </div>
             </div>
         </div>

@@ -282,21 +282,109 @@
         });
 
         /* ───────────────────────────────────────────────────────────────────── */
-        /*                             shortTypeInput                            */
+        /*                    URL form field visibility (DRY)                     */
         /* ───────────────────────────────────────────────────────────────────── */
-        $("#shortTypeInput").on("change", function() {
-            inputsToShow = {
-                "path"     : ".urlInputRow[data-input=short_path]",
-                "subdomain": ".urlInputRow[data-input=short_domain]",
-                "custom"   : ".urlInputRow[data-input=short_custom]",
+        function urlFormRow(inputName) {
+            return ".urlInputRow[data-input='" + inputName + "']";
+        }
+
+        function setUrlFormRows(rows, visible) {
+            rows.forEach(function(name) {
+                if (visible) {
+                    utils.showObject(urlFormRow(name));
+                } else {
+                    utils.hideObject(urlFormRow(name));
+                }
+            });
+        }
+
+        function updateShortTypeRows() {
+            var shortType = $("#shortTypeInput").val();
+            var shortRows = {
+                "path"     : "short_path",
+                "subdomain": "short_domain",
+                "custom"   : "short_custom",
             };
-            for (input in inputsToShow) {
-                utils.log("hiding input", input);
-                utils.hideObject(inputsToShow[input]);
+
+            setUrlFormRows(Object.values(shortRows), false);
+
+            if (shortRows[shortType]) {
+                utils.showObject(urlFormRow(shortRows[shortType]));
+                utils.showObject(urlFormRow("dest_type"));
+            } else {
+                utils.hideObject(urlFormRow("dest_type"));
+                setUrlFormRows(["protocol", "dest_redirect", "dest_alias", "dest_custom"], false);
             }
-            utils.showObject(inputsToShow[$(this).val()]);
-            utils.showObject(".urlInputRow[data-input=dest_type]");
+        }
+
+        function updateDestTypeRows() {
+            var destType = $("#destTypeInput").val();
+            var destRows = {
+                "redirect": ["protocol", "dest_redirect"],
+                "alias"   : ["protocol", "dest_alias"],
+                "custom"  : ["dest_custom"],
+            };
+
+            setUrlFormRows(["protocol", "dest_redirect", "dest_alias", "dest_custom"], false);
+
+            if ($(urlFormRow("dest_type")).is(":hidden")) {
+                return;
+            }
+
+            if (destRows[destType]) {
+                setUrlFormRows(destRows[destType], true);
+            }
+        }
+
+        function updateExpireFormRows() {
+            var timeEnabled  = $("#enableExpireTimeInput").is(":checked");
+            var clicksEnabled = $("#enableMaxClicksInput").is(":checked");
+            var mode = $("#expireTimeModeInput").val() || "relative";
+
+            setUrlFormRows([
+                "expire_time_mode",
+                "expire_relative_value",
+                "expire_absolute",
+                "max_clicks",
+                "on_expire",
+            ], false);
+
+            if (timeEnabled) {
+                utils.showObject(urlFormRow("expire_time_mode"));
+                if (mode === "relative") {
+                    utils.showObject(urlFormRow("expire_relative_value"));
+                }
+                if (mode === "absolute") {
+                    utils.showObject(urlFormRow("expire_absolute"));
+                }
+            }
+
+            if (clicksEnabled) {
+                utils.showObject(urlFormRow("max_clicks"));
+            }
+
+            if (timeEnabled || clicksEnabled) {
+                utils.showObject(urlFormRow("on_expire"));
+            }
+        }
+
+        function updateUrlFormRows() {
+            updateShortTypeRows();
+            updateDestTypeRows();
+            updateExpireFormRows();
+        }
+
+        $("#shortTypeInput").on("change", function() {
+            updateShortTypeRows();
+            updateDestTypeRows();
         });
+
+        $("#destTypeInput").on("change", updateDestTypeRows);
+
+        $("#enableExpireTimeInput, #enableMaxClicksInput").on("change", updateExpireFormRows);
+        $("#expireTimeModeInput").on("change", updateExpireFormRows);
+
+        updateUrlFormRows();
 
         /* ───────────────────────────────────────────────────────────────────── */
         /*                               shortInput                              */
@@ -323,63 +411,6 @@
             previewHTML = previewObj.html();
             $(this).closest(".urlInputDescription").append(previewHTML);
         });
-
-        /* ────────────────────────────────────────────────────────────────────────── */
-        /*                              destTypeInput                                 */
-        /* ────────────────────────────────────────────────────────────────────────── */
-        $("#destTypeInput").on("change", function() {
-            inputsToShow = {
-                "redirect": ".urlInputRow[data-input=dest_redirect]",
-                "custom"  : ".urlInputRow[data-input=dest_custom]",
-                "alias"   : ".urlInputRow[data-input=dest_alias]",
-            };
-            for (var input in inputsToShow) {
-                utils.hideObject(inputsToShow[input]);
-            }
-            utils.showObject(inputsToShow[$(this).val()]);
-        });
-
-        /* ────────────────────────────────────────────────────────────────────────── */
-        /*                         expire time / on_expire toggles                    */
-        /* ────────────────────────────────────────────────────────────────────────── */
-        function updateExpireFormRows() {
-            var mode = $("#expireTimeModeInput").val() || "none";
-            var maxClicks = $("#maxClicksInput").val();
-            var hasClickLimit = maxClicks !== undefined && String(maxClicks).trim() !== "";
-
-            utils.hideObject(".urlInputRow[data-input=expire_relative_value]");
-            utils.hideObject(".urlInputRow[data-input=expire_absolute]");
-            utils.hideObject(".urlInputRow[data-input=on_expire]");
-
-            if (mode === "relative") {
-                utils.showObject(".urlInputRow[data-input=expire_relative_value]");
-            }
-            if (mode === "absolute") {
-                utils.showObject(".urlInputRow[data-input=expire_absolute]");
-            }
-            if (mode !== "none" || hasClickLimit) {
-                utils.showObject(".urlInputRow[data-input=on_expire]");
-            }
-        }
-
-        $("#expireTimeModeInput").on("change", updateExpireFormRows);
-        $("#maxClicksInput").on("input change", updateExpireFormRows);
-        updateExpireFormRows();
-            // utils.hideObject(".urlInputRow");
-            // // utils.showObject(".urlInputRow[data-input=short]");
-            // utils.hideObject(".urlOptions");
-            // var type = $(this).val();
-            // if (type == "redirect") {
-            //     utils.showObject(".urlInputRow[data-input=redirect]");
-            //     utils.showObject(".urlOptions[data-type=redirect]");
-            // } else if (type == "custom") {
-            //     utils.showObject(".urlInputRow[data-input=custom]");
-            //     utils.showObject(".urlOptions[data-type=custom]");
-            // } else if (type == "alias") {
-            //     utils.showObject(".urlInputRow[data-input=alias]");
-            //     utils.showObject(".urlOptions[data-type=alias]");
-            // }
-        // });
 
         /* ────────────────────────────────────────────────────────────────────────── */
         /*                                 NOTE: urls                                 */
@@ -426,6 +457,7 @@
                     utils.error("Edit form not found.");
                     return;
                 }
+                editUrlForm.find(".openUrlBtn").attr("href", short || "#");
                 return;
                 var editUrlName   = editUrlForm.find(".urlNameInput");
                 var editUrlType   = editUrlForm.find(".urlTypeInput");

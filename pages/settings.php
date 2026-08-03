@@ -33,7 +33,7 @@
                     >
                     <div class="form-text">Controls how wide page content is relative to the browser window.</div>
                 </div>
-                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" class="btn btn-primary"><?= icon("floppy2") ?> Save</button>
             </form>
         </div>
     </div>

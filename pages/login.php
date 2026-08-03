@@ -19,7 +19,7 @@
                     <tr>
                         <td></td>
                         <td>
-                            <input class='btn btn-primary' type='submit' name='login' value='Login'>
+                            <button class='btn btn-primary' type='submit' name='login' value='Login'><?= icon("box-arrow-in-right") ?> Login</button>
                         </td>
                     </tr>
                 </table>

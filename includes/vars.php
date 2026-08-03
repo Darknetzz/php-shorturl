@@ -147,11 +147,6 @@ $selectOptions["dest_types"] = [
 */
 $selectOptions["expire_time_modes"] = [
     [
-        "name"        => "No time limit",
-        "value"       => "none",
-        "description" => "The short URL does not expire based on time.",
-    ],
-    [
         "name"        => "Relative (after a duration)",
         "value"       => "relative",
         "description" => "Expires after a duration from creation (e.g. 7 days).",
@@ -335,10 +330,17 @@ $tooltip["delay"] = "
     <b>Default:</b> <code>".$cfg["default_delay"]."</code>
 ";
 
-$tooltip["expire_time_mode"] = "
+$tooltip["enable_expire_time"] = "
     <h4>Time expiry</h4>
     <p class='text-success'>Optional</p>
-    Optionally expire this short URL after a duration or at a specific date/time.
+    Enable to expire this short URL after a duration or at a specific date/time.
+    Can be combined with a click limit.
+";
+
+$tooltip["expire_time_mode"] = "
+    <h4>Time expiry mode</h4>
+    <p class='text-danger'>Required when time expiry is enabled</p>
+    Choose relative (after a duration) or absolute (at a date/time).
     ".$listTypes($selectOptions["expire_time_modes"]);
 
 $tooltip["expire_relative_value"] = "
@@ -359,11 +361,18 @@ $tooltip["expire_absolute"] = "
     The date and time when the short URL should stop working (server local timezone on input; stored as UTC).
 ";
 
+$tooltip["enable_max_clicks"] = "
+    <h4>Click limit</h4>
+    <p class='text-success'>Optional</p>
+    Enable to expire this short URL after a maximum number of visits.
+    Can be combined with a time limit.
+";
+
 $tooltip["max_clicks"] = "
     <h4>Max clicks</h4>
-    <p class='text-success'>Optional</p>
+    <p class='text-danger'>Required when click limit is enabled</p>
     Maximum number of successful visits before the URL expires.
-    Leave empty for unlimited clicks. The Nth click still works; the next visit is expired.
+    The Nth click still works; the next visit is expired.
 ";
 
 $tooltip["on_expire"] = "
@@ -517,7 +526,8 @@ $urlInputs = [
     ],
     "delay"      => [
         "id"          => "delayInput",
-        "name"        => "Delay",
+        "title"       => "Delay",
+        "name"        => "delay",
         "type"        => "number",
         "class"       => "form-control urlInput",
         "placeholder" => "100",
@@ -527,20 +537,33 @@ $urlInputs = [
         "tooltip"     => $tooltip["delay"],
         "description" => "The delay in seconds before the redirect",
     ],
+    "enable_expire_time" => [
+        "id"          => "enableExpireTimeInput",
+        "title"       => "Time expiry",
+        "name"        => "enable_expire_time",
+        "type"        => "checkbox",
+        "class"       => "form-check-input urlInput",
+        "default"     => False,
+        "required"    => False,
+        "hidden"      => False,
+        "tooltip"     => $tooltip["enable_expire_time"],
+        "description" => "Expire this URL after a duration or at a specific date/time. Can be combined with a click limit.",
+        "label"       => "Enable time expiry",
+    ],
     "expire_time_mode" => [
         "id"          => "expireTimeModeInput",
-        "title"       => "Time expiry",
+        "title"       => "Time expiry mode",
         "name"        => "expire_time_mode",
         "type"        => "select",
         "options"     => $selectOptions["expire_time_modes"],
         "class"       => "form-select urlInput",
-        "default"     => "none",
-        "value"       => "none",
+        "default"     => "relative",
+        "value"       => "relative",
         "attributes"  => "",
         "required"    => False,
-        "hidden"      => False,
+        "hidden"      => True,
         "tooltip"     => $tooltip["expire_time_mode"],
-        "description" => "Optionally expire this URL after a duration or at a specific date/time.",
+        "description" => "Expire after a duration from creation, or at a specific date/time.",
     ],
     "expire_relative_value" => [
         "id"          => "expireRelativeValueInput",
@@ -588,20 +611,33 @@ $urlInputs = [
         "tooltip"     => $tooltip["expire_absolute"],
         "description" => "Date and time when the short URL should stop working.",
     ],
+    "enable_max_clicks" => [
+        "id"          => "enableMaxClicksInput",
+        "title"       => "Click limit",
+        "name"        => "enable_max_clicks",
+        "type"        => "checkbox",
+        "class"       => "form-check-input urlInput",
+        "default"     => False,
+        "required"    => False,
+        "hidden"      => False,
+        "tooltip"     => $tooltip["enable_max_clicks"],
+        "description" => "Expire this URL after a maximum number of visits. Can be combined with a time limit.",
+        "label"       => "Enable click limit",
+    ],
     "max_clicks" => [
         "id"          => "maxClicksInput",
         "title"       => "Max clicks",
         "name"        => "max_clicks",
         "type"        => "number",
         "class"       => "form-control urlInput",
-        "placeholder" => "Unlimited",
-        "default"     => "",
-        "value"       => "",
+        "placeholder" => "1",
+        "default"     => "1",
+        "value"       => "1",
         "attributes"  => "min=\"1\"",
         "required"    => False,
-        "hidden"      => False,
+        "hidden"      => True,
         "tooltip"     => $tooltip["max_clicks"],
-        "description" => "Optional click limit. Leave empty for unlimited.",
+        "description" => "Maximum successful visits before the URL expires.",
     ],
     "on_expire" => [
         "id"          => "onExpireInput",
@@ -629,8 +665,20 @@ $renderUrlInputControl = function(string $inputName, array $input): string {
     $placeholder = $input["placeholder"] ?? "";
     $value       = $input["value"] ?? ($input["default"] ?? "");
     $attributes  = $input["attributes"] ?? "";
-    $data        = 'id="'.$id.'" class="'.$class.'" name="'.$inputName.'" data-input="'.$inputName.'" placeholder="'.$placeholder.'"';
+    $nameAttr    = $input["name"] ?? $inputName;
+    $data        = 'id="'.$id.'" class="'.$class.'" name="'.$nameAttr.'" data-input="'.$nameAttr.'"';
 
+    if ($type === "checkbox") {
+        $checked = (!empty($input["value"]) || !empty($input["default"])) ? "checked" : "";
+        $label   = $input["label"] ?? ($input["title"] ?? $inputName);
+        return '
+            <div class="form-check form-switch m-1">
+                <input '.$data.' type="checkbox" value="1" '.$checked.' '.$attributes.'>
+                <label class="form-check-label" for="'.$id.'">'.$label.'</label>
+            </div>';
+    }
+
+    $data .= ' placeholder="'.$placeholder.'"';
     if ($type === "select") {
         $html = '<select '.$data.' '.$attributes.'>';
         foreach (($input["options"] ?? []) as $option) {
@@ -672,8 +720,10 @@ $urlForm = function($action = "create", $values = []) {
         }
 
         $rowid         = $i["id"]."Row";
-        $i["required"] = ($i["required"] !== False ? '<span class="form-text text-danger">*</span>' : '');
-        $i["style"]    = ($i["hidden"] != False ? 'display:none;' : '');
+        $isRequired    = !empty($input["required"]);
+        $isHidden      = !empty($input["hidden"]);
+        $i["required"] = ($isRequired ? '<span class="form-text text-danger">*</span>' : '');
+        $i["style"]    = ($isHidden ? 'display:none;' : '');
         $thisInput     = $renderUrlInputControl($inputName, $input);
 
         foreach ($urlInputs as $groupedName => $groupedInput) {
@@ -683,34 +733,36 @@ $urlForm = function($action = "create", $values = []) {
             $thisInput .= $renderUrlInputControl($groupedName, $groupedInput);
         }
 
+        $inputWrapClass = (($input["type"] ?? "") === "checkbox") ? "" : "input-group m-1";
         $form .= '
-        <tr id="'.$rowid.'" class="urlInputRow" data-input="'.$i["name"].'" style="'.$i["style"].'">
+        <tr id="'.$rowid.'" class="urlInputRow" data-input="'.($input["name"] ?? $inputName).'" style="'.$i["style"].'">
                 <td>
-                    '.$i["title"].'
+                    '.($input["title"] ?? ($input["name"] ?? $inputName)).'
                     '.$i["required"].'
                 </td>
                 <td>
-                    '.$newTooltip($i["tooltip"]).'
+                    '.$newTooltip($input["tooltip"] ?? "").'
                 </td>
                 <td>
-                    <div class="input-group m-1">
+                    <div class="'.$inputWrapClass.'">
                         '.$thisInput.'
                     </div>
-                    <p class="form-text urlInputDescription">'.$i["description"].'</p>
+                    <p class="form-text urlInputDescription">'.($input["description"] ?? "").'</p>
                 </td>
                 <td>
 
             </tr>
         ';
     }
-    $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Submit">';
+    $submitBtn = '<button class="btn btn-success" name="action" type="submit" value="Submit">'.icon("send").' Submit</button>';
     if ($action == "create") {
-        $submitBtn = '<input class="btn btn-success" name="action" type="submit" value="Create">';
+        $submitBtn = '<button class="btn btn-success" name="action" type="submit" value="Create">'.icon("plus-circle").' Create</button>';
     } 
     if ($action == "edit") {
+        $openHref = htmlspecialchars((string) ($values["short"] ?? "#"), ENT_QUOTES, "UTF-8");
         $submitBtn = '
-            <a class="btn btn-primary" target="_blank" href="'.$i["value"].'">Open</a>
-            <input class="btn btn-success" name="action" type="submit" value="Update">
+            <a class="btn btn-primary openUrlBtn" target="_blank" href="'.$openHref.'">'.icon("box-arrow-up-right").' Open</a>
+            <button class="btn btn-success" name="action" type="submit" value="Update">'.icon("check2").' Update</button>
         ';
     }
     $form .= '
