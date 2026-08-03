@@ -286,7 +286,7 @@ function setUser($id, $column, $value) {
 /* ────────────────────────────────────────────────────────────────────────── */
 function defaultUserSettings(): array {
     return [
-        "content_width" => 100,
+        "content_width" => 75,
     ];
 }
 

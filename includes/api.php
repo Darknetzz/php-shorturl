@@ -302,7 +302,11 @@ do {
         }
 
         setUserSettings($_SESSION["id"], ["content_width" => $contentWidth]);
-        $res = ["status" => "OK", "message" => "Settings saved."];
+        $res = [
+            "status"         => "OK",
+            "message"        => "Settings saved.",
+            "content_width"  => $contentWidth,
+        ];
         break;
     }
 

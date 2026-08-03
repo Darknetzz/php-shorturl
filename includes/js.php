@@ -112,6 +112,9 @@
                 if (status == "OK") {
                     playSound("notification");
                     type = "success";
+                    if (data["content_width"] != null) {
+                        document.documentElement.style.setProperty("--content-width", data["content_width"] + "%");
+                    }
                 } else if (status == "ERROR") {
                     playSound("error");
                     type = "danger";

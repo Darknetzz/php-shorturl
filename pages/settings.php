@@ -46,12 +46,8 @@
         if (!input || !label) {
             return;
         }
-        function applyContentWidth(value) {
-            label.textContent = value + "%";
-            document.documentElement.style.setProperty("--content-width", value + "%");
-        }
         input.addEventListener("input", function() {
-            applyContentWidth(this.value);
+            label.textContent = this.value + "%";
         });
     })();
 </script>
