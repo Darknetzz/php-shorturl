@@ -40,7 +40,7 @@
     <script src="assets/highlight/languages/css.min.js"></script>
     <script src="assets/highlight/languages/xml.min.js"></script> -->
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.36.3/ace.min.js" integrity="sha512-faieT+YRcxd+aQZbK6m2iaKhYEKkDvwbn7n2WToge2+k6+YBlxbT/Wii5bVPUWpnXm186SPynzVfc+ME8a/a3Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ace-builds@1.44.0/src-min/ace.js" integrity="sha512-+dWoJ4nMR1zflFH9wM1ZaI8waJi8iGlGuTnQrEZ7CrjVS3rpgE9b06SLIdLUjieiYodMEl8tUYtcVgXXL0/e8w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <script src="assets/jsutils/utils.js"></script>
 
