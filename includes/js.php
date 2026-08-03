@@ -474,10 +474,21 @@
             return $("<div>").text(value == null ? "" : String(value)).html();
         }
 
-        function buildShortPreview(shortType, shortVal) {
+        function buildShortPreview(shortType, shortVal, $form) {
             shortVal = String(shortVal || "").trim();
             if (shortType === "path") {
                 if (!shortVal) {
+                    var autoShort = "";
+                    if ($form && $form.length) {
+                        autoShort = String($form.find("#shortgenInput").val() || $form.find("#shortPathInput").attr("placeholder") || "").trim();
+                    }
+                    if (autoShort) {
+                        return {
+                            text: shortPreviewBaseUrl + "/" + autoShort,
+                            href: null,
+                            muted: true,
+                        };
+                    }
                     return {
                         text: shortPreviewBaseUrl + "/<auto>",
                         href: null,
@@ -534,7 +545,7 @@
                 shortVal = $form.find(urlFormRow(inputName) + " .shortInput").val();
             }
 
-            var preview   = buildShortPreview(shortType, shortVal);
+            var preview   = buildShortPreview(shortType, shortVal, $form);
             // Only real URLs are copyable — placeholders like <auto> are not.
             var copyValue = preview.muted ? "" : (preview.href || preview.text || "");
             var $url      = $preview.find(".shortPreviewUrl");
@@ -799,7 +810,7 @@
             if (!shortVal) {
                 if (shortType === "path") {
                     urlFormValidation.shortOk = true;
-                    setFieldValidation($input, "ok", "Will be auto-generated.");
+                    setFieldValidation($input, null);
                     if (done) {
                         done(true);
                     }

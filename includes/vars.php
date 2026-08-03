@@ -443,7 +443,7 @@ $urlInputs = [
         "required"    => False,
         "hidden"      => True,
         "tooltip"     => $tooltip["short"],
-        "description" => "The path that you want to use. Should only consist of alphanumeric characters. If not specified, it will be generated for you.",
+        "description" => "The path that you want to use. Should only consist of alphanumeric characters. If not specified, the placeholder value will be used.",
     ],
     "short_domain"    => [
         "id"          => "shortDomainInput",
@@ -742,6 +742,8 @@ $urlForm = function($action = "create", $values = []) {
     global $newTooltip;
     global $urlInputs;
     global $renderUrlInputControl;
+    global $cfg;
+    $autoShort = htmlspecialchars((string) genStr($cfg["short_default"] ?? 5), ENT_QUOTES, "UTF-8");
     $form = '
     <div class="d-flex justify-content-center">
         <form class="dynamic-form" id="urlForm" action="index.php" method="POST" data-action="'.$action.'">
@@ -756,6 +758,7 @@ $urlForm = function($action = "create", $values = []) {
                 </button>
             </div>
             <input class="urlActionInput" type="hidden" name="action" value="'.$action.'">
+            <input type="hidden" name="shortgen" id="shortgenInput" value="'.$autoShort.'">
             <table class="table table-default">
                 <tbody>
     ';
@@ -763,6 +766,10 @@ $urlForm = function($action = "create", $values = []) {
         // Affix-only / grouped fields are rendered inside another row's input-group.
         if (!empty($input["group_with"]) || !empty($input["skip_row"])) {
             continue;
+        }
+
+        if ($inputName === "short_path") {
+            $input["placeholder"] = $autoShort;
         }
 
         $i = [];
