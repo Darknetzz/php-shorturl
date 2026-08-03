@@ -335,6 +335,35 @@
             }
             utils.showObject(inputsToShow[$(this).val()]);
         });
+
+        /* ────────────────────────────────────────────────────────────────────────── */
+        /*                         expire time / on_expire toggles                    */
+        /* ────────────────────────────────────────────────────────────────────────── */
+        function updateExpireFormRows() {
+            var mode = $("#expireTimeModeInput").val() || "none";
+            var maxClicks = $("#maxClicksInput").val();
+            var hasClickLimit = maxClicks !== undefined && String(maxClicks).trim() !== "";
+
+            utils.hideObject(".urlInputRow[data-input=expire_relative_value]");
+            utils.hideObject(".urlInputRow[data-input=expire_relative_unit]");
+            utils.hideObject(".urlInputRow[data-input=expire_absolute]");
+            utils.hideObject(".urlInputRow[data-input=on_expire]");
+
+            if (mode === "relative") {
+                utils.showObject(".urlInputRow[data-input=expire_relative_value]");
+                utils.showObject(".urlInputRow[data-input=expire_relative_unit]");
+            }
+            if (mode === "absolute") {
+                utils.showObject(".urlInputRow[data-input=expire_absolute]");
+            }
+            if (mode !== "none" || hasClickLimit) {
+                utils.showObject(".urlInputRow[data-input=on_expire]");
+            }
+        }
+
+        $("#expireTimeModeInput").on("change", updateExpireFormRows);
+        $("#maxClicksInput").on("input change", updateExpireFormRows);
+        updateExpireFormRows();
             // utils.hideObject(".urlInputRow");
             // // utils.showObject(".urlInputRow[data-input=short]");
             // utils.hideObject(".urlOptions");

@@ -145,9 +145,20 @@ do {
             break;
         }
 
-        // Check if options are empty
-        if (!empty($options) && is_array($options)) {
+        // Merge posted options with optional time/click expiry settings
+        if (!is_array($options)) {
+            $options = [];
+        }
+        $options = buildUrlExpiryOptions($_POST, $options);
+        if (is_string($options)) {
+            $res = ["status" => "ERROR", "message" => $options];
+            break;
+        }
+
+        if (!empty($options)) {
             $options = json_encode($options);
+        } else {
+            $options = Null;
         }
 
         $insertShort = "INSERT INTO urls (`type`, `short`, `dest`, `userid`, `options`) VALUES (?, ?, ?, ?, ?)";

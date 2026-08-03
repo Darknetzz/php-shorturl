@@ -30,7 +30,16 @@ do {
     $url     = getUrl($p, "short");
     $type    = $url["type"] ?? Null;
     $dest    = $url["dest"] ?? Null;
-    $options = $url["options"] ?? Null;
+    $options = urlOptions(is_array($url) ? $url : []);
+
+    if ($url === False) {
+        echo alert("The short URL <b>$p</b> does not exist.", "danger");
+        die();
+    }
+
+    if (urlIsExpired($options)) {
+        urlHandleExpired($url, $options);
+    }
 
     # NOTE: Write to log
     if (!empty($url) && !empty($type) && !empty($dest)) {
@@ -39,10 +48,10 @@ do {
         writeLog("Clicked on URL $urlText -> $type -> $destText");
     }
 
-    if ($url === False) {
-        echo alert("The short URL <b>$p</b> does not exist.", "danger");
-        die();
+    if (!empty($options["max_clicks"]) && !empty($url["id"])) {
+        urlIncrementClicks((int) $url["id"]);
     }
+
     if (empty($type) || !is_string($type)) {
         echo alert("The type is empty.", "danger");
         die();
@@ -57,9 +66,6 @@ do {
         echo alert("The short URL <b>$p</b> does not exist.", "danger");
         jsRedirect();
         die();
-    }
-    if (!empty($options) && is_string($options)) {
-        $options = json_decode($options, True);
     }
 
     $delay = $options["delay"] ?? 0;

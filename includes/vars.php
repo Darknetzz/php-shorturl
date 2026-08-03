@@ -141,6 +141,55 @@ $selectOptions["dest_types"] = [
     ],
 ];
 
+/**
+* expire_time_modes
+* How the optional time-based expiry is specified on create.
+*/
+$selectOptions["expire_time_modes"] = [
+    [
+        "name"        => "No time limit",
+        "value"       => "none",
+        "description" => "The short URL does not expire based on time.",
+    ],
+    [
+        "name"        => "Relative (after a duration)",
+        "value"       => "relative",
+        "description" => "Expires after a duration from creation (e.g. 7 days).",
+    ],
+    [
+        "name"        => "Absolute (at a date/time)",
+        "value"       => "absolute",
+        "description" => "Expires at a specific date and time.",
+    ],
+];
+
+/**
+* expire_relative_units
+*/
+$selectOptions["expire_relative_units"] = [
+    ["name" => "Minutes", "value" => "minutes"],
+    ["name" => "Hours",   "value" => "hours"],
+    ["name" => "Days",    "value" => "days"],
+    ["name" => "Weeks",   "value" => "weeks"],
+];
+
+/**
+* on_expire_actions
+* What happens when a short URL hits a time or click limit.
+*/
+$selectOptions["on_expire_actions"] = [
+    [
+        "name"        => "Keep (show expired message)",
+        "value"       => "keep",
+        "description" => "Block redirects and show an expired message. The URL stays in the list.",
+    ],
+    [
+        "name"        => "Delete",
+        "value"       => "delete",
+        "description" => "Remove the URL from the database when expiry is detected.",
+    ],
+];
+
 # FUNCTION: $newTooltip
 # This function is used to generate a new tooltip.
 $newTooltip = 
@@ -285,6 +334,43 @@ $tooltip["delay"] = "
     <br><br>
     <b>Default:</b> <code>".$cfg["default_delay"]."</code>
 ";
+
+$tooltip["expire_time_mode"] = "
+    <h4>Time expiry</h4>
+    <p class='text-success'>Optional</p>
+    Optionally expire this short URL after a duration or at a specific date/time.
+    ".$listTypes($selectOptions["expire_time_modes"]);
+
+$tooltip["expire_relative_value"] = "
+    <h4>Expire after</h4>
+    <p class='text-danger'>Required when relative time expiry is selected</p>
+    How long until the short URL expires, measured from creation time.
+";
+
+$tooltip["expire_relative_unit"] = "
+    <h4>Duration unit</h4>
+    <p class='text-danger'>Required when relative time expiry is selected</p>
+    Unit for the relative expiry duration.
+";
+
+$tooltip["expire_absolute"] = "
+    <h4>Expires at</h4>
+    <p class='text-danger'>Required when absolute time expiry is selected</p>
+    The date and time when the short URL should stop working (server local timezone on input; stored as UTC).
+";
+
+$tooltip["max_clicks"] = "
+    <h4>Max clicks</h4>
+    <p class='text-success'>Optional</p>
+    Maximum number of successful visits before the URL expires.
+    Leave empty for unlimited clicks. The Nth click still works; the next visit is expired.
+";
+
+$tooltip["on_expire"] = "
+    <h4>On expire</h4>
+    <p class='text-success'>Optional (default: keep)</p>
+    What happens when the time or click limit is reached.
+    ".$listTypes($selectOptions["on_expire_actions"]);
 
 # NOTE: $urlInputs
 # This array contains all the inputs for the URL form.
@@ -440,6 +526,96 @@ $urlInputs = [
         "hidden"      => True,
         "tooltip"     => $tooltip["delay"],
         "description" => "The delay in seconds before the redirect",
+    ],
+    "expire_time_mode" => [
+        "id"          => "expireTimeModeInput",
+        "title"       => "Time expiry",
+        "name"        => "expire_time_mode",
+        "type"        => "select",
+        "options"     => $selectOptions["expire_time_modes"],
+        "class"       => "form-select urlInput",
+        "default"     => "none",
+        "value"       => "none",
+        "attributes"  => "",
+        "required"    => False,
+        "hidden"      => False,
+        "tooltip"     => $tooltip["expire_time_mode"],
+        "description" => "Optionally expire this URL after a duration or at a specific date/time.",
+    ],
+    "expire_relative_value" => [
+        "id"          => "expireRelativeValueInput",
+        "title"       => "Expire after",
+        "name"        => "expire_relative_value",
+        "type"        => "number",
+        "class"       => "form-control urlInput",
+        "placeholder" => "7",
+        "default"     => "7",
+        "value"       => "7",
+        "attributes"  => "min=\"1\"",
+        "required"    => False,
+        "hidden"      => True,
+        "tooltip"     => $tooltip["expire_relative_value"],
+        "description" => "How long until the URL expires from creation time.",
+    ],
+    "expire_relative_unit" => [
+        "id"          => "expireRelativeUnitInput",
+        "title"       => "Duration unit",
+        "name"        => "expire_relative_unit",
+        "type"        => "select",
+        "options"     => $selectOptions["expire_relative_units"],
+        "class"       => "form-select urlInput",
+        "default"     => "days",
+        "value"       => "days",
+        "attributes"  => "",
+        "required"    => False,
+        "hidden"      => True,
+        "tooltip"     => $tooltip["expire_relative_unit"],
+        "description" => "Unit for the relative expiry duration.",
+    ],
+    "expire_absolute" => [
+        "id"          => "expireAbsoluteInput",
+        "title"       => "Expires at",
+        "name"        => "expire_absolute",
+        "type"        => "datetime-local",
+        "class"       => "form-control urlInput",
+        "placeholder" => "",
+        "default"     => "",
+        "value"       => "",
+        "attributes"  => "",
+        "required"    => False,
+        "hidden"      => True,
+        "tooltip"     => $tooltip["expire_absolute"],
+        "description" => "Date and time when the short URL should stop working.",
+    ],
+    "max_clicks" => [
+        "id"          => "maxClicksInput",
+        "title"       => "Max clicks",
+        "name"        => "max_clicks",
+        "type"        => "number",
+        "class"       => "form-control urlInput",
+        "placeholder" => "Unlimited",
+        "default"     => "",
+        "value"       => "",
+        "attributes"  => "min=\"1\"",
+        "required"    => False,
+        "hidden"      => False,
+        "tooltip"     => $tooltip["max_clicks"],
+        "description" => "Optional click limit. Leave empty for unlimited.",
+    ],
+    "on_expire" => [
+        "id"          => "onExpireInput",
+        "title"       => "On expire",
+        "name"        => "on_expire",
+        "type"        => "select",
+        "options"     => $selectOptions["on_expire_actions"],
+        "class"       => "form-select urlInput",
+        "default"     => "keep",
+        "value"       => "keep",
+        "attributes"  => "",
+        "required"    => False,
+        "hidden"      => True,
+        "tooltip"     => $tooltip["on_expire"],
+        "description" => "Keep the URL with an expired message, or delete it when the limit is reached.",
     ],
 ];
 

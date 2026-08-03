@@ -297,6 +297,216 @@ function deleteURL($id) {
     $delete = query($delete, [$id]);
 }
 
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                             FUNCTION urlOptions                            */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlOptions($url): array {
+    if (!is_array($url)) {
+        return [];
+    }
+    $options = $url["options"] ?? [];
+    if (is_array($options)) {
+        return $options;
+    }
+    if (!is_string($options) || $options === "") {
+        return [];
+    }
+    if (function_exists("json_validate") && !json_validate($options)) {
+        return [];
+    }
+    $decoded = json_decode($options, True);
+    return is_array($decoded) ? $decoded : [];
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                            FUNCTION urlIsExpired                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlIsExpired(array $options): bool {
+    if (!empty($options["expires_at"])) {
+        $expiresAt = strtotime((string) $options["expires_at"]);
+        if ($expiresAt !== False && time() >= $expiresAt) {
+            return True;
+        }
+    }
+
+    if (!empty($options["max_clicks"])) {
+        $maxClicks = (int) $options["max_clicks"];
+        $clicks    = (int) ($options["clicks"] ?? 0);
+        if ($maxClicks > 0 && $clicks >= $maxClicks) {
+            return True;
+        }
+    }
+
+    return False;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                         FUNCTION urlExpireReason                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlExpireReason(array $options): string {
+    if (!empty($options["expires_at"])) {
+        $expiresAt = strtotime((string) $options["expires_at"]);
+        if ($expiresAt !== False && time() >= $expiresAt) {
+            return "time";
+        }
+    }
+    if (!empty($options["max_clicks"])) {
+        $maxClicks = (int) $options["max_clicks"];
+        $clicks    = (int) ($options["clicks"] ?? 0);
+        if ($maxClicks > 0 && $clicks >= $maxClicks) {
+            return "clicks";
+        }
+    }
+    return "unknown";
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                        FUNCTION urlExpireMessage                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlExpireMessage(array $url, array $options): string {
+    $short  = htmlspecialchars((string) ($url["short"] ?? ""), ENT_QUOTES, "UTF-8");
+    $reason = urlExpireReason($options);
+
+    if ($reason === "time") {
+        $when = htmlspecialchars((string) $options["expires_at"], ENT_QUOTES, "UTF-8");
+        return "The short URL <b>$short</b> expired at <code>$when</code>.";
+    }
+    if ($reason === "clicks") {
+        $max = (int) $options["max_clicks"];
+        return "The short URL <b>$short</b> has reached its click limit ($max).";
+    }
+    return "The short URL <b>$short</b> has expired.";
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                       FUNCTION urlIncrementClicks                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlIncrementClicks(int $id): void {
+    $update = "UPDATE urls SET options = JSON_SET(
+        COALESCE(options, JSON_OBJECT()),
+        '$.clicks',
+        COALESCE(CAST(JSON_UNQUOTE(JSON_EXTRACT(options, '$.clicks')) AS UNSIGNED), 0) + 1
+    ) WHERE id = ?";
+    query($update, [$id]);
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                        FUNCTION urlHandleExpired                           */
+/* ────────────────────────────────────────────────────────────────────────── */
+function urlHandleExpired(array $url, array $options): void {
+    $short   = $url["short"] ?? "";
+    $urlText = "#".($url["id"] ?? "?")." - ".$short;
+    $message = urlExpireMessage($url, $options);
+    $action  = ($options["on_expire"] ?? "keep") === "delete" ? "delete" : "keep";
+
+    if ($action === "delete") {
+        if (!empty($url["id"])) {
+            deleteURL((int) $url["id"]);
+        }
+        writeLog("Expired hit (deleted) on URL $urlText");
+        echo alert($message." This URL has been deleted.", "danger");
+        die();
+    }
+
+    writeLog("Expired hit on URL $urlText");
+    echo alert($message, "warning", Null, True);
+    die();
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                      FUNCTION buildUrlExpiryOptions                        */
+/* ────────────────────────────────────────────────────────────────────────── */
+function buildUrlExpiryOptions(array $post, ?array $options = Null): array|string {
+    $options = is_array($options) ? $options : [];
+
+    $timeMode = !empty($post["expire_time_mode"]) ? $post["expire_time_mode"] : "none";
+    $hasTime  = False;
+
+    if ($timeMode === "relative") {
+        $value = isset($post["expire_relative_value"]) ? (int) $post["expire_relative_value"] : 0;
+        $unit  = !empty($post["expire_relative_unit"]) ? $post["expire_relative_unit"] : "";
+        $secondsPerUnit = [
+            "minutes" => 60,
+            "hours"   => 3600,
+            "days"    => 86400,
+            "weeks"   => 604800,
+        ];
+        if ($value < 1 || !isset($secondsPerUnit[$unit])) {
+            return "Relative expiry requires a positive duration and a valid unit.";
+        }
+        $options["expires_at"] = gmdate(DATE_ATOM, time() + ($value * $secondsPerUnit[$unit]));
+        $hasTime = True;
+    } elseif ($timeMode === "absolute") {
+        $absolute = !empty($post["expire_absolute"]) ? trim((string) $post["expire_absolute"]) : "";
+        if ($absolute === "") {
+            return "Absolute expiry requires a date and time.";
+        }
+        // datetime-local is typically "YYYY-MM-DDTHH:MM" without timezone.
+        $expiresAt = strtotime($absolute);
+        if ($expiresAt === False) {
+            return "The absolute expiry date/time is not valid.";
+        }
+        if ($expiresAt <= time()) {
+            return "The absolute expiry date/time must be in the future.";
+        }
+        $options["expires_at"] = gmdate(DATE_ATOM, $expiresAt);
+        $hasTime = True;
+    }
+
+    $maxClicksRaw = $post["max_clicks"] ?? "";
+    $hasClicks    = False;
+    if ($maxClicksRaw !== "" && $maxClicksRaw !== Null) {
+        $maxClicks = (int) $maxClicksRaw;
+        if ($maxClicks < 1) {
+            return "Max clicks must be an integer of 1 or greater.";
+        }
+        $options["max_clicks"] = $maxClicks;
+        $options["clicks"]     = 0;
+        $hasClicks = True;
+    }
+
+    if ($hasTime || $hasClicks) {
+        $onExpire = !empty($post["on_expire"]) ? $post["on_expire"] : "keep";
+        $options["on_expire"] = ($onExpire === "delete") ? "delete" : "keep";
+    }
+
+    return $options;
+}
+
+/* ────────────────────────────────────────────────────────────────────────── */
+/*                         FUNCTION formatUrlOptions                          */
+/* ────────────────────────────────────────────────────────────────────────── */
+function formatUrlOptions(array $options): string {
+    if (empty($options)) {
+        return "";
+    }
+
+    $parts = [];
+    if (!empty($options["expires_at"])) {
+        $parts[] = "expires_at = ".htmlspecialchars((string) $options["expires_at"], ENT_QUOTES, "UTF-8");
+    }
+    if (!empty($options["max_clicks"])) {
+        $clicks = (int) ($options["clicks"] ?? 0);
+        $max    = (int) $options["max_clicks"];
+        $parts[] = "clicks = $clicks / $max";
+    }
+    if (!empty($options["on_expire"])) {
+        $parts[] = "on_expire = ".htmlspecialchars((string) $options["on_expire"], ENT_QUOTES, "UTF-8");
+    }
+
+    foreach ($options as $key => $value) {
+        if (in_array($key, ["expires_at", "max_clicks", "clicks", "on_expire"], True)) {
+            continue;
+        }
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode($value);
+        }
+        $parts[] = htmlspecialchars((string) $key, ENT_QUOTES, "UTF-8")." = ".htmlspecialchars((string) $value, ENT_QUOTES, "UTF-8");
+    }
+
+    return implode("<br>", $parts);
+}
+
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*                              FUNCTION redirect                             */
@@ -674,7 +884,7 @@ function listUrls(?array $urls = []) {
             $urlDest     = $url["dest"];
             $urlType     = $url["type"];
             $urlDestLink = "<a href='$urlDest' target='_blank' class='link-info link-underline-opacity-0'><span class='badge bg-primary'>".icon("box-arrow-in-up-right")." $urlDest</span></a>";
-            $urlOptions  = (!empty($url["options"]) && json_validate($url["options"]) ? json_decode($url["options"]) : []);
+            $urlOptions  = urlOptions($url);
 
             if ($urlType == "custom") {
                 $urlDestLink = "Custom";
@@ -685,10 +895,10 @@ function listUrls(?array $urls = []) {
                 $favoriteIcon = " ".icon("star-fill", 1.5, "gold");
             }
 
-            $optionsText = "";
-            foreach ($urlOptions as $key => $value) {
-                $optionsText .= "$key = $value<br>";
-            }
+            $optionsText = formatUrlOptions($urlOptions);
+            $expiredBadge = urlIsExpired($urlOptions)
+                ? " <span class='badge text-bg-warning'>Expired</span>"
+                : "";
 
             $urlsTable .= '
                 <tr
@@ -713,6 +923,7 @@ function listUrls(?array $urls = []) {
                             data-bs-target="#editUrlModal">
                                 '.icon('gear-wide-connected') .' '.$urlName.'
                         </a>
+                        '.$expiredBadge.'
                     </td>
                     <td>
                         <!--<a href="'.$urlShort.'" target="_blank" class="link-info link-underline-opacity-0">'.icon("box-arrow-in-up-right").' '.$urlShort.'</a>-->
