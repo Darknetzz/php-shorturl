@@ -358,19 +358,19 @@
                 utils.showObject(urlFormRow("dest_type"));
             } else {
                 utils.hideObject(urlFormRow("dest_type"));
-                setUrlFormRows(["protocol", "dest_redirect", "dest_alias", "dest_custom"], false);
+                setUrlFormRows(["dest_redirect", "dest_alias", "dest_custom"], false);
             }
         }
 
         function updateDestTypeRows() {
             var destType = $("#destTypeInput").val();
             var destRows = {
-                "redirect": ["protocol", "dest_redirect"],
-                "alias"   : ["protocol", "dest_alias"],
+                "redirect": ["dest_redirect"],
+                "alias"   : ["dest_alias"],
                 "custom"  : ["dest_custom"],
             };
 
-            setUrlFormRows(["protocol", "dest_redirect", "dest_alias", "dest_custom"], false);
+            setUrlFormRows(["dest_redirect", "dest_alias", "dest_custom"], false);
 
             if ($(urlFormRow("dest_type")).is(":hidden")) {
                 return;
@@ -703,22 +703,30 @@
             $("tr[data-id='" + $(this).data("id") + "']").remove();
         });
 
-        // NOTE: .urlValidate
-        $(".urlValidate").on("input", function() {
-            var url = $(this).val();
-            var protocol = "";
+        // NOTE: .urlValidate — peel http(s):// into the protocol prefix select
+        function syncUrlProtocols(protocol, $scope) {
+            var $protocols = $scope && $scope.length
+                ? $scope.find(".url-protocol")
+                : $(".url-protocol");
+            $protocols.val(protocol);
+        }
 
-            if (url.startsWith("https://")) {
-                protocol = "https://";
-            } else if (url.startsWith("http://")) {
-                protocol = "http://";
-            } else {
+        $(document).on("input", ".urlValidate", function() {
+            var $input = $(this);
+            var url    = String($input.val() || "");
+            var match  = url.match(/^(https?:\/\/)/i);
+
+            if (!match) {
                 return;
             }
 
-            url = url.replace(/^(http:\/\/|https:\/\/)/, '');
-            $(this).val(url);
-            $(this).closest(".input-group").find(".url-protocol").val(protocol);
+            var protocol = match[1].toLowerCase();
+            $input.val(url.slice(match[1].length));
+            syncUrlProtocols(protocol, $input.closest("form"));
+        });
+
+        $(document).on("change", ".url-protocol", function() {
+            syncUrlProtocols($(this).val(), $(this).closest("form"));
         });
 
 

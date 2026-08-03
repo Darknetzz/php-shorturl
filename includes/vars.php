@@ -53,12 +53,12 @@ $exampleTable = function(
 */
 $selectOptions["protocol_types"] = [
     [
-        "name"  => "HTTP",
+        "name"  => "http://",
         "value" => "http://",
         "description" => "The HTTP protocol.",
     ],
     [
-        "name"  => "HTTPS",
+        "name"  => "https://",
         "value" => "https://",
         "description" => "The HTTPS protocol.",
     ],
@@ -490,11 +490,12 @@ $urlInputs = [
         "name"        => "protocol",
         "type"        => "select",
         "options"     => $selectOptions["protocol_types"],
-        "class"       => "form-select urlInput destInput",
-        "placeholder" => "http://",
+        "class"       => "form-select urlInput destInput url-protocol",
+        "placeholder" => "https://",
         "default"     => $cfg["default_protocol"],
         "required"    => True,
         "hidden"      => True,
+        "skip_row"    => True,
         "tooltip"     => $tooltip["protocol"],
         "description" => "The protocol of the destination URL (e.g. <code>http://</code> or <code>https://</code>).",
     ],
@@ -503,26 +504,28 @@ $urlInputs = [
         "title"       => "Redirect URL",
         "name"        => "dest_redirect",
         "type"        => "text",
-        "class"       => "form-control urlInput destInput",
-        "placeholder" => "http://example.com",
+        "class"       => "form-control urlInput destInput urlValidate",
+        "placeholder" => "example.com",
         "default"     => "",
         "required"    => False,
         "hidden"      => True,
+        "prefix_with" => "protocol",
         "tooltip"     => $tooltip["redirect"],
-        "description" => "The URL the short URL will redirect to.",
+        "description" => "The URL the short URL will redirect to. Protocol is chosen on the left; if you paste <code>http://</code> or <code>https://</code>, it is moved into the protocol selector.",
     ],
     "alias"      => [
         "id"          => "aliasInput",
         "title"       => "Alias URL",
         "name"        => "dest_alias",
         "type"        => "text",
-        "class"       => "form-control urlInput destInput",
-        "placeholder" => "http://example.com",
+        "class"       => "form-control urlInput destInput urlValidate",
+        "placeholder" => "example.com",
         "default"     => "",
         "required"    => False,
         "hidden"      => True,
+        "prefix_with" => "protocol",
         "tooltip"     => $tooltip["alias"],
-        "description" => "The URL that the short URL will be an alias of.",
+        "description" => "The URL that the short URL will be an alias of. Protocol is chosen on the left; if you paste <code>http://</code> or <code>https://</code>, it is moved into the protocol selector.",
     ],
     "custom"     => [
         "id"          => "customInput",
@@ -699,8 +702,8 @@ $urlInputs = [
 
 # FUNCTION: $renderUrlInputControl
 # Renders a single form control from a $urlInputs entry.
-$renderUrlInputControl = function(string $inputName, array $input): string {
-    $id          = $input["id"] ?? $inputName;
+$renderUrlInputControl = function(string $inputName, array $input, string $idSuffix = ""): string {
+    $id          = ($input["id"] ?? $inputName) . $idSuffix;
     $class       = $input["class"] ?? "form-control";
     $type        = $input["type"] ?? "text";
     $placeholder = $input["placeholder"] ?? "";
@@ -750,8 +753,8 @@ $urlForm = function($action = "create", $values = []) {
                 <tbody>
     ';
     foreach ($urlInputs as $inputName => $input) {
-        // Fields with group_with are rendered inside another row's input-group.
-        if (!empty($input["group_with"])) {
+        // Affix-only / grouped fields are rendered inside another row's input-group.
+        if (!empty($input["group_with"]) || !empty($input["skip_row"])) {
             continue;
         }
 
@@ -765,7 +768,14 @@ $urlForm = function($action = "create", $values = []) {
         $isHidden      = !empty($input["hidden"]);
         $i["required"] = ($isRequired ? '<span class="form-text text-danger">*</span>' : '');
         $i["style"]    = ($isHidden ? 'display:none;' : '');
-        $thisInput     = $renderUrlInputControl($inputName, $input);
+        $thisInput     = '';
+
+        if (!empty($input["prefix_with"]) && isset($urlInputs[$input["prefix_with"]])) {
+            $prefixName = $input["prefix_with"];
+            $thisInput .= $renderUrlInputControl($prefixName, $urlInputs[$prefixName], "_".$inputName);
+        }
+
+        $thisInput .= $renderUrlInputControl($inputName, $input);
 
         foreach ($urlInputs as $groupedName => $groupedInput) {
             if (($groupedInput["group_with"] ?? Null) !== $inputName) {

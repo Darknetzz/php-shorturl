@@ -71,6 +71,12 @@
         white-space: nowrap;
     }
 
+    .url-protocol {
+        flex: 0 0 auto;
+        width: auto;
+        max-width: 8.5rem;
+    }
+
     /* Page content (not the navbar's nested container-fluid) */
     body > .container-fluid {
         max-width: var(--content-width);
